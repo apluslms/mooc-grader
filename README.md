@@ -37,16 +37,6 @@ Installing for development
 
 		sudo apt-get install python3 python3-dev python3-pip
 
-	OR install from source.
-
-		sudo apt-get install build-essential libssl-dev libsqlite3-dev
-		wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tar.xz
-		tar xvf Python-3.4.3.tar.xz
-		cd Python-3.4.3
-		./configure
-		make
-		sudo make install
-
 	Make sure pip and virtualenv are installed.
 
 		sudo pip3 install virtualenv
@@ -164,7 +154,7 @@ Installing the full stack
 		sudo apt-get install rabbitmq-server
 		sudo /usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
 
-	Create `mooc-grader/settings_local.py` and override necessary configuration, e.g.
+	Create `mooc-grader/grader/local_settings.py` and override necessary configuration, e.g.
 
 	* `CELERY_BROKER`: the queue URL (RabbitMQ service)
 	* `CELERY_TASK_LIMIT_SEC`: the timeout for grading a task
@@ -192,11 +182,10 @@ Installing the full stack
 
 5. ### Django application settings for deployment
 
-	When deploying, overwrite necessary configurations in `mooc-grader/settings_local.py`:
-	`SECRET_KEY`, `AJAX_KEY`, `DEBUG`, `ALLOWED_HOSTS`
+	When deploying, overwrite necessary configurations in `mooc-grader/grader/local_settings.py`.
 
 	If `gitmanager` is used to update course content via Git operations, enable it in
-	`settings_local.py`:
+	`local_settings.py`:
 
 		ADD_APPS = (
 			'gitmanager',

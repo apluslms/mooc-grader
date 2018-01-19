@@ -1,32 +1,24 @@
-"""
-Django settings for grader project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
-"""
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Note that this trick to find the base dir does not always work correctly.
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'y!*vae&k7l6#2^rjz#3_7@5v3!t^kvdvyhv1vdy*q_%dm%1p$q'
-AJAX_KEY = 't76q54Gv'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = [ "*" ]
+####
+# Default settings for MOOC Grader project.
+# You should create local_settings.py and override any settings there.
+# You can copy local_settings.example.py and start from there.
+##
+from os.path import abspath, dirname, join
+BASE_DIR = dirname(dirname(abspath(__file__)))
 
 
-# Application definition
+# Base options, commonly overridden in local_settings.py
+##########################################################################
+DEBUG = False
+SECRET_KEY = None
+AJAX_KEY = None
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+#SERVER_EMAIL = 'root@'
+ALLOWED_HOSTS = ["*"]
+##########################################################################
+
 
 INSTALLED_APPS = (
     # 'django.contrib.admin',
@@ -42,52 +34,75 @@ ADD_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    # 'django.middleware.security.SecurityMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
-    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # 'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    # 'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
 )
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'courses'),
-            os.path.join(BASE_DIR, 'exercises'),
+            join(BASE_DIR, 'local_templates'),
+            join(BASE_DIR, 'templates'),
+            join(BASE_DIR, 'courses'),
+            join(BASE_DIR, 'exercises'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 #"django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
+                #'django.template.context_processors.request',
                 "django.template.context_processors.i18n",
                 "django.template.context_processors.media",
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
-                "django.contrib.messages.context_processors.messages",
+                #"django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-# Add project level static files
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+#FILE_UPLOAD_HANDLERS = (
+#    "django.core.files.uploadhandler.MemoryFileUploadHandler",
+#    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+#)
 
 ROOT_URLCONF = 'grader.urls'
-
+# LOGIN_REDIRECT_URL = "/"
+# LOGIN_ERROR_URL = "/login/"
 WSGI_APPLICATION = 'grader.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/1.6/ref/settings/#databases
+# Database (override in local_settings.py)
+# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
+##########################################################################
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': join(BASE_DIR, 'db.sqlite3'),
+        # NOTE: Above setting can't be changed if girmanager is used.
+        # cron.sh expects database to be in that file.
     }
 }
+##########################################################################
+
+# Cache (override in local_settings.py)
+# https://docs.djangoproject.com/en/1.10/topics/cache
+##########################################################################
+#CACHES = {
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#        'TIMEOUT': None,
+#    }
+#}
+#SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+##########################################################################
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -96,36 +111,41 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
+LOCALE_PATHS = (
+    join(BASE_DIR, 'locale'),
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
+STATICFILES_DIRS = (
+    join(BASE_DIR, 'assets'),
+)
 STATIC_URL = '/static/'
 STATIC_URL_HOST_INJECT = ''
+STATIC_ROOT = join(BASE_DIR, 'static')
 
-# HTTP
-DEFAULT_EXPIRY_MINUTES = 15
+#MEDIA_URL = '/media/'
+#MEDIA_ROOT = join(BASE_DIR, 'media')
 
-#
-# Task queue settings:
-#
+
+# Task queue settings
+##########################################################################
 CONTAINER_MODE = False
-CONTAINER_SCRIPT = os.path.join(BASE_DIR, "scripts/docker-run.sh")
+CONTAINER_SCRIPT = join(BASE_DIR, "scripts/docker-run.sh")
 CELERY_BROKER = False #'amqp://guest@localhost/'
 RABBITMQ_MANAGEMENT = { "port": 55672, "password": "guest" }
 CELERY_TASK_LIMIT_SEC = 2 * 60
 CELERY_TASK_KILL_SEC = CELERY_TASK_LIMIT_SEC + 5
 CELERY_AFFINITIES = []
 
-#
 # Task queue alert length via logging error.
-#
 QUEUE_ALERT_LENGTH = 20
 
-#
+# HTTP
+DEFAULT_EXPIRY_MINUTES = 15
+
 # Sandbox process default limits.
 # CELERY_TASK_LIMIT_SEC is enforced over this time limit.
-#
 SANDBOX_LIMITS = {
     "time": "-",
     "memory": "-",
@@ -133,39 +153,34 @@ SANDBOX_LIMITS = {
     "disk": "1m",
 }
 
-#
 # Exercise files submission path:
 # Django process requires write access to this directory.
-#
-SUBMISSION_PATH = os.path.join(BASE_DIR, 'uploads')
-#
+SUBMISSION_PATH = join(BASE_DIR, 'uploads')
+
 # Personalized exercises and user files are kept here.
 # Django process requires write access to this directory.
-#
-PERSONALIZED_CONTENT_PATH = os.path.join(BASE_DIR, 'exercises-meta')
-#
+PERSONALIZED_CONTENT_PATH = join(BASE_DIR, 'exercises-meta')
+
 # Enable personal directories for users, which can be used in personalized
 # exercises to permanently store personal files with the
 # grader.actions.store_user_files action. Personalized exercises can still be
 # used even if this setting is False if the grading only uses the pregenerated
 # exercise instance files. Enabling and using personal directories makes the
 # grader stateful, which at least increases the amount of disk space used.
-#
 ENABLE_PERSONAL_DIRECTORIES = False
 
-#
 # Grading action scripts.
-#
-PREPARE_SCRIPT = os.path.join(BASE_DIR, "scripts/prepare.sh")
-GITCLONE_SCRIPT = os.path.join(BASE_DIR, "scripts/gitclone.sh")
-SANDBOX_RUNNER = os.path.join(BASE_DIR, "scripts/chroot_execvp")
-SANDBOX_FALLBACK = os.path.join(BASE_DIR, "scripts/no_sandbox.sh")
-EXPACA_SCRIPT = os.path.join(BASE_DIR, "scripts/expaca_grade.sh")
-STORE_USER_FILES_SCRIPT = os.path.join(BASE_DIR, "scripts/store_user_files.sh")
+PREPARE_SCRIPT = join(BASE_DIR, "scripts/prepare.sh")
+GITCLONE_SCRIPT = join(BASE_DIR, "scripts/gitclone.sh")
+SANDBOX_RUNNER = join(BASE_DIR, "scripts/chroot_execvp")
+SANDBOX_FALLBACK = join(BASE_DIR, "scripts/no_sandbox.sh")
+EXPACA_SCRIPT = join(BASE_DIR, "scripts/expaca_grade.sh")
+STORE_USER_FILES_SCRIPT = join(BASE_DIR, "scripts/store_user_files.sh")
 
-#
-# Define a dummy logging configuration:
-#
+
+# Logging
+# https://docs.djangoproject.com/en/1.7/topics/logging/
+##########################################################################
 LOGGING = {
   'version': 1,
   'disable_existing_loggers': False,
@@ -199,12 +214,25 @@ LOGGING = {
   },
 }
 
-#
-# Import local settings overrides if any
-#
-try:
-    from settings_local import *
-except ImportError:
-    pass
 
+
+
+
+###############################################################################
+from os import environ
+from r_django_essentials.conf import *
+
+# get settings values from other sources
+update_settings_from_environment(__name__, 'DJANGO_') # Provide defaults before local_settings
+update_settings_from_module(__name__, 'local_settings', quiet=True)
+update_settings_from_module(__name__, 'settings_local', quiet=True) # Compatibility with older releases
+update_secret_from_file(__name__, environ.get('GRADER_SECRET_KEY_FILE', 'secret_key'))
+update_secret_from_file(__name__, environ.get('GRADER_AJAX_KEY_FILE', 'ajax_key'), setting='AJAX_KEY')
+assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
+update_settings_from_environment(__name__, 'GRADER_') # Provide overrides after local_settings
+
+# update INSTALLED_APPS
 INSTALLED_APPS = INSTALLED_APPS + ADD_APPS
+
+# update template loaders for production
+use_cache_template_loader_in_production(__name__)
