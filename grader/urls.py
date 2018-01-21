@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.conf.urls import include, url
-from django.conf.global_settings import DEBUG
 
 import os
 
@@ -12,5 +11,9 @@ if 'gitmanager' in settings.INSTALLED_APPS:
 
 import access.urls
 urlpatterns.append(url(r'^', include(access.urls)))
+
+if settings.DEBUG:
+    import staticfileserver.urls
+    urlpatterns.append(url(r'^', include(staticfileserver.urls)))
 
 os.umask(0o002)
