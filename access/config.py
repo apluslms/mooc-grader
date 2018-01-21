@@ -17,9 +17,8 @@ from util.static import symbolic_link
 META = "apps.meta"
 INDEX = "index"
 DEFAULT_LANG = "en"
+#DIR = settings.COURSES_PATH # FIXME: not yet possible. Check settings.py for a comment
 DIR = os.path.join(settings.BASE_DIR, "courses")
-
-# Keep backwards compatibility for exercises directory.
 OLD_DIR = os.path.join(settings.BASE_DIR, "exercises")
 if os.path.isdir(OLD_DIR):
     DIR = OLD_DIR
