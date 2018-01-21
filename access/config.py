@@ -519,6 +519,7 @@ class ConfigParser:
 # An object that holds on to the latest exercise configuration.
 config = ConfigParser()
 
-# If testing one course preload configuration.
-if len(os.listdir(DIR)) == 1:
+# We are probably developing a course if only single course is detected. Pre-read configuration in the case.
+if len(next(os.walk(DIR))[1]) == 1:
+    LOGGER.info('Only single course detected. Pre-reading course configuration.')
     config.courses()
