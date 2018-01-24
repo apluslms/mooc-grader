@@ -323,6 +323,8 @@ class GradedForm(forms.Form):
         return (points, error_groups, error_fields)
 
     def compare_values(self, method, val, cmp):
+        # Note: when adding new compare methods or modifiers, remember to update
+        # _validate_compare_method in a-plus-rst-tools/directives/questionnaire.py
         parts = method.split("-")
         t = parts[0]
         mods = parts[1:]
