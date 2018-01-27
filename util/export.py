@@ -15,7 +15,7 @@ def url_to_model(request, course_key, exercise_key, parameter=None):
 
 def url_to_template(request, course_key, exercise_key, parameter=None):
     return request.build_absolute_uri(
-        reverse('template', args=[course_key, exercise_key, parameter or ''])
+        reverse('exercise_template', args=[course_key, exercise_key, parameter or ''])
     )
 
 
@@ -60,11 +60,11 @@ def exercise(request, course, exercise, of):
             request, course['key'], exercise['key']
         )
 
-    if 'template' in exercise:
-        of['template'] = exercise['template']
+    if 'exercise_template' in exercise:
+        of['exercise_template'] = exercise['exercise_template']
     elif 'template_files' in exercise:
         file_names = [path.split('/')[-1] for path in exercise['template_files']]
-        of['template'] = ' '.join([
+        of['exercise_template'] = ' '.join([
             url_to_template(request, course['key'], exercise['key'], name)
             for name in file_names
         ])
