@@ -68,6 +68,10 @@ def exercise(request, course, exercise, of):
             url_to_template(request, course['key'], exercise['key'], name)
             for name in file_names
         ])
+
+    if 'radar_info' in exercise:
+        of['exercise_info']['radar'] = exercise['radar_info']
+
     return of
 
 
