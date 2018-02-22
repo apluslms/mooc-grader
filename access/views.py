@@ -9,7 +9,7 @@ import copy
 import os
 import json
 
-from access.config import config
+from access.config import config, DEFAULT_LANG
 from util.files import read_and_remove_submission_meta, clean_submission_dir
 from util.queue import queue_length as qlength
 from util.http import post_data
@@ -73,10 +73,7 @@ def exercise(request, course_key, exercise_key):
 
     # Exercise language.
     if not lang:
-        if "lang" in course:
-            lang = course["lang"]
-        else:
-            lang = "en"
+        lang = course.get('lang', DEFAULT_LANG)
     translation.activate(lang)
 
     # Try to call the configured view.
@@ -181,6 +178,8 @@ def aplus_json(request, course_key):
     data = _copy_fields(course, ["name", "description", "lang", "contact",
         "assistants", "start", "end", "categories",
         "numerate_ignoring_modules"])
+    if "language" in course:
+        data["lang"] = course["language"]
 
     def children_recursion(parent):
         if not "children" in parent:
