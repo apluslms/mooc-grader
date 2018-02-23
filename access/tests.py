@@ -25,6 +25,11 @@ class ConfigTestCase(TestCase):
     def setUp(self):
         self.config = ConfigParser()
 
+    def get_course_key(self):
+        courses = self.config.courses()
+        self.assertGreater(len(courses), 0, "No courses configured")
+        return courses[0]['key']
+
     def test_rst_parsing(self):
         from access.config import get_rst_as_html
         self.assertEqual(get_rst_as_html('A **foobar**.'), '<p>A <strong>foobar</strong>.</p>\n')
@@ -66,14 +71,8 @@ class ConfigTestCase(TestCase):
         self.assertGreater(root["mtime"], mtime)
         self.assertGreater(root["ptime"], ptime)
 
-
     def test_shell_invoke(self):
         r = invoke_script(settings.PREPARE_SCRIPT, {})
         self.assertEqual(1, r["code"])
         r = invoke_script(settings.PREPARE_SCRIPT, { "course_key": "foo", "dir": settings.SUBMISSION_PATH })
         self.assertEqual(0, r["code"])
-
-    def get_course_key(self):
-        courses = self.config.courses()
-        self.assertGreater(len(courses), 0, "No courses configured")
-        return courses[0]['key']

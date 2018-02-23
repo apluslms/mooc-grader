@@ -27,34 +27,45 @@ def url_to_static(request, course_key, path):
 
 def chapter(request, course, of):
     ''' Exports chapter data '''
-    of['url'] = url_to_static(request, course['key'], of['static_content'])
+    path = of.pop('static_content')
+    if type(path) == dict:
+        of['url'] = {
+            lang: url_to_static(request, course['key'], p)
+            for lang,p in path.items()
+        }
+    else:
+        of['url'] = url_to_static(request, course['key'], path)
     return of
 
 
-def exercise(request, course, exercise, of):
+def exercise(request, course, exercise_root, of):
     ''' Exports exercise data '''
-    if not "title" in of and not "name" in of:
-        of["title"] = exercise.get("title", "")
-    if not "description" in of:
-        of["description"] = exercise.get("description", "")
-    if "url" in exercise:
-        of["url"] = exercise["url"]
+    of.pop('config')
+    languages,exercises = zip(*exercise_root.items())
+    exercise = exercises[0]
+
+    if not 'title' in of and not 'name' in of:
+        of['title'] = i18n(languages, exercises, 'title')
+    if not 'description' in of:
+        of['description'] = exercise.get('description', '')
+    if 'url' in exercise:
+        of['url'] = exercise['url']
     else:
-        of["url"] = url_to_exercise(request, course['key'], exercise['key'])
+        of['url'] = url_to_exercise(request, course['key'], exercise['key'])
 
     of['exercise_info'] = {
-        'form_spec': form_fields(exercise),
-        'resources': [url_to_static(request, course['key'], p) for p in exercise.get('resource_files', [])],
+        'form_spec': form_fields(languages, exercises),
     }
+    if 'radar_info' in exercise:
+        of['exercise_info']['radar'] = exercise['radar_info']
 
     if 'model_answer' in exercise:
         of['model_answer'] = exercise['model_answer']
     elif 'model_files' in exercise:
-        file_names = [path.split('/')[-1] for path in exercise['model_files']]
-        of['model_answer'] = ' '.join([
-            url_to_model(request, course['key'], exercise['key'], name)
-            for name in file_names
-        ])
+        of['model_answer'] = i18n_urls(
+            languages, exercises, 'model_files',
+            url_to_model, request, course['key'], exercise['key']
+        )
     elif exercise.get('view_type', None) == 'access.types.stdsync.createForm':
         of['model_answer'] = url_to_model(
             request, course['key'], exercise['key']
@@ -63,28 +74,22 @@ def exercise(request, course, exercise, of):
     if 'exercise_template' in exercise:
         of['exercise_template'] = exercise['exercise_template']
     elif 'template_files' in exercise:
-        file_names = [path.split('/')[-1] for path in exercise['template_files']]
-        of['exercise_template'] = ' '.join([
-            url_to_template(request, course['key'], exercise['key'], name)
-            for name in file_names
-        ])
-
-    if 'radar_info' in exercise:
-        of['exercise_info']['radar'] = exercise['radar_info']
+        of['exercise_template'] = i18n_urls(
+            languages, exercises, 'template_files',
+            url_to_template, request, course['key'], exercise['key']
+        )
 
     return of
 
 
-def form_fields(exercise):
+def form_fields(languages, exercises):
     ''' Describes a form that the configured exercise produces '''
-    form = []
-    t = exercise.get('view_type', None)
 
     def field_spec(f, n):
         field = {
             'key': f.get('key', 'field_' + str(n)),
-            'type': f['type'],
-            'title': f['title'],
+            'type': f.get('type'),
+            'title': f.get('title', ''),
             'required': f.get('required', False),
         }
 
@@ -94,9 +99,10 @@ def form_fields(exercise):
         elif 'float' in mods:
             field['type'] = 'number'
         elif 'regexp' in mods:
-            field['pattern'] = f['correct']
+            field['pattern'] = f.get('correct')
+
         if 'more' in f:
-            field['description'] = f['more']
+            field['description'] = f.get('more', '')
 
         if 'options' in f:
             titleMap = {}
@@ -104,7 +110,7 @@ def form_fields(exercise):
             m = 0
             for o in f['options']:
                 v = o.get('value', 'option_' + str(m))
-                titleMap[v] = o.get('label|i18n', o.get('label', ['missing']))
+                titleMap[v] = o.get('label', 'missing')
                 enum.append(v)
                 m += 1
             field['titleMap'] = titleMap
@@ -119,11 +125,16 @@ def form_fields(exercise):
 
         return field
 
+    #TODO define form spec for language support
+    exercise = exercises[0]
+    t = exercise.get('view_type', None)
+    form = []
+
     if t == 'access.types.stdsync.createForm':
         n = 0
         for fg in exercise.get('fieldgroups', []):
             for f in fg.get('fields', []):
-                t = f['type']
+                t = f.get('type')
 
                 if t == 'table-radio' or t == 'table-checkbox':
                     for row in f.get('rows', []):
@@ -151,18 +162,41 @@ def form_fields(exercise):
     elif t == 'access.types.stdasync.acceptPost':
         for f in exercise.get('fields', []):
             form.append({
-                'key': f['name'],
+                'key': f.get('name'),
                 'type': 'textarea',
-                'title': f['title'],
+                'title': f.get('title'),
                 'requred': f.get('required', False),
             })
 
     elif t == 'access.types.stdasync.acceptFiles':
         for f in exercise.get('files', []):
             form.append({
-                'key': f['field'],
+                'key': f.get('field'),
                 'type': 'file',
-                'title': f['name'],
+                'title': f.get('name'),
                 'required': f.get('required', True),
             })
     return form
+
+
+def i18n(languages, values, key):
+    if len(languages) == 1:
+        return values[0].get(key)
+    return {
+        l: values[i].get(key)
+        for i,l in enumerate(languages)
+    }
+
+
+def i18n_urls(languages, values, key, mapper, request, course_key, exercise_key):
+    def urls(paths):
+        return ' '.join([
+            mapper(request, course_key, exercise_key, path.split('/')[-1])
+            for path in paths
+        ])
+    if len(languages) == 1:
+        return urls(values[0].get(key, []))
+    return {
+        l: urls(values[i].get(key, []))
+        for i,l in enumerate(languages)
+    }

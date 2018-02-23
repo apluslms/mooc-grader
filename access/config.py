@@ -152,6 +152,9 @@ class ConfigParser:
         if not exercise_root or "data" not in exercise_root or not exercise_root["data"]:
             return course_root["data"], None
 
+        if lang == '_root':
+            return course_root["data"], exercise_root["data"]
+
         # Try to find version for requested or configured language.
         for lang in (lang, course_root["lang"]):
             if lang in exercise_root["data"]:
@@ -510,9 +513,9 @@ class ConfigParser:
             else:
                 return n
 
-        default = recursion(data, DEFAULT_LANG, True)
+        default = recursion(data, default_lang, True)
         root = { default_lang: default }
-        for lang in set(lang_keys) - set([DEFAULT_LANG]):
+        for lang in (set(lang_keys) - set([default_lang])):
             root[lang] = recursion(data, lang)
 
         LOGGER.debug('Processed %d tags.', len(tags_processed))
