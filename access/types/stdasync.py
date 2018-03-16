@@ -412,6 +412,9 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
         write_submission_meta(sid, {
             "url": surl,
             "dir": sdir,
+            "course_key": course["key"],
+            "exercise_key": exercise["key"],
+            "lang": translation.get_language(),
         })
         r = invoke([
             settings.CONTAINER_SCRIPT,

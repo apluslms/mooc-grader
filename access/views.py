@@ -16,6 +16,7 @@ from util.http import post_data
 from util.importer import import_named
 from util.personalized import read_generated_exercise_file
 from util import export
+from util.templates import template_to_str
 
 
 def index(request):
@@ -331,13 +332,35 @@ def container_post(request):
     data = {
         "points": int(request.POST.get("points", 0)),
         "max_points": int(request.POST.get("max_points", 1)),
-        "feedback": request.POST.get("feedback", ""),
     }
     for key in ["error", "grading_data"]:
         if key in request.POST:
             data[key] = request.POST[key]
     if "error" in data and data["error"].lower() in ("no", "false"):
         del data["error"]
+
+    feedback = request.POST.get("feedback", "")
+    # Fetch the corresponding exercise entry from the config.
+    lang = meta["lang"]
+    (course, exercise) = config.exercise_entry(meta["course_key"], meta["exercise_key"], lang=lang)
+    if "feedback_template" in exercise:
+        # replace the feedback with a rendered feedback template if the exercise is configured to do so
+        # it is not feasible to support all of the old feedback template variables that runactions.py
+        # used to have since the grading actions are not configured in the exercise YAML file anymore
+        result = {
+            "points": data["points"],
+            "max_points": data["max_points"],
+            "out": feedback,
+            "error": data.get("error", False),
+            "title": exercise.get("title", ""),
+        }
+        translation.activate(lang)
+        feedback = template_to_str(course, exercise, None, exercise["feedback_template"], result=result)
+        # Make unicode results ascii.
+        feedback = feedback.encode("ascii", "xmlcharrefreplace")
+
+    data["feedback"] = feedback
+
     if not post_data(meta["url"], data):
         raise IOError("Failed to deliver results")
     return HttpResponse("Ok")
