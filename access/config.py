@@ -48,10 +48,9 @@ class ConfigParser:
         'json': json.load,
         'yaml': yaml.load
     }
-    PROCESSOR_TAG_REGEX_18N = re.compile(r'^.+\|i18n(\|.+)?$')
     PROCESSOR_TAG_REGEX = re.compile(r'^(.+)\|(\w+)$')
     TAG_PROCESSOR_DICT = {
-        'i18n': lambda root, parent, value, **kwargs: value[kwargs['lang']],
+        'i18n': lambda root, parent, value, **kwargs: value.get(kwargs['lang']),
         'rst': lambda root, parent, value, **kwargs: get_rst_as_html(value),
     }
 
@@ -153,8 +152,11 @@ class ConfigParser:
         if not exercise_root or "data" not in exercise_root or not exercise_root["data"]:
             return course_root["data"], None
 
+        if lang == '_root':
+            return course_root["data"], exercise_root["data"]
+
         # Try to find version for requested or configured language.
-        for lang in lang, course_root["lang"]:
+        for lang in (lang, course_root["lang"]):
             if lang in exercise_root["data"]:
                 return course_root["data"], exercise_root["data"][lang]
 
@@ -205,9 +207,6 @@ class ConfigParser:
                 course_key
             )
 
-        if "language" in data:
-            data["lang"] = data["language"]
-
         if "modules" in data:
             keys = []
             config = {}
@@ -243,12 +242,21 @@ class ConfigParser:
             "mtime": t,
             "ptime": time.time(),
             "data": data,
-            "lang": data.get('lang', DEFAULT_LANG),
+            "lang": self._default_lang(data),
             "exercise_loader": exercise_loader,
             "exercises": {}
         }
         symbolic_link(DIR, data)
         return course_root
+
+
+    def _default_lang(self, data):
+        l = data.get('language')
+        if type(l) == list:
+            data['lang'] = l[0]
+        elif l == str:
+            data['lang'] = l
+        return data.get('lang', DEFAULT_LANG)
 
 
     def _exercise_root(self, course_root, exercise_key):
@@ -292,7 +300,7 @@ class ConfigParser:
             return None
 
         # Process key modifiers and create language versions of the data.
-        self._process_exercise_data(course_root, data)
+        data = self._process_exercise_data(course_root, data)
         for version in data.values():
             self._check_fields(f, version, ["title", "view_type"])
             version["key"] = exercise_key
@@ -479,41 +487,39 @@ class ConfigParser:
         @type data: C{dict}
         @param data: a config data dictionary to process (in-place)
         '''
+        default_lang = course_root['lang']
+        lang_keys = []
+        tags_processed = []
 
-        # Create a deep copy of data for each intercepted language.
-        lang_root = {}
-        for k, v, p in iterate_kvp_with_dfs(data, key_regex=self.PROCESSOR_TAG_REGEX_18N):
-            for lang in v.keys():
-                if lang not in lang_root:
-                    lang_root[lang] = copy.deepcopy(data)
-        default_lang = course_root["lang"]
-        if not default_lang in lang_root:
-            lang_root[default_lang] = copy.deepcopy(data)
+        def recursion(n, lang, collect_lang=False):
+            t = type(n)
+            if t == dict:
+                d = {}
+                for k,v in n.items():
+                    m = self.PROCESSOR_TAG_REGEX.match(k)
+                    while m:
+                        k, tag = m.groups()
+                        tags_processed.append(tag)
+                        if collect_lang and tag == 'i18n' and type(v) == dict:
+                            lang_keys.extend(v.keys())
+                        if tag not in self.TAG_PROCESSOR_DICT:
+                            raise ConfigError('Unsupported processor tag "%s"' % (tag))
+                        v = self.TAG_PROCESSOR_DICT[tag](d, n, v, lang=lang)
+                        m = self.PROCESSOR_TAG_REGEX.match(k)
+                    d[k] = recursion(v, lang, collect_lang)
+                return d
+            elif t == list:
+                return [recursion(v, lang, collect_lang) for v in n]
+            else:
+                return n
 
-        LOGGER.debug('Found %d language versions: %s', len(lang_root), list(lang_root.keys()))
+        default = recursion(data, default_lang, True)
+        root = { default_lang: default }
+        for lang in (set(lang_keys) - set([default_lang])):
+            root[lang] = recursion(data, lang)
 
-        # Replace data with the language versions.
-        data.clear()
-        data.update(lang_root)
-
-        # Apply processor flag transformations for data.
-        tags_processed_count = 0
-        for lang, lang_data in data.items():
-            for k, v, p in iterate_kvp_with_dfs(lang_data, key_regex=self.PROCESSOR_TAG_REGEX):
-
-                # Multiple processor flags may be combined.
-                match = self.PROCESSOR_TAG_REGEX.match(k)
-                while match:
-                    del p[k]
-                    k, tag = match.groups()
-                    if tag not in self.TAG_PROCESSOR_DICT:
-                        raise ConfigError('Unsupported processor tag "%s"' % (tag))
-                    p[k] = v = self.TAG_PROCESSOR_DICT[tag](lang_data, p, v, lang=lang)
-
-                    tags_processed_count += 1
-                    match = self.PROCESSOR_TAG_REGEX.match(k)
-
-        LOGGER.debug('Processed %d tags.', tags_processed_count)
+        LOGGER.debug('Processed %d tags.', len(tags_processed))
+        return root
 
 
 # An object that holds on to the latest exercise configuration.
