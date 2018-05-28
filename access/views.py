@@ -326,7 +326,10 @@ def container_post(request):
         return HttpResponseForbidden("Missing sid")
 
     meta = read_and_remove_submission_meta(sid)
+    if meta is None:
+        return HttpResponseForbidden("Invalid sid")
     #clean_submission_dir(meta["dir"])
+
 
     data = {
         "points": int(request.POST.get("points", 0)),
