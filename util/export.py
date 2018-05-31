@@ -67,9 +67,16 @@ def exercise(request, course, exercise_root, of):
             url_to_model, request, course['key'], exercise['key']
         )
     elif exercise.get('view_type', None) == 'access.types.stdsync.createForm':
-        of['model_answer'] = url_to_model(
+        model_url = url_to_model(
             request, course['key'], exercise['key']
         )
+        if len(languages) == 1:
+            of['model_answer'] = model_url
+        else:
+            of['model_answer'] = {
+                l: model_url + '?lang=' + l
+                for i,l in enumerate(languages)
+            }
 
     if 'exercise_template' in exercise:
         of['exercise_template'] = exercise['exercise_template']
