@@ -1,3 +1,4 @@
+from itertools import zip_longest
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
@@ -39,13 +40,22 @@ def chapter(request, course, of):
 
 
 def exercise(request, course, exercise_root, of):
-    ''' Exports exercise data '''
+    """
+    Exports exercise data.
+
+    Note! The a-plus json syntax only supports identical exercises apart from
+    translations. At the time of writing, mooc-grader does not enforce such
+    design and configuration can be written that produces totally different
+    exercise types per language. In this export, only the exercise details
+    from the default language are exported along with any translations that
+    match the exercise structure in other languages.
+    """
     of.pop('config')
     languages,exercises = zip(*exercise_root.items())
     exercise = exercises[0]
 
     if not 'title' in of and not 'name' in of:
-        of['title'] = i18n(languages, exercises, 'title')
+        of['title'] = i18n_get(languages, exercises, 'title')
     if not 'description' in of:
         of['description'] = exercise.get('description', '')
     if 'url' in exercise:
@@ -53,9 +63,12 @@ def exercise(request, course, exercise_root, of):
     else:
         of['url'] = url_to_exercise(request, course['key'], exercise['key'])
 
+    form, i18n = form_fields(languages, exercises)
     of['exercise_info'] = {
-        'form_spec': form_fields(languages, exercises),
+        'form_spec': form,
+        'form_i18n': i18n,
     }
+
     if 'radar_info' in exercise:
         of['exercise_info']['radar'] = exercise['radar_info']
 
@@ -67,9 +80,16 @@ def exercise(request, course, exercise_root, of):
             url_to_model, request, course['key'], exercise['key']
         )
     elif exercise.get('view_type', None) == 'access.types.stdsync.createForm':
-        of['model_answer'] = url_to_model(
+        model_url = url_to_model(
             request, course['key'], exercise['key']
         )
+        if len(languages) == 1:
+            of['model_answer'] = model_url
+        else:
+            of['model_answer'] = {
+                l: model_url + '?lang=' + l
+                for i,l in enumerate(languages)
+            }
 
     if 'exercise_template' in exercise:
         of['exercise_template'] = exercise['exercise_template']
@@ -85,11 +105,29 @@ def exercise(request, course, exercise_root, of):
 def form_fields(languages, exercises):
     ''' Describes a form that the configured exercise produces '''
 
-    def field_spec(f, n):
+    form = []
+    i18n = {}
+
+    def i18n_map(values):
+        if all(v == "" for v in values):
+            return ""
+        key = str(values[0])
+        if key in values[1:]:
+            key = "i18n_" + "_".join(key.split())
+        while key in i18n:
+            key += "_duplicate"
+        i18n[key] = {
+            l: v
+            for l,v in zip(languages, values)
+        }
+        return key
+
+    def field_spec(fs, n):
+        f = fs[0]
         field = {
             'key': f.get('key', 'field_' + str(n)),
             'type': f.get('type'),
-            'title': f.get('title', ''),
+            'title': i18n_map(list_get(fs, 'title', '')),
             'required': f.get('required', False),
         }
 
@@ -98,26 +136,32 @@ def form_fields(languages, exercises):
             field['type'] = 'number'
         elif 'float' in mods:
             field['type'] = 'number'
-        elif 'regexp' in mods:
-            field['pattern'] = f.get('correct')
+        # Regexp does not validate input but checks the correct answer.
+        #elif 'regexp' in mods:
+        #    field['pattern'] = f.get('correct')
 
         if 'more' in f:
-            field['description'] = f.get('more', '')
+            field['description'] = i18n_map(list_get(fs, 'more', ''))
 
         if 'options' in f:
             titleMap = {}
             enum = []
             m = 0
-            for o in f['options']:
-                v = o.get('value', 'option_' + str(m))
-                titleMap[v] = o.get('label', 'missing')
+            for os in list_enumerate(list_get(fs, 'options', []), {}):
+                v = os[0].get('value', 'option_' + str(m))
+                titleMap[v] = i18n_map(list_get(os, 'label', ''))
                 enum.append(v)
                 m += 1
             field['titleMap'] = titleMap
             field['enum'] = enum
 
         if 'extra_info' in f:
-            field.update(f['extra_info'])
+            es = list_get(fs, 'extra_info', {})
+            extra = es[0]
+            for key in ['validationMessage']:
+                if key in extra:
+                    extra[key] = i18n_map(list_get(es, key, ''))
+            field.update(extra)
 
         if 'class' in field:
             field['htmlClass'] = field['class']
@@ -125,61 +169,63 @@ def form_fields(languages, exercises):
 
         return field
 
-    #TODO define form spec for language support
-    exercise = exercises[0]
-    t = exercise.get('view_type', None)
-    form = []
-
+    t = exercises[0].get('view_type', None)
     if t == 'access.types.stdsync.createForm':
         n = 0
-        for fg in exercise.get('fieldgroups', []):
-            for f in fg.get('fields', []):
-                t = f.get('type')
+        for fgs in list_enumerate(list_get(exercises, 'fieldgroups', []), {}):
+            for fs in list_enumerate(list_get(fgs, 'fields', []), {}):
+                t = fs[0].get('type', None)
 
                 if t == 'table-radio' or t == 'table-checkbox':
-                    for row in f.get('rows', []):
-                        rf = f.copy()
-                        rf['type'] = t[6:]
-                        if 'key' in row:
-                            rf['key'] = row['key']
-                        if 'label' in row:
-                            rf['title'] += ': ' + row['label']
-                        form.append(field_spec(rf, n))
+                    for rows in list_enumerate(list_get(fs, 'rows', []), {}):
+                        rfs = [f.copy() for f in fs]
+                        for i,rf in enumerate(rfs):
+                            row = rows[i]
+                            rf['type'] = t[6:]
+                            if 'key' in row:
+                                rf['key'] = row['key']
+                            if 'label' in row:
+                                rf['title'] += ': ' + row['label']
+                        form.append(field_spec(rfs, n))
                         n += 1
 
+                        rf = rfs[0]
                         if 'more_text' in rf:
                             form.append({
                                 'key': rf.get('key', 'field_' + str(n)) + '_more',
                                 'type': 'text',
-                                'title': rf['more_text'],
+                                'title': i18n_map(list_get(rfs, 'more_text', '')),
                                 'required': False,
                             })
                             n += 1
                 else:
-                    form.append(field_spec(f, n))
+                    form.append(field_spec(fs, n))
                     n += 1
 
     elif t == 'access.types.stdasync.acceptPost':
-        for f in exercise.get('fields', []):
+        for fs in list_enumerate(list_get(exercises, 'fields', []), {}):
+            f = fs[0]
             form.append({
                 'key': f.get('name'),
                 'type': 'textarea',
-                'title': f.get('title'),
+                'title': i18n_map(list_get(fs, 'title', '')),
                 'requred': f.get('required', False),
             })
 
     elif t == 'access.types.stdasync.acceptFiles':
-        for f in exercise.get('files', []):
+        for fs in list_enumerate(list_get(exercises, 'files', []), {}):
+            f = fs[0]
             form.append({
                 'key': f.get('field'),
                 'type': 'file',
-                'title': f.get('name'),
+                'title': i18n_map(list_get(fs, 'name', '')),
                 'required': f.get('required', True),
             })
-    return form
+
+    return form, i18n
 
 
-def i18n(languages, values, key):
+def i18n_get(languages, values, key):
     if len(languages) == 1:
         return values[0].get(key)
     return {
@@ -200,3 +246,14 @@ def i18n_urls(languages, values, key, mapper, request, course_key, exercise_key)
         l: urls(values[i].get(key, []))
         for i,l in enumerate(languages)
     }
+
+
+def list_get(dicts, key, default):
+    return [
+        d.get(key, default)
+        for d in dicts
+    ]
+
+
+def list_enumerate(lists, default):
+    return zip_longest(*lists, fillvalue=default)

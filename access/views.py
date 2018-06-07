@@ -65,35 +65,27 @@ def exercise(request, course_key, exercise_key):
     '''
     post_url = request.GET.get('post_url', None)
     lang = request.GET.get('lang', None)
-
-    # Fetch the corresponding exercise entry from the config.
-    (course, exercise) = config.exercise_entry(course_key, exercise_key, lang=lang)
-    if course is None or exercise is None:
-        raise Http404()
-
-    # Exercise language.
-    if not lang:
-        lang = course.get('lang', DEFAULT_LANG)
-    translation.activate(lang)
+    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
 
     # Try to call the configured view.
-    return import_named(course, exercise['view_type'])(
-        request, course, exercise, post_url)
+    return import_named(course, exercise['view_type'])(request, course, exercise, post_url)
 
 
 def exercise_ajax(request, course_key, exercise_key):
     '''
     Receives an AJAX request for an exercise.
     '''
-    (course, exercise) = config.exercise_entry(course_key, exercise_key)
+    lang = request.GET.get('lang', None)
+    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
+
     if course is None or exercise is None or 'ajax_type' not in exercise:
         raise Http404()
+
     # jQuery does not send "requested with" on cross domain requests
     #if not request.is_ajax():
     #    return HttpResponse('Method not allowed', status=405)
 
-    response = import_named(course, exercise['ajax_type'])(
-        request, course, exercise)
+    response = import_named(course, exercise['ajax_type'])(request, course, exercise)
 
     # No need to control domain as valid submission_url is required to submit.
     response['Access-Control-Allow-Origin'] = '*'
@@ -104,12 +96,12 @@ def exercise_model(request, course_key, exercise_key, parameter=None):
     '''
     Presents a model answer for an exercise.
     '''
-    (course, exercise) = config.exercise_entry(course_key, exercise_key)
-    if course is None or exercise is None:
-        raise Http404()
-    response = None
+    lang = request.GET.get('lang', None)
+    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
 
+    response = None
     path = None
+
     if 'model_files' in exercise:
         def find_name(paths, name):
             models = [(path,path.split('/')[-1]) for path in paths]
@@ -118,16 +110,17 @@ def exercise_model(request, course_key, exercise_key, parameter=None):
                     return path
             return None
         path = find_name(exercise['model_files'], parameter)
+
     if path:
         with open(os.path.join(course['dir'], path)) as f:
             content = f.read()
         response = HttpResponse(content, content_type='text/plain')
     else:
         try:
-            response = import_named(course, exercise['view_type'] + "Model")(
-                request, course, exercise, parameter)
+            response = import_named(course, exercise['view_type'] + "Model")(request, course, exercise, parameter)
         except ImportError:
             pass
+
     if response:
         return response
     else:
@@ -138,12 +131,12 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
     '''
     Presents the exercise template.
     '''
-    (course, exercise) = config.exercise_entry(course_key, exercise_key)
-    if course is None or exercise is None:
-        raise Http404()
-    response = None
+    lang = request.GET.get('lang', None)
+    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
 
+    response = None
     path = None
+
     if 'template_files' in exercise:
         def find_name(paths, name):
             templates = [(path,path.split('/')[-1]) for path in paths]
@@ -152,16 +145,17 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
                     return path
             return None
         path = find_name(exercise['template_files'], parameter)
+
     if path:
         with open(os.path.join(course['dir'], path)) as f:
             content = f.read()
         response = HttpResponse(content, content_type='text/plain')
     else:
         try:
-            response = import_named(course, exercise['view_type'] + "Template")(
-                request, course, exercise, parameter)
+            response = import_named(course, exercise['view_type'] + "Template")(request, course, exercise, parameter)
         except ImportError:
             pass
+
     if response:
         return response
     else:
@@ -259,6 +253,17 @@ def generated_exercise_file(request, course_key, exercise_key, exercise_instance
                     # hide file existence with 404
                     raise Http404()
     raise Http404()
+
+
+def _get_course_exercise_lang(course_key, exercise_key, lang_code):
+    (course, exercise) = config.exercise_entry(course_key, exercise_key, lang=lang_code)
+    if course is None or exercise is None:
+        raise Http404()
+    if not lang_code:
+        lang_code = course.get('lang', DEFAULT_LANG)
+    translation.activate(lang_code)
+    return (course, exercise, lang_code)
+
 
 def _filter_fields(dict_list, pick_fields):
     '''
