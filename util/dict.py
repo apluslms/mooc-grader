@@ -48,6 +48,8 @@ def get_rst_as_html(rst_str):
     @rtype : C{str}
     @return: the resulting HTML string
     '''
+    if not rst_str:
+        return rst_str
     try:
         parts = docutils.core.publish_parts(source=rst_str, writer_name='html')
         return parts['fragment']
