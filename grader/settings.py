@@ -242,5 +242,9 @@ update_settings_from_environment(__name__, 'GRADER_') # Provide overrides after 
 # update INSTALLED_APPS
 INSTALLED_APPS = INSTALLED_APPS + ADD_APPS
 
+# Drop x-frame policy when debugging
+if DEBUG:
+    MIDDLEWARE_CLASSES = [c for c in MIDDLEWARE_CLASSES if "XFrameOptionsMiddleware" not in c]
+
 # update template loaders for production
 use_cache_template_loader_in_production(__name__)
