@@ -3,9 +3,12 @@ import glob
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from access.views import config
-from util.personalized import delete_pregenerated_exercise_instances, \
-    prepare_pregenerated_exercises_directory, generate_exercise_instances, \
-    pregenerated_exercise_instances
+from util.personalized import (
+    delete_pregenerated_exercise_instances,
+    generate_exercise_instances,
+    pregenerated_exercise_instances,
+    prepare_pregenerated_exercises_directory,
+)
 
 class Command(BaseCommand):
     help = "Pregenerate personalized exercise instances"
@@ -46,7 +49,7 @@ class Command(BaseCommand):
             # take only personalized exercises
             exercises = list(filter(lambda ex: "personalized" in ex and ex["personalized"], exercises))
             if not exercises:
-                self.stderr.write("The course %s has no personalized exercises so no instances are generated." % (course_key))
+                self.stdout.write(self.style.WARNING("The course %s has no personalized exercises so no instances are generated." % (course_key)))
                 return
         
         # course and exercises have been parsed
