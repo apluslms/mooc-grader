@@ -11,7 +11,7 @@ def read_static_dir(course_key):
     config = ConfigParser()
 
     course = config.course_entry(course_key)
-    if 'static_dir' in course:
+    if course and 'static_dir' in course:
         return course['static_dir']
     return ''
 
