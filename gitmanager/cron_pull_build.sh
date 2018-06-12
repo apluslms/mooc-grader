@@ -37,7 +37,7 @@ fi
 if [ -e build.sh ]; then
   echo " ### Detected 'build.sh' executing it with bash. ###"
   /bin/bash build.sh
-elif [ -e Makefile ] && grep -qsE '^SPHINXBUILD' Makefile && grep -qsE '^html:'; then
+elif [ -e Makefile ] && grep -qsE '^SPHINXBUILD' Makefile && grep -qsE '^html:' Makefile; then
   echo " ### Detected sphinx Makefile. Running 'make html'. Add nop 'build.sh' to disable this! ###"
   make html
 else
