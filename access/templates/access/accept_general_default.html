@@ -8,6 +8,11 @@
 <div class="instructions">
   {{ exercise.instructions|safe }}
 </div>
+  {% if exercise.instructions_file %}
+    {% include exercise.instructions_file %}
+  {% endif %}
+{% elif exercise.instructions_file %}
+    {% include exercise.instructions_file %}
 {% else %}
 <h1>{% trans "Enter your submission" %}</h1>
 {% endif %}
