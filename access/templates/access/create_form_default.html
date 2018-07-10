@@ -36,6 +36,9 @@
   {{ exercise.instructions|safe }}
 </div>
 {% endif %}
+{% if exercise.instructions_file %}
+  {% include exercise.instructions_file %}
+{% endif %}
 
 {% include 'access/graded_form.html' %}
 

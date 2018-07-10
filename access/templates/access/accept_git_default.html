@@ -6,6 +6,9 @@
 <div class="instructions">
   {{ exercise.instructions|safe }}
 </div>
+{% if exercise.instructions_file %}
+  {% include exercise.instructions_file %}
+{% endif %}
 {% endif %}
 
 {% include 'access/accept_git_form.html' %}
