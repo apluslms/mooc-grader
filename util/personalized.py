@@ -206,12 +206,13 @@ def generate_one_exercise_instance(course, exercise, dir_path):
         raise access.config.ConfigError(
                 'Missing "generator" and/or "cmd" under "generator" in the exercise configuration %s/%s' %
                 (course["key"], exercise["key"]))
-    
-    cwd = None
+
+    # default cwd is the course directory
+    cwd = os.path.join(access.config.DIR, course["key"])
     if "cwd" in exercise["generator"]:
-        # cwd path in the exercise config should start from the course directory
-        cwd = os.path.join(access.config.DIR, exercise["generator"]["cwd"])
-    
+        # if cwd is set, it should reside inside course directory
+        cwd = os.path.join(cwd, exercise["generator"]["cwd"])
+
     command = exercise["generator"]["cmd"][:] # copy the command list from config before appending
     command.append(dir_path)
     return invoke(command, cwd)
