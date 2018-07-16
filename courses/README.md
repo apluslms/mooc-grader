@@ -98,8 +98,12 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 		   of the generated file
 		* `allow_download`: if true, the generated file can be downloaded from the web
 	* `generator`: (required if personalized) settings for the generator program that
-		creates one new instance of the exercise. At least `cmd` must be set.
+		creates one new instance of the exercise. At least `cmd` must be set. The generator
+		cmd will be run from course_key dir (course_key is the cwd).
 		* `cmd`: command line as an ARRAY that is used to run the generator.
+			Eg. ["generator_script.sh"] will run generator_script.sh from course_key dir
+			and ["python3", "script_dir/generator.py"] will run generator.py from
+			course_key/script_dir but keep course_key as cwd.
 			Mooc-grader appends the instance directory path to the argument list and
 			the generator is expected to write files into the directory. The file names
 			should be listed under `generated_files` setting so that mooc-grader is aware
@@ -107,8 +111,9 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 			`python manage.py pregenerate_exercises course_key <exercise_key>`
 			(`--help` option prints all possible arguments).
 		* `cwd`: if set, this sets the current working directory for the generator
-			program. Start the path from the course directory (course key as the
-			first directory).
+			program. Since the default cwd is course_key, this applies to directories
+			in course_key. Eg. cwd: "script_dir" will change the cwd to course_key/script_dir
+			and only after that run cmd.
 	* `max_submissions_before_regeneration`: (optional, only usable in personalized exercises)
 		defines how many times the student may submit before the personalized exercise is
 		regenerated (the exercise instance is changed to another one). If unset,
