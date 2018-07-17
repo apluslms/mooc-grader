@@ -19,3 +19,4 @@ scripts/chroot_execvp
 
 .DS_Store
 *~
+venv
