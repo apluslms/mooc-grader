@@ -158,7 +158,9 @@ class ConfigParser:
         # Try to find version for requested or configured language.
         for lang in (lang, course_root["lang"]):
             if lang in exercise_root["data"]:
-                return course_root["data"], exercise_root["data"][lang]
+                exercise = exercise_root["data"][lang]
+                exercise["lang"] = lang
+                return course_root["data"], exercise
 
         # Fallback to any existing language version.
         return course_root["data"], list(exercise_root["data"].values())[0]

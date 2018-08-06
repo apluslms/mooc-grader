@@ -142,6 +142,13 @@ class GradedForm(forms.Form):
 
             g += 1
 
+        if 'lang' in self.exercise:
+            self.add_field(i, {
+                'type': 'hidden',
+                'initial': self.exercise['lang'],
+                'key': '__grader_lang',
+            }, forms.CharField, forms.HiddenInput)
+
         # Protect sample used in a randomized form.
         if len(samples) > 0:
             self.nonce = random_ascii(16)
@@ -217,7 +224,8 @@ class GradedForm(forms.Form):
         field = field_class(**args)
         field.type = config['type']
         field.name = self.field_name(i, config)
-        field.label = mark_safe(config['title'])
+        if 'title' in config:
+            field.label = mark_safe(config['title'])
         field.more = self.create_more(config)
         field.points = config.get('points', 0)
         field.choice_list = not choices is None and widget_class != forms.Select

@@ -8,6 +8,8 @@
 
 		{% if field.field.type == "static" %}
 		{{ field.field.more|safe }}
+		{% elif field.field.type == "hidden" %}
+			{{ field }}
 		{% else %}
 
 		{% if not field.field.row_label or field.field.open_table %}
