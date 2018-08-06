@@ -64,7 +64,7 @@ def exercise(request, course_key, exercise_key):
     Presents the exercise and accepts answers to it.
     '''
     post_url = request.GET.get('post_url', None)
-    lang = request.GET.get('lang', None)
+    lang = request.POST.get('__grader_lang', None) or request.GET.get('lang', None)
     (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
 
     # Try to call the configured view.
