@@ -47,10 +47,7 @@ for key in $keys; do
   fi
 
   # Write to database.
-  data=`python gitmanager/cron.py log $LOG`
-  $SQL <<SQL
-update gitmanager_courseupdate set log='$data',updated_time=CURRENT_TIMESTAMP,updated=1 where course_repo_id=$id and updated=0;
-SQL
+  $SQL "update gitmanager_courseupdate set log=readfile('$LOG'),updated_time=CURRENT_TIMESTAMP,updated=1 where course_repo_id=$id and updated=0;"
 
   # Clean up old entries.
   vals=(`$SQL "select request_time from gitmanager_courseupdate where id=$id order by request_time desc limit 4,1;"`)
