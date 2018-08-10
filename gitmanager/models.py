@@ -29,4 +29,7 @@ class CourseUpdate(models.Model):
         ordering = ['-request_time']
 
     def log_nl(self):
-        return self.log.replace('\\n', '\n').replace('\\t', '\t')
+        log = self.log
+        if isinstance(log, bytes):
+            log = log.decode('utf-8')
+        return log.replace('\\n', '\n').replace('\\t', '\t')
