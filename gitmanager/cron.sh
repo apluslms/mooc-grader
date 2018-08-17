@@ -7,7 +7,7 @@ fi
 touch $FLAG
 
 LOG="/tmp/mooc-grader-log"
-TOUCH="/etc/uwsgi/grader.ini"
+TOUCH="/srv/grader/uwsgi-grader.ini"
 SQL="sqlite3 -batch -noheader -column db.sqlite3 "
 TRY_PYTHON="/srv/grader/venv/bin/activate"
 
