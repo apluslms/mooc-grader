@@ -7,6 +7,10 @@ url=$4
 branch=$5
 echo "Processing key=$key id=$id url=$url branch=$branch python=$TRY_PYTHON"
 
+if [ -z "$key" -o -z "$id" -o -z "$url" -o -z "$branch" ]; then
+    echo "  Some arguments are missing, skipping..."
+fi
+
 if [ -d exercises ]; then
   CDIR=exercises
 else
