@@ -1,32 +1,28 @@
 #!/bin/bash
 
 FLAG="/tmp/mooc-grader-manager-clean"
-if [ -e $FLAG ]; then
-  exit 0
-fi
-touch $FLAG
-
 LOG="/tmp/mooc-grader-log"
 TOUCH="/srv/grader/uwsgi-grader.ini"
 SQL="sqlite3 -batch -noheader -column db.sqlite3 "
 TRY_PYTHON="/srv/grader/venv/bin/activate"
 
-if [ -f $TRY_PYTHON ]; then
-  source $TRY_PYTHON
-fi
-
 cd `dirname $0`/..
-
 if [ -d exercises ]; then
   CDIR=exercises
 else
   CDIR=courses
 fi
+USER=$(stat -c '%U' $CDIR/)
 
-vals=(`ls -ld $CDIR`)
-USER=${vals[2]}
-
+if [ -e $FLAG ]; then
+  exit 0
+fi
+touch $FLAG
 chown $USER $FLAG
+
+if [ -f $TRY_PYTHON ]; then
+  source $TRY_PYTHON
+fi
 
 # Handle each scheduled course key.
 keys="`$SQL "select r.key from gitmanager_courseupdate as u left join gitmanager_courserepo r on u.course_repo_id=r.id where u.updated=0;"`"
