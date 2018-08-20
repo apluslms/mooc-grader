@@ -83,7 +83,7 @@ chmod 711 $sbd/tmp/grader
 
 # Compile program for running scripts inside the chroot sandbox.
 echo_ok "*** Compiling chroot script runner program"
-gcc -o scripts/chroot_execvp scripts/chroot_execvp.c
+gcc -D_GNU_SOURCE -std=gnu11 -Wall -O2 -o scripts/chroot_execvp scripts/chroot_execvp.c
 chown root:root scripts/chroot_execvp
 chmod 4755 scripts/chroot_execvp
 
