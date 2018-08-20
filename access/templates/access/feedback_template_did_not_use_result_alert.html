@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="alert alert-warning">
+    {% blocktrans %}
+    <p>
+        The feedback template did not access the <code>result</code> dict. This
+        means that the feedback shown below is likely inadequate or missing.
+        The template should access at least one of <code>points</code>,
+        <code>max_points</code>, <code>error</code> or <code>out</code>. Please
+        check the <code>feedback_template</code> specified in the exercise YAML.
+    </p><p>
+        If you are a student, please tell course staff what you were doing
+        before you got this message, and the content of this message.
+    </p>
+    {% endblocktrans %}
+</div>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-10 09:17+0000\n"
+"POT-Creation-Date: 2018-08-20 12:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,6 +59,19 @@ msgstr "Pyydä Git-repositoryni arvostelua"
 #: access/templates/access/accept_post_default.html:10
 msgid "Enter your submission"
 msgstr "Kirjoita ratkaisusi"
+#: access/templates/access/active_element_default.html:21
+#: access/templates/access/exercise_frame.html:41
+msgid ""
+"The same form can obly be submitted once. Start again from exercise "
+"description."
+msgstr ""
+"Sama lomake voidaan lähettää vain kerran. Aloita uudelleen tehtävänannosta."
+
+#: access/templates/access/active_element_default.html:25
+#: access/templates/access/exercise_frame.html:45
+msgid "Missing required fields."
+msgstr "Täytä kaikki pakolliset kentät."
+
 
 #: access/templates/access/ajax.html:2
 #, python-format
@@ -185,16 +198,41 @@ msgstr "Tuntematon tiedosto vastaanotettu (tiedostonimeä ei ole asetuksissa)."
 msgid "Invalid address entered."
 msgstr "Syötetty osoite ei kelpaa."
 
-#: access/templates/access/exercise_frame.html:41
+#: access/templates/access/feedback_template_did_not_use_result_alert.html:3
 msgid ""
-"The same form can obly be submitted once. Start again from exercise "
-"description."
+"\n"
+"    <p>\n"
+"        The feedback template did not access the <code>result</code> dict. "
+"This\n"
+"        means that the feedback shown below is likely inadequate or "
+"missing.\n"
+"        The template should access at least one of <code>points</code>,\n"
+"        <code>max_points</code>, <code>error</code> or <code>out</code>. "
+"Please\n"
+"        check the <code>feedback_template</code> specified in the exercise "
+"YAML.\n"
+"    </p><p>\n"
+"        If you are a student, please tell course staff what you were doing\n"
+"        before you got this message, and the content of this message.\n"
+"    </p>\n"
+"    "
 msgstr ""
-"Sama lomake voidaan lähettää vain kerran. Aloita uudelleen tehtävänannosta."
-
-#: access/templates/access/exercise_frame.html:45
-msgid "Missing required fields."
-msgstr "Täytä kaikki pakolliset kentät."
+"\n"
+"    <p>\n"
+"        Palaute-template ei käyttänyt <code>result</code>-dictiä, "
+"joten\n"
+"        alla oleva palaute luultavasti puuttuu tai on puutteellinen"
+"\n"
+"        Templaten tulisi käyttää lukea ainakin <code>points</code>,\n"
+"        <code>max_points</code>, <code>error</code> tai <code>out</code>. "
+"Ole\n"
+"        hyvä ja tarkista tehtävän YAML-tiedostossa määritelty "
+"<code>feedback_template</code>\n"
+"    </p><p>\n"
+"        Jos olet opiskelija, ole hyvä ja kerro kurssihenkilökunnalle mitä\n"
+"        olit tekemässä viestin saadessasi, sekä tämän viestin sisältö.\n"
+"    </p>\n"
+"    "
 
 #: access/templates/access/graded_form.html:91
 msgid "Correct answer"
