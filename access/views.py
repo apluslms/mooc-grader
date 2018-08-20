@@ -14,6 +14,7 @@ from util.files import read_and_remove_submission_meta, clean_submission_dir
 from util.queue import queue_length as qlength
 from util.http import post_data
 from util.importer import import_named
+from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util import export
 from util.templates import template_to_str
@@ -354,15 +355,21 @@ def container_post(request):
         # replace the feedback with a rendered feedback template if the exercise is configured to do so
         # it is not feasible to support all of the old feedback template variables that runactions.py
         # used to have since the grading actions are not configured in the exercise YAML file anymore
-        result = {
+        required_fields = { 'points', 'max_points', 'error', 'out' }
+        result = MonitoredDict({
             "points": data["points"],
             "max_points": data["max_points"],
             "out": feedback,
             "error": data.get("error", False),
             "title": exercise.get("title", ""),
-        }
+        })
         translation.activate(lang)
         feedback = template_to_str(course, exercise, None, exercise["feedback_template"], result=result)
+        if result.accessed.isdisjoint(required_fields):
+            alert = template_to_str(
+                course, exercise, None,
+                "access/feedback_template_did_not_use_result_alert.html")
+            feedback = alert + feedback
         # Make unicode results ascii.
         feedback = feedback.encode("ascii", "xmlcharrefreplace")
 
