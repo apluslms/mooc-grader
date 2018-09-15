@@ -25,11 +25,14 @@ fi
 dir=$CDIR/$key
 if [ -e $dir ]; then
   cd $dir
+  git fetch
+  # Following trick might not be needed. It's supposed to ensure there is local branch per remote
   branchnow=`git branch`
   if [ "${branchnow#* }" != "$branch" ]; then
-    git checkout $branch
+    git reset -q --hard
+    git checkout -q $branch
   fi
-  git pull
+  git reset -q --hard origin/$branch
   git submodule update --init --recursive
   git --no-pager log --pretty=format:"------------;Commit metadata;;Hash:;%H;Subject:;%s;Body:;%b;Committer:;%ai;%ae;Author:;%ci;%cn;%ce;------------;" -1 | tr ';' '\n'
 else
