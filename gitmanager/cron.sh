@@ -2,7 +2,6 @@
 
 FLAG="/tmp/mooc-grader-manager-clean"
 LOG="/tmp/mooc-grader-log"
-TOUCH="/srv/grader/uwsgi-grader.ini"
 SQL="sqlite3 -batch -noheader -column db.sqlite3 "
 TRY_PYTHON="/srv/grader/venv/bin/activate"
 
@@ -12,6 +11,7 @@ if [ -d exercises ]; then
 else
   CDIR=courses
 fi
+CDIR=$(realpath $CDIR)
 USER=$(stat -c '%U' $CDIR/)
 
 if [ -e $FLAG ]; then
@@ -53,6 +53,8 @@ for key in $keys; do
   fi
 done
 
-if [ -e $TOUCH ]; then
-  touch $TOUCH
-fi
+# Reload course configuration by restarting uwsgi processes
+touch $CDIR
+for f in /srv/grader/uwsgi-grader*.ini; do
+    [ -e $f ] && touch $f
+done

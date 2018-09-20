@@ -22,6 +22,7 @@ DIR = os.path.join(settings.BASE_DIR, "courses")
 OLD_DIR = os.path.join(settings.BASE_DIR, "exercises")
 if os.path.isdir(OLD_DIR):
     DIR = OLD_DIR
+DIR = os.path.realpath(DIR) # resolve symlinks
 
 LOGGER = logging.getLogger('main')
 
