@@ -81,7 +81,7 @@ def hook(request, key):
                 logger.warning("Invalid json data from gitlab. Error: %s", e)
                 pass
             else:
-                branch = data.get('ref')
+                branch = data.get('ref', '')
                 branch = branch[11:] if branch.startswith('refs/heads/') else None
 
         if branch is not None and branch != repo.git_branch:
