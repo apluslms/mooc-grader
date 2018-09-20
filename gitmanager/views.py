@@ -1,4 +1,7 @@
+import json
+import logging
 import os, tempfile
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -7,6 +10,7 @@ from .forms import CourseRepoForm
 from .models import CourseRepo
 
 
+logger = logging.getLogger("grader.gitmanager")
 clean_flag = os.path.join(tempfile.gettempdir(), "mooc-grader-manager-clean")
 
 
@@ -67,7 +71,22 @@ def get_client_ip(request):
 
 def hook(request, key):
     repo = get_object_or_404(CourseRepo, key=key)
+
     if request.method == 'POST':
+        branch = None
+        if request.META.get('HTTP_X_GITLAB_EVENT'):
+            try:
+                data = json.loads(request.body.decode(request.encoding or settings.DEFAULT_CHARSET))
+            except ValueError as e:
+                logger.warning("Invalid json data from gitlab. Error: %s", e)
+                pass
+            else:
+                branch = data.get('ref')
+                branch = branch[11:] if branch.startswith('refs/heads/') else None
+
+        if branch is not None and branch != repo.git_branch:
+            return HttpResponse("ignored. update to '{}', but expected '{}'".format(branch, repo.git_branch))
+
         if repo.updates.filter(updated=False).count() == 0:
             repo.updates.create(
                 course_repo=repo,
