@@ -85,7 +85,10 @@ def hook(request, key):
                 branch = branch[11:] if branch.startswith('refs/heads/') else None
 
         if branch is not None and branch != repo.git_branch:
-            return HttpResponse("ignored. update to '{}', but expected '{}'".format(branch, repo.git_branch))
+            return HttpResponse(
+                "ignored. update to '{}', but expected '{}'".format(branch, repo.git_branch),
+                status=400,
+            )
 
         if repo.updates.filter(updated=False).count() == 0:
             repo.updates.create(
