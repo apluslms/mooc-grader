@@ -235,15 +235,16 @@ def i18n_get(languages, values, key):
 
 
 def i18n_urls(languages, values, key, mapper, request, course_key, exercise_key):
-    def urls(paths):
+    def urls(paths, lang=None):
         return ' '.join([
-            mapper(request, course_key, exercise_key, path.split('/')[-1])
+            mapper(request, course_key, exercise_key, path.split('/')[-1]) +
+            ('?lang='+lang if lang else '')
             for path in paths
         ])
     if len(languages) == 1:
         return urls(values[0].get(key, []))
     return {
-        l: urls(values[i].get(key, []))
+        l: urls(values[i].get(key, []), lang=l)
         for i,l in enumerate(languages)
     }
 
