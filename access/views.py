@@ -113,9 +113,13 @@ def exercise_model(request, course_key, exercise_key, parameter=None):
         path = find_name(exercise['model_files'], parameter)
 
     if path:
-        with open(os.path.join(course['dir'], path)) as f:
-            content = f.read()
-        response = HttpResponse(content, content_type='text/plain')
+        try:
+            with open(os.path.join(course['dir'], path)) as f:
+                content = f.read()
+        except FileNotFoundError:
+            pass
+        else:
+            response = HttpResponse(content, content_type='text/plain')
     else:
         try:
             response = import_named(course, exercise['view_type'] + "Model")(request, course, exercise, parameter)
