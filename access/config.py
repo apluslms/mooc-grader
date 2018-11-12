@@ -433,6 +433,7 @@ class ConfigParser:
                 # Load new data from rendered include file string
                 render_context = include_data["template_context"]
                 template_name = os.path.join(course_dir, include_file)
+                template_name = template_name[len(DIR)+1:] # FIXME: XXX: NOTE: TODO: Fix this hack
                 rendered = django_template_loader.render_to_string(
                             template_name,
                             render_context
