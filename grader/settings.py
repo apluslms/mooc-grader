@@ -231,13 +231,15 @@ from os import environ
 from r_django_essentials.conf import *
 
 # get settings values from other sources
-update_settings_from_environment(__name__, 'DJANGO_') # Provide defaults before local_settings
-update_settings_from_module(__name__, 'local_settings', quiet=True)
+update_settings_with_file(__name__,
+                          environ.get('GRADER_LOCAL_SETTINGS', 'local_settings'),
+                          quiet='GRADER_LOCAL_SETTINGS' in environ)
 update_settings_from_module(__name__, 'settings_local', quiet=True) # Compatibility with older releases
+update_settings_from_environment(__name__, 'DJANGO_') # FIXME: deprecated
+update_settings_from_environment(__name__, 'GRADER_')
 update_secret_from_file(__name__, environ.get('GRADER_SECRET_KEY_FILE', 'secret_key'))
 update_secret_from_file(__name__, environ.get('GRADER_AJAX_KEY_FILE', 'ajax_key'), setting='AJAX_KEY')
 assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
-update_settings_from_environment(__name__, 'GRADER_') # Provide overrides after local_settings
 
 # update INSTALLED_APPS
 INSTALLED_APPS = INSTALLED_APPS + ADD_APPS
