@@ -400,6 +400,8 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
         exercise_extra = {
             "key": exercise["key"],
             "title": exercise.get("title", None),
+            "resources": c.get("resources", {}), # Unofficial param, implemented differently later
+            "require_constant_environment": c.get("require_constant_environment", False) # Unofficial param, implemented differently later
         }
         if exercise.get("personalized", False):
             exercise_extra["personalized_exercise"] \
