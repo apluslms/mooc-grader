@@ -26,12 +26,12 @@ var aplusSetGitCookie = function($) { // supply jQuery as parameter
 	}
 
 	$("#git_submit").on("click", function() {
-		var id = $("#git_id").val();
-		if (id.trim().length > 0) {
+		var id_val = $("#git_id").val();
+		if (id_val.trim().length > 0) {
 			var expire = new Date();
 			expire.setFullYear(expire.getFullYear() + 1);
 			var path = document.location.href.split("/");
-			document.cookie = "aplusgit=" + encodeURIComponent(id)
+			document.cookie = "aplusgit=" + encodeURIComponent(id_val)
 				+ ";path=/" + path[3] + "/" + path[4] + "/"
 				+ ";expires=" + expire.toGMTString();
 		}
@@ -39,8 +39,8 @@ var aplusSetGitCookie = function($) { // supply jQuery as parameter
 
 };
 
-document.addEventListener("DOMContentLoaded", function(event) {
-	if (typeof require === 'function') {
+var aplusRegisterCookieSetter = function(event) {
+	if (typeof require === "function") {
 		// in Moodle
 		require(["jquery"], function(jQuery) {
 			aplusSetGitCookie(jQuery);
@@ -49,5 +49,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		// in A+
 		aplusSetGitCookie(jQuery);
 	}
-});
+};
+
+if(document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", aplusRegisterCookieSetter );
+} else {
+    aplusRegisterCookieSetter( null );
+}
 </script>
