@@ -1,10 +1,11 @@
 #!/bin/bash
-
+set -x
 TRY_PYTHON=$1
 key=$2
 id=$3
 url=$4
 branch=$5
+
 echo "Processing key=$key id=$id url=$url branch=$branch python=$TRY_PYTHON"
 
 if [ -z "$key" -o -z "$id" -o -z "$url" -o -z "$branch" ]; then
@@ -24,7 +25,7 @@ fi
 # Update from git origin and move to dir.
 dir=$CDIR/$key
 if [ -e $dir ]; then
-  cd $dir
+
   git fetch
   # Following trick might not be needed. It's supposed to ensure there is local branch per remote
   branchnow=`git branch`
@@ -37,23 +38,22 @@ if [ -e $dir ]; then
   git --no-pager log --pretty=format:"------------;Commit metadata;;Hash:;%H;Subject:;%s;Body:;%b;Committer:;%ai;%ae;Author:;%ci;%cn;%ce;------------;" -1 | tr ';' '\n'
 else
   git clone -b $branch --recursive $url $dir
-  cd $dir
 fi
+
+pushd $dir
 
 # Build course material.
-if [ -e build.sh ]; then
-  echo " ### Detected 'build.sh' executing it with bash. ###"
-  /bin/bash build.sh
-elif [ -e Makefile ] && grep -qsE '^SPHINXBUILD' Makefile && grep -qsE '^html:' Makefile; then
-  echo " ### Detected sphinx Makefile. Running 'make html'. Add nop 'build.sh' to disable this! ###"
-  make html
-else
-  echo " ### No build.sh or sphinx Makefile. Not building the course. ###"
+if [ -e roman.yml ] || [ -e course.yml ] || [ -e roman.yaml ] || [ -e course.yaml ]; then
+    echo "### Detected normal roman YAML file, running roman directly"
+    roman -p /var/lib/docker/volumes/aplus_data/_data/grader/courses/$key/
+else [ -z "$6" ]
+    roman -f ../../legacy_roman.yml
 fi
-cd ../..
+popd
 
 # Link to static.
-static_dir=`python gitmanager/cron.py static $key`
+static_dir=`python3 gitmanager/cron.py static $key`
+  make html
 if [ "$static_dir" != "" ]; then
   echo "Link static dir $static_dir"
   cd static

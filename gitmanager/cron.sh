@@ -2,7 +2,7 @@
 
 FLAG="/tmp/mooc-grader-manager-clean"
 LOG="/tmp/mooc-grader-log"
-SQL="sqlite3 -batch -noheader -column db.sqlite3 "
+SQL="sqlite3 -batch -noheader -column db.sqlite3"
 TRY_PYTHON="/srv/grader/venv/bin/activate"
 
 cd `dirname $0`/..
@@ -30,7 +30,6 @@ for key in $keys; do
   echo "Update $key" > $LOG
   vals=(`$SQL "select id,git_origin,git_branch from gitmanager_courserepo where key='$key';"`)
   id=${vals[0]}
-
   sudo -u $USER -H gitmanager/cron_pull_build.sh $TRY_PYTHON $key ${vals[@]} >> $LOG 2>&1 || continue
 
   # Update sandbox.
