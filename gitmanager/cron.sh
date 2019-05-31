@@ -30,7 +30,7 @@ for key in $keys; do
   echo "Update $key" > $LOG
   vals=(`$SQL "select id,git_origin,git_branch from gitmanager_courserepo where key='$key';"`)
   id=${vals[0]}
-  sudo -u $USER -H gitmanager/cron_pull_build.sh $TRY_PYTHON $key ${vals[@]} >> $LOG 2>&1 || continue
+  sudo -u $USER -H gitmanager/cron_pull_build.sh $TRY_PYTHON $key ${vals[@]} $DOCKER_HOST_PATH >> $LOG 2>&1 || continue
 
   # Update sandbox.
   if [ -d /var/sandbox_$key ]; then
