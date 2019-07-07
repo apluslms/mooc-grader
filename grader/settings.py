@@ -29,6 +29,7 @@ INSTALLED_APPS = (
     'staticfileserver', # override for runserver command, thus this needs to be before django contrib one
     'django.contrib.staticfiles',
     'access',
+    'deploy_api',
 )
 ADD_APPS = (
     #'gitmanager',
@@ -224,3 +225,25 @@ if DEBUG:
 
 # update template loaders for production
 use_cache_template_loader_in_production(__name__)
+
+
+###############################################################################
+# JWT settings
+
+JWT_ALGORITHM = "RS256"
+JWT_ISSUER = "shepherd"
+
+# JWT_PUBLIC_KEY = """
+# -----BEGIN PUBLIC KEY-----
+# MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0QIB6wP5rGpT7pcKM0uQ
+# bn3FbQI2Xp58vLW+eLISgPvh0EMNuVWMazRfTBGnSxYI2P2F+Yf+O8Ck3JWOpuCD
+# +i0a+RlC7gZdspULHpRYSccOqvRdcMn93nuPxiHJ+zAFuVR6mmDQmkHR3ruFvbQt
+# FWABpbZpqVOlaOUqoyQcp7JGOrrGZZhifS8EE56azvhIm8n2qf+KhKkTq0P71j+4
+# 3h2sZtHM9nrsm/wtyb26xPBwGS1v1d5bWw0D2vhPSCP4HV2DuI6WD6pEN9Axjf5j
+# dG7tGa6GnyPchdDAvlnA1FQiFfkz4NQtL5upmGiz6gBslFlPhZmejlr2RUYd4mbQ
+# 3QIDAQAB
+# -----END PUBLIC KEY-----
+# """
+
+
+
