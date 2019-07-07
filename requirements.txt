@@ -6,3 +6,6 @@ lxml ~= 4.3.2
 PyYAML==3.11
 docutils==0.12
 python-magic==0.4.11
+PyJWT[crypto] ~= 1.7.1
+ruamel.yaml >=0.15.89, <0.16
+git+https://github.com/apluslms/apluslms-file-transfer.git
