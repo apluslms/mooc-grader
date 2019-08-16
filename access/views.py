@@ -176,7 +176,7 @@ def aplus_json(request, course_key):
         raise Http404()
     data = _copy_fields(course, ["name", "description", "lang", "contact",
         "assistants", "start", "end", "categories",
-        "numerate_ignoring_modules", "head_urls"])
+        "numerate_ignoring_modules"])
     if "language" in course:
         data["lang"] = course["language"]
 

@@ -23,9 +23,6 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 	* `start`: (optional/a+) The course instance start date
 	* `end`: (optional/a+) The course instance end/archive date
 	* `static_dir`: (optional) This subdirectory will be linked to URL /static/course_key
-	* `head_urls`: (optional/a+) A list of URLs to JS and CSS files that A+ includes
-		on all course pages. For example, a common JavaScript library could be included
-		this way without adding it separately to each exercise description.
 	* `exercises`: (deprecated, see modules) A list of active exercise keys
 	* `modules`: a list of
 		* `key`: part of the url
