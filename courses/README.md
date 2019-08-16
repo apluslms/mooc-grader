@@ -21,8 +21,43 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 	* `contact_phone`: (optional) A private contact phone number for course responsible
 	* `assistants`: (optional/a+) A list of assistant student ids
 	* `start`: (optional/a+) The course instance start date
-	* `end`: (optional/a+) The course instance end/archive date
+	* `end`: (optional/a+) The course instance end date
 	* `static_dir`: (optional) This subdirectory will be linked to URL /static/course_key
+	* `head_urls`: (optional/a+) A list of URLs to JS and CSS files that A+ includes
+		on all course pages. For example, a common JavaScript library could be included
+		this way without adding it separately to each exercise description.
+	* `enrollment_start`: The enrollment start date
+	* `enrollment_end`: The enrollment end date
+	* `lifesupport_time`: The lifesupport date (model answers are hidden from students)
+	* `archive_time`: The archive date (no submissions allowed after it)
+	* `enrollment_audience`: Selects the user group that is allowed to enroll in the course. One of the following:
+		* `internal`: only internal students
+		  (they have a student number and should log-in with internal accounts)
+		* `external`: only external students (no student number and login with Google accounts)
+		* `all`: internal and external students
+	* `view_content_to`: Selects the user group that may view course contents. One of the following:
+		* `enrolled`: only enrolled students
+		* `enrollment_audience`: logged-in users in the enrollment audience (the audience is set separately)
+		* `all_registered`: all logged-in users
+		* `public`: all anonymous and authenticated users
+	* `index_mode`: Selects the display mode for the course front page. One of the following:
+		* `results`: exercise results
+		* `toc`: table of contents
+		* `last`: opens the page that the user viewed last time
+		* `experimental`: do not use this
+	* `content_numbering`: numbering mode for the course contents (chapters and exercises). One of the following:
+		* `none`: no numbers shown
+		* `arabic`: arabic numbers (1, 2, 3)
+		* `roman`: roman numbers (I, II, III)
+		* `hidden`: no numbers, but child objects may show the hierarchy in numbering.
+			If there are children (e.g., exercises are children of the module) and
+			the parent has hidden numbering, then the children may have numbers
+			such as "1.2" instead of just "2" (exercise 2 in the round 1).
+			The hidden setting is more sensible in `module_numbering` than `content_numbering`.
+	* `module_numbering`: numbering mode for the modules (exercise rounds).
+		The options are the same as for `content_numbering`.
+	* `course_description`: HTML text for the course front page
+	* `course_footer`: HTML text for the footer of the front page
 	* `exercises`: (deprecated, see modules) A list of active exercise keys
 	* `modules`: a list of
 		* `key`: part of the url
