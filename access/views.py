@@ -174,9 +174,29 @@ def aplus_json(request, course_key):
     course = config.course_entry(course_key)
     if course is None:
         raise Http404()
-    data = _copy_fields(course, ["name", "description", "lang", "contact",
-        "assistants", "start", "end", "categories",
-        "numerate_ignoring_modules"])
+    data = _copy_fields(course, [
+        "archive_time",
+        "assistants",
+        "categories",
+        "contact",
+        "content_numbering",
+        "course_description",
+        "course_footer",
+        "description",
+        "end",
+        "enrollment_audience",
+        "enrollment_end",
+        "enrollment_start",
+        "head_urls",
+        "index_mode",
+        "lang",
+        "lifesupport_time",
+        "module_numbering",
+        "name",
+        "numerate_ignoring_modules",
+        "start",
+        "view_content_to",
+    ])
     if "language" in course:
         data["lang"] = course["language"]
 
