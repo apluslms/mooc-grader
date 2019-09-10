@@ -353,7 +353,7 @@ class GradedForm(forms.Form):
 
         if "ignorews" in mods or t == "unsortedchars":
             def strip_ws(v):
-                return v.replace(" ","")
+                return ''.join(v.split())
             val = strip_ws(val)
             cmp = strip_ws(cmp)
 
