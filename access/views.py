@@ -10,13 +10,17 @@ import os
 import json
 
 from access.config import config, DEFAULT_LANG
-from util.files import read_and_remove_submission_meta, clean_submission_dir
-from util.queue import queue_length as qlength
+from util import export
+from util.files import (
+    clean_submission_dir,
+    read_and_remove_submission_meta,
+    write_submission_meta,
+)
 from util.http import post_data
 from util.importer import import_named
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
-from util import export
+from util.queue import queue_length as qlength
 from util.templates import template_to_str
 
 
@@ -400,5 +404,6 @@ def container_post(request):
     data["feedback"] = feedback
 
     if not post_data(meta["url"], data):
-        raise IOError("Failed to deliver results")
+        write_submission_meta(sid, meta)
+        return HttpResponse("Failed to deliver results", status=502)
     return HttpResponse("Ok")
