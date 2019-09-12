@@ -115,6 +115,7 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 		`instructions` will be placed before the content of `instructions_file`.
 	* `max_points` (optional): The maximum exercise points (positive int).
 		Overrides any maximum points reported by test actions.
+	* `feedback`: If true, the exercise is a feedback exercise/questionnaire.
 	* `view_type`: A dotted name for an exercise implementation
 	* `submission_file_max_size`: (optional/Moodle frontend only) maximum accepted file size
 		for submissions (in bytes). The limit is checked for each file separately if
@@ -263,16 +264,17 @@ course specific exercise view in a course specific Python module.
         * ignorequotes: iqnore "quotes" around
         * requirecase: require identical lower and upper cases
         * ignorerepl: ignore REPL prefixes
-			* `regex` (deprecated): regex to match correct answer for text fields
+			* `regex` (deprecated): regex to match correct answer for text fields (use compare_method instead)
 			* `options` list of options for choice fields
 				* `label`: option label
 				* `value` (optional): the unique value for the option in the form post
 				* `selected` (optional): `true` to make this initial selection
-				* `correct` (optional): `true` for correct option.
+				* `correct` (optional): `true` for correct option. "neutral" for neutral
+					options that do not affect grading (in checkbox questions).
 					Checkbox requires all and only correct
 					options selected. Radio requires one of
-					the correct options selected. If no correct
-					options are configured anything is correct.
+					the correct options selected.
+			* `partial_points`: if true, a checkbox question awards some points for partially correct answers
 			* `feedback` (optional): list of feedback messages
 				* `label`: the message
 				* `value`: show when this value is posted
