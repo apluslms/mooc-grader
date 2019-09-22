@@ -499,7 +499,8 @@ class ConfigParser:
             t = type(n)
             if t == dict:
                 d = {}
-                for k,v in n.items():
+                for k in sorted(n.keys(), key=lambda x: (len(x), x)):
+                    v = n[k]
                     m = self.PROCESSOR_TAG_REGEX.match(k)
                     while m:
                         k, tag = m.groups()
