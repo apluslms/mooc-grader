@@ -1,18 +1,16 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
+# Finnish translations for the MOOC-grader
+# Copyright (C) 2015 Teemu Lehtinen
+# This file is distributed under the same license as the MOOC-grader package.
+# Teemu Lehtinen <teemu.t.lehtinen@aalto.fi>, 2015.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-20 12:08+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-10-12 17:41+0000\n"
+"PO-Revision-Date: 2019-10-12 20:00+0300\n"
+"Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
+"Language-Team: Finnish <>\n"
+"Language: fi_FI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,21 +21,37 @@ msgid "Select your files for grading"
 msgstr "Valitse arvosteltavat tiedostot"
 
 #: access/templates/access/accept_files_form.html:6
-#, fuzzy, python-format
-#| msgid ""
-#| "Submit only %(exercise.required_number_of_files)s of the following files."
+#, python-format
 msgid ""
 "\n"
 "\t\t\tSubmit only %(num_files)s of the following files.\n"
 "\t\t"
-msgstr "Palauta vain %(num_files)s seuraavista tiedostoista."
+msgstr ""
+"\n"
+"Palauta vain %(num_files)s seuraavista tiedostoista."
 
 #: access/templates/access/accept_files_form.html:23
+#: access/templates/access/accept_general_form.html:42
 #: access/templates/access/accept_git_form.html:16
 #: access/templates/access/accept_post_form.html:17
-#: access/templates/access/graded_form.html:123
+#: access/templates/access/graded_form.html:143
 msgid "Submit"
 msgstr "Lähetä"
+
+#: access/templates/access/accept_general_default.html:17
+#: access/templates/access/accept_post_default.html:15
+msgid "Enter your submission"
+msgstr "Kirjoita ratkaisusi"
+
+#: access/templates/access/accept_general_form.html:23
+#, python-format
+msgid ""
+"\n"
+"\t\t\t\tSubmit only %(num_files)s of the following files.\n"
+"\t\t\t"
+msgstr ""
+"\n"
+"Palauta vain %(num_files)s seuraavista tiedostoista."
 
 #: access/templates/access/accept_git_form.html:5
 msgid "Enter your Git repository address for grading"
@@ -54,11 +68,13 @@ msgstr "Anna käyttäjätunnuksesi arvostelua varten"
 
 #: access/templates/access/accept_git_user.html:31
 msgid "Request grading of my repository"
-msgstr "Pyydä Git-repositoryni arvostelua"
+msgstr "Pyydä versiosäilöni arvostelua"
 
-#: access/templates/access/accept_post_default.html:10
-msgid "Enter your submission"
-msgstr "Kirjoita ratkaisusi"
+#: access/templates/access/active_element_default.html:17
+#: access/templates/access/exercise_frame.html:37
+msgid "Invalid address entered."
+msgstr "Syötetty osoite ei kelpaa."
+
 #: access/templates/access/active_element_default.html:21
 #: access/templates/access/exercise_frame.html:41
 msgid ""
@@ -72,6 +88,16 @@ msgstr ""
 msgid "Missing required fields."
 msgstr "Täytä kaikki pakolliset kentät."
 
+#: access/templates/access/active_element_feedback.html:10
+#: access/templates/access/task_success.html:16
+#, python-format
+msgid ""
+"\n"
+"\t\tPoints %(points)s/%(max_points)s\n"
+"\t\t"
+msgstr ""
+"\n"
+"Pisteet %(points)s/%(max_points)s"
 
 #: access/templates/access/ajax.html:2
 #, python-format
@@ -80,7 +106,7 @@ msgid ""
 "You got %(points)s/%(max_points)s for your answer.\n"
 msgstr ""
 "\n"
-"Sait %(points)s/%(max_points)s pistettä tästä monivalintatehtävästä.\n"
+"Sait %(points)s/%(max_points)s pistettä vastauksestasi.\n"
 
 #: access/templates/access/async_accepted.html:7
 msgid ""
@@ -89,6 +115,10 @@ msgid ""
 "\tsynchronously while blocking other services. NOT READY FOR PRODUCTION!\n"
 "\t"
 msgstr ""
+"\n"
+"Arvostelujonoa ei ole konfiguroitu. Tämä palautus arvosteltiin "
+"synkronisesti, mikä estää muita palveluja toimimasta samaan aikaan. EI "
+"VALMIS TUOTANTOKÄYTTÖÖN!"
 
 #: access/templates/access/async_accepted.html:17
 msgid "Submission accepted"
@@ -102,6 +132,10 @@ msgid ""
 "  The result can be temporarily seen at <a href=\"%(url)s\">%(url)s</a>.\n"
 "\t"
 msgstr ""
+"\n"
+"<code>%(key)s</code> puuttuu ja se vaaditaan tulosten toimittamiseen!\n"
+"Tuloksia voi väliaikaisesti katsella osoitteessa <a href=\"%(url)s\">"
+"%(url)s</a>."
 
 #: access/templates/access/async_accepted.html:34
 msgid ""
@@ -135,9 +169,25 @@ msgstr ""
 "Tulos näytetään tällä sivulla, kun arvosteluprosessi on suoritettu.\n"
 "Joudut lataamaan sivun uudelleen nähdäksesi palautteen."
 
-#: access/templates/access/course.html:15
+#: access/templates/access/course.html:10
+msgid "Service URLs for A+"
+msgstr "Palveluosoitteet A+:aa varten"
+
+#: access/templates/access/course.html:13
+msgid "A+ configuration JSON"
+msgstr "A+:n konfiguraatio-JSON"
+
+#: access/templates/access/course.html:21
+msgid "Build/make output retrieval"
+msgstr "Kurssin kääntämisen tulosteen haku"
+
+#: access/templates/access/course.html:28
+msgid "Requires the gitmanager plugin"
+msgstr "Vaatii gitmanager-liitännäisen"
+
+#: access/templates/access/course.html:33
 msgid "Available exercises"
-msgstr ""
+msgstr "Saatavilla olevat tehtävät"
 
 #: access/templates/access/create_form_default.html:12
 #, python-format
@@ -173,8 +223,7 @@ msgstr ""
 "Huomaa kuitenkin jäljellä olevien palautuskertojen määrä!"
 
 #: access/templates/access/exercise_frame.html:21
-#, fuzzy, python-format
-#| msgid "You must submit %(exercise.required_number_of_files)s file(s)."
+#, python-format
 msgid ""
 "\n"
 "\t\t\tYou must submit %(num_files)s file.\n"
@@ -183,8 +232,12 @@ msgid_plural ""
 "\n"
 "\t\t\tYou must submit %(num_files)s files.\n"
 "\t\t\t"
-msgstr[0] "Sinun täytyy palauttaa %(num_files)s tiedosto."
-msgstr[1] "Sinun täytyy palauttaa %(num_files)s tiedostoa."
+msgstr[0] ""
+"\n"
+"Sinun täytyy palauttaa %(num_files)s tiedosto."
+msgstr[1] ""
+"\n"
+"Sinun täytyy palauttaa %(num_files)s tiedostoa."
 
 #: access/templates/access/exercise_frame.html:27
 msgid "Every file is required for a submission."
@@ -193,10 +246,6 @@ msgstr "Palautus vaatii kaikki tiedostot."
 #: access/templates/access/exercise_frame.html:33
 msgid "Unknown file received (no file name configured)."
 msgstr "Tuntematon tiedosto vastaanotettu (tiedostonimeä ei ole asetuksissa)."
-
-#: access/templates/access/exercise_frame.html:37
-msgid "Invalid address entered."
-msgstr "Syötetty osoite ei kelpaa."
 
 #: access/templates/access/feedback_template_did_not_use_result_alert.html:3
 msgid ""
@@ -219,10 +268,8 @@ msgid ""
 msgstr ""
 "\n"
 "    <p>\n"
-"        Palaute-template ei käyttänyt <code>result</code>-dictiä, "
-"joten\n"
-"        alla oleva palaute luultavasti puuttuu tai on puutteellinen"
-"\n"
+"        Palaute-template ei käyttänyt <code>result</code>-dictiä, joten\n"
+"        alla oleva palaute luultavasti puuttuu tai on puutteellinen\n"
 "        Templaten tulisi käyttää lukea ainakin <code>points</code>,\n"
 "        <code>max_points</code>, <code>error</code> tai <code>out</code>. "
 "Ole\n"
@@ -234,7 +281,7 @@ msgstr ""
 "    </p>\n"
 "    "
 
-#: access/templates/access/graded_form.html:91
+#: access/templates/access/graded_form.html:109
 msgid "Correct answer"
 msgstr "Oikea vastaus"
 
@@ -244,19 +291,19 @@ msgstr "Lataa"
 
 #: access/templates/access/ready.html:6
 msgid "Grader ready"
-msgstr ""
+msgstr "Arvostelija on valmiina"
 
 #: access/templates/access/ready.html:10
 msgid "Current queue length"
-msgstr ""
+msgstr "Tämänhetkinen jonon pituus"
 
 #: access/templates/access/ready.html:14
 msgid "Git manager"
-msgstr ""
+msgstr "Git-hallinnointi"
 
 #: access/templates/access/ready.html:18
 msgid "Available courses"
-msgstr ""
+msgstr "Saatavilla olevat kurssit"
 
 #: access/templates/access/task_success.html:4
 #, python-format
@@ -267,16 +314,6 @@ msgid ""
 msgstr ""
 "\n"
 "Kokonaispisteet %(points)s/%(max_points)s"
-
-#: access/templates/access/task_success.html:16
-#, python-format
-msgid ""
-"\n"
-"\t\tPoints %(points)s/%(max_points)s\n"
-"\t\t"
-msgstr ""
-"\n"
-"Pisteet %(points)s/%(max_points)s"
 
 #: access/templates/access/task_success.html:38
 msgid "Appendixes"
@@ -316,6 +353,6 @@ msgstr ""
 "Pahoittelemme häiriötä.\n"
 "Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."
 
-#: access/types/forms.py:484
+#: access/types/forms.py:520
 msgid "Multiple choices are selectable."
 msgstr "Voit valita useita vaihtoehtoja."
