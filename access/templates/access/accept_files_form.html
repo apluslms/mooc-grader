@@ -15,7 +15,8 @@
 			<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
 			{{ entry.name }}
 		</label>
-		<input type="file" id="{{ entry.field }}_id" name="{{ entry.field }}" class="form-control" />
+		<input type="file" id="{{ entry.field }}_id" name="{{ entry.field }}" class="form-control"
+			{% if entry.required or entry.required == None %}required{% endif %}/>
 	</div>
 	{% endfor %}
 	{% if post_url or not result.accepted %}
