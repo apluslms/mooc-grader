@@ -29,6 +29,15 @@
 			{% if result.accepted %}
 				{% if not exercise.feedback or field.field.points > 0 %}
 				<span class="badge badge-{% if field.field.name in result.error_fields %}danger{% else %}success{% endif %}">{{ field.field.grade_points }} / {{ field.field.max_points }}</span>
+					{% if field.field.max_points == 0 %}
+					<span class="sr-only">
+					{% if field.field.name in result.error_fields %}
+						{% trans "Incorrect" %}
+					{% else %}
+						{% trans "Correct" %}
+					{% endif %}
+					</span>
+					{% endif %}
 				{% endif %}
 			{% else %}
 				{% if exercise.max_points > 0 and not exercise.feedback or field.field.points > 0 %}
