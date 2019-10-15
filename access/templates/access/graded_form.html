@@ -25,8 +25,22 @@
 			{% endif %}
 			{% endif %}
 
-			{% if result.accepted and not field.field.group_errors and field.field.max_points > 0 %}
-			<span class="badge badge-{% if field.field.name in result.error_fields %}danger{% else %}success{% endif %}">{{ field.field.grade_points }} / {{ field.field.max_points }}</span>
+			{% if not field.field.group_errors %}
+			{% if result.accepted %}
+				{% if not exercise.feedback or field.field.points > 0 %}
+				<span class="badge badge-{% if field.field.name in result.error_fields %}danger{% else %}success{% endif %}">{{ field.field.grade_points }} / {{ field.field.max_points }}</span>
+				{% endif %}
+			{% else %}
+				{% if exercise.max_points > 0 and not exercise.feedback or field.field.points > 0 %}
+				<span class="badge">
+				{% blocktrans count points=field.field.points %}
+				{{ points }} point
+				{% plural %}
+				{{ points }} points
+				{% endblocktrans %}
+				</span>
+				{% endif %}
+			{% endif %}
 			{% endif %}
 
 			{% if field.field.more %}
