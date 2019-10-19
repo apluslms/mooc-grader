@@ -1,3 +1,4 @@
+import math
 import random
 import re
 import json
@@ -10,6 +11,7 @@ from django.forms.utils import ErrorDict
 from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+
 from util.files import random_ascii
 from util.templates import template_to_str
 from util import forms as custom_forms
@@ -104,14 +106,14 @@ class GradedForm(forms.Form):
                         initial, correct, choices, False)
                 elif t == "text":
                     i, f = self.add_field(i, field,
-                        forms.CharField, forms.TextInput)
+                        self._get_text_field_type(field), forms.TextInput)
                 elif t == "textarea":
                     attrs = {'class': 'form-control'}
                     for key in ['rows','cols']:
                         if key in field:
                             attrs[key] = field[key]
                     i, f = self.add_field(i, field,
-                        forms.CharField, forms.Textarea,
+                        self._get_text_field_type(field), forms.Textarea,
                         widget_attrs=attrs)
                 elif t == "table-radio":
                     i, f = self.add_table_fields(i, field,
@@ -155,6 +157,17 @@ class GradedForm(forms.Form):
             self.sample = '/'.join(samples)
             self.checksum = self.samples_hash(self.nonce, self.sample)
 
+
+    def _get_text_field_type(self, field):
+        # Field is a dictionary from the exercise config.yaml.
+        input_type = field.get('compare_method', '').split('-')[0]
+        # Integer and float fields validate that the input is numeric.
+        if input_type == 'int':
+            return forms.IntegerField
+        elif input_type == 'float':
+            return forms.FloatField
+        else:
+            return forms.CharField
 
     def samples_hash(self, nonce, sample):
         return make_hash(
@@ -351,6 +364,14 @@ class GradedForm(forms.Form):
 
         if t == "array":
             return cmp in val
+        elif t == "int":
+            if val is None or val == '':
+                return False
+            return int(val) == int(cmp)
+        elif t == "float":
+            if val is None or val == '':
+                return False
+            return math.isclose(float(val), float(cmp), rel_tol=0.02)
 
         def good_strip(v):
             return v.strip().replace("\r","")
@@ -407,16 +428,6 @@ class GradedForm(forms.Form):
                 cmp = cmp[1:-1]
             p = re.compile(cmp)
             return bool(p.search(val))
-        elif t == "int":
-            try:
-                return int(val) == int(cmp)
-            except ValueError:
-                return False
-        elif t == "float":
-            try:
-                return abs(float(val) - float(cmp)) <= 0.02
-            except ValueError:
-                return False
         else:
             raise ConfigError("Unknown compare method in form: %s" % (t))
 
