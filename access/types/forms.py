@@ -597,15 +597,14 @@ class GradedForm(forms.Form):
 
     def grade_radio(self, configuration, value, hints=None):
         hints = hints or []
-        correct_exists = False
 
-        # One correct required if any configured
+        # There may be several correct options, but only one of them needs to
+        # be selected in the submission in order to gain points.
         correct = False
         i = 0
         for opt in configuration.get("options", []):
             name = self.option_name(i, opt)
             if opt.get("correct", False):
-                correct_exists = True
                 if name == value:
                     correct = True
                 else:
@@ -613,7 +612,7 @@ class GradedForm(forms.Form):
             elif name == value:
                 self.append_hint(hints, opt)
             i += 1
-        return not correct_exists or correct, hints, 'string'
+        return correct, hints, 'string'
 
     def grade_text(self, configuration, value, hints=None):
         hints = hints or []
