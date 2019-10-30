@@ -33,20 +33,12 @@ class GradedForm(forms.Form):
         self.exercise = kwargs.pop("exercise")
         self.show_correct = kwargs.pop('show_correct') if 'show_correct' in kwargs else False
         self.show_correct_once = kwargs.pop('show_correct_once') if 'show_correct_once' in kwargs else False
+        self.request = kwargs.pop('request') if 'request' in kwargs else None
         kwargs['label_suffix'] = ''
         super(forms.Form, self).__init__(*args, **kwargs)
 
         if "fieldgroups" not in self.exercise:
             raise ConfigError("Missing required \"fieldgroups\" in exercise configuration")
-
-        # Check that sample is unmodified in a randomized form.
-        if not args[0] is None:
-            nonce = args[0].get('_nonce', '')
-            sample = args[0].get('_sample', '')
-            if nonce and sample:
-                if self.samples_hash(nonce, sample) != args[0].get('_checksum', ''):
-                    raise PermissionDenied('Invalid checksum')
-                post_samples = sample.split('/')
 
         self.disabled = self.show_correct
         self.randomized = False
@@ -68,14 +60,20 @@ class GradedForm(forms.Form):
             # Randomly pick fields to include.
             if "pick_randomly" in group:
                 self.randomized = True
-                if not args[0] is None:
+                # Check that sample is unmodified in a randomized form.
+                if args[0] is not None:
+                    nonce = args[0].get('_nonce', '')
+                    sample = args[0].get('_sample', '')
+                    if self.samples_hash(nonce, sample) != args[0].get('_checksum', ''):
+                        raise PermissionDenied('Invalid checksum')
+                    post_samples = sample.split('/')
                     self.disabled = True
                     if len(post_samples) > 0:
                         indexes = [int(i) for i in post_samples.pop(0).split('-')]
                     else:
                         indexes = []
                 else:
-                    indexes = random.sample(range(len(group["fields"])), int(group["pick_randomly"]))
+                    indexes = self.current_sample(False, int(group["pick_randomly"]), len(group["fields"]))
                     samples.append('-'.join([str(i) for i in indexes]))
                 group["_fields"] = [group["fields"][i] for i in indexes]
             else:
@@ -95,7 +93,7 @@ class GradedForm(forms.Form):
                 if t == "checkbox":
                     i, f = self.add_field(i, field,
                         forms.MultipleChoiceField, forms.CheckboxSelectMultiple,
-                        initial, correct, choices, True, {})
+                        initial, correct, choices, True, {}, args)
                 elif t == "radio":
                     i, f = self.add_field(i, field,
                         forms.ChoiceField, forms.RadioSelect,
@@ -211,13 +209,14 @@ class GradedForm(forms.Form):
 
     def add_field(self, i, config, field_class, widget_class,
             initial=None, correct=None, choices=None, multiple=False,
-            widget_attrs={'class': 'form-control'}):
+            widget_attrs={'class': 'form-control'}, post_data=None):
         args = {
             'widget': widget_class(attrs=widget_attrs),
             'required': 'required' in config and config['required'],
         }
         if self.disabled:
             args['widget'].attrs['disabled'] = 'disabled'
+
         if args['required'] and (
             widget_class is not forms.CheckboxSelectMultiple or len(choices) == 1
         ):
@@ -230,30 +229,48 @@ class GradedForm(forms.Form):
             # When Django is upgraded, we don't need to set the "required" attr
             # to the widget here anymore.
             args['widget'].attrs['required'] = True
-        if not choices is None:
-            args['choices'] = choices
+
+        name = self.field_name(i, config)
+        selected_choices = choices
+        correct_choices = correct
+        initial_choices = initial
+        random_attributes = None
+
+        if choices is not None:
+            if 'randomized' in config and multiple:
+                selected_choices, correct_choices, initial_choices, random_attributes \
+                = self.get_randomized_checkbox_attributes(i, config, initial,
+                                        correct, name, choices, post_data)
+            args['choices'] = selected_choices
 
         if self.show_correct:
             if correct:
-                args['initial'] = correct if multiple else correct[0]
+                args['initial'] = correct_choices if multiple else correct[0]
             elif config.get('model', False):
                 args['initial'] = config['model']
             elif config.get('correct', False):
                 args['initial'] = config['correct']
         else:
             if initial:
-                args['initial'] = initial if multiple else initial[0]
+                args['initial'] = initial_choices if multiple else initial[0]
             elif config.get('initial', False):
                 args['initial'] = config['initial']
 
         field = field_class(**args)
         field.type = config['type']
-        field.name = self.field_name(i, config)
+        field.name = name
         if 'title' in config:
-            field.label = mark_safe(config['title'])
+            field.label = mark_safe(config['title'].replace('{#}', str(i+1)))
         field.more = self.create_more(config)
         field.points = config.get('points', 0)
-        field.choice_list = not choices is None and widget_class != forms.Select
+        field.choice_list = choices is not None and widget_class != forms.Select
+        if random_attributes:
+            field.randomized = True
+            field.random_nonce = random_attributes['nonce']
+            field.random_sample = random_attributes['sample']
+            field.random_checksum = random_attributes['checksum']
+        else:
+            field.random_sample = ''
 
         if self.show_correct_once:
             if correct:
@@ -320,6 +337,30 @@ class GradedForm(forms.Form):
 
     def is_enrollment_exercise(self):
         return self.exercise.get('status', '') in ('enrollment', 'enrollment_ext')
+
+    # calculate a sample for pick_randomly or randomized checkbox
+    def current_sample(self, is_checkbox_question, how_many, index_range,
+                correct_count=None, correct_indexes=None, incorrect_indexes=None):
+        # Model answers show all questions
+        if not self.request:
+            return range(index_range)
+        # Int overflow error is technically possible
+        random.seed(sum(
+            [int(uid) for uid in self.request.GET.get('uid', '1').split('-')]
+        ))
+        calculated_seed = int(self.request.GET.get('ordinal_number', 1)) + random.randrange(10000000000)
+
+        random.seed(calculated_seed)
+        random_sample = []
+        if is_checkbox_question:
+            if correct_count is not None:
+                random_sample = random.sample(correct_indexes, correct_count) \
+                    + random.sample(incorrect_indexes, how_many - correct_count)
+            else:
+                random_sample = random.sample(range(index_range), how_many)
+        else:
+            random_sample = random.sample(range(index_range), how_many)
+        return random_sample
 
     def bind_initial(self):
         '''
@@ -453,7 +494,7 @@ class GradedForm(forms.Form):
                         self.row_options(configuration, row), value, hints)
                 else:
                     ok, hints, method = self.grade_checkbox(
-                        self.row_options(configuration, row), value, hints)
+                        self.row_options(configuration, row), value, hints, name=name)
                 if self.exercise.get("feedback") or self.is_enrollment_exercise():
                     points += row.get("points", 0)
                     max_points += row.get("points", 0)
@@ -477,7 +518,7 @@ class GradedForm(forms.Form):
         name = self.field_name(i, configuration)
         value = self.cleaned_data.get(name, None)
         if t == "checkbox":
-            ok, hints, method = self.grade_checkbox(configuration, value)
+            ok, hints, method = self.grade_checkbox(configuration, value, name=name)
         elif t == "radio" or t == "dropdown" or t == "select":
             ok, hints, method = self.grade_radio(configuration, value)
         elif t == "text" or t == "textarea":
@@ -547,11 +588,15 @@ class GradedForm(forms.Form):
             opt.append(trgopt)
         return { 'options': opt }
 
-    def grade_checkbox(self, configuration, value, hints=None):
+    def grade_checkbox(self, configuration, value, hints=None, name=''):
         hints = hints or []
         correct_count = 0
         wrong_answers = 0
         non_neutral_count = 0
+        # Non-random checkbox questions have empty string as random_sample.
+        randomized_sample = self.fields[name].random_sample if name else ''
+        sample = [int(x) for x in randomized_sample.split('-')] if randomized_sample else []
+        is_randomized = bool(sample)
         # If partial points is not set, all options must be answered correctly
         # in order to gain points.
         # If no correct answers are set in configuration, points are granted to
@@ -559,25 +604,26 @@ class GradedForm(forms.Form):
         correct = True
         i = 0
         for opt in configuration.get("options", []):
-            name = self.option_name(i, opt)
-            correct_answer = opt.get("correct", False)
-            # correct_answer may be boolean or string "neutral"
-            if correct_answer is True:
-                correct_count += 1
-                non_neutral_count += 1
-                if name not in value:
-                    wrong_answers += 1
-                    correct = False
-                    self.append_hint(hints, opt)
-            elif correct_answer is False:
-                non_neutral_count += 1
-                if value is not None and name in value:
-                    correct = False
-                    wrong_answers += 1
-                    self.append_hint(hints, opt)
-            elif correct_answer == "neutral":
-                if value is not None and name in value:
-                    self.append_hint(hints, opt)
+            if i in sample:
+                name = self.option_name(i, opt)
+                correct_answer = opt.get("correct", False)
+                # correct_answer may be boolean or string "neutral"
+                if correct_answer is True:
+                    correct_count += 1
+                    non_neutral_count += 1
+                    if name not in value:
+                        wrong_answers += 1
+                        correct = False
+                        self.append_hint(hints, opt)
+                elif correct_answer is False:
+                    non_neutral_count += 1
+                    if value is not None and name in value:
+                        correct = False
+                        wrong_answers += 1
+                        self.append_hint(hints, opt)
+                elif correct_answer == "neutral":
+                    if value is not None and name in value:
+                        self.append_hint(hints, opt)
             i += 1
 
         # If partial_points are set, the variable 'correct' becomes a float
@@ -641,3 +687,44 @@ class GradedForm(forms.Form):
         if post_url:
             data["__aplus_post_url"] = post_url
         return json.dumps(data), files
+
+    def get_randomized_checkbox_attributes(self, i, config, initial, correct,
+                                name, choices, post_data):
+        self.randomized = True
+        index = 0
+        correct_indexes = []
+        initial_indexes = []
+        randomized_data = None
+        if post_data is not None and post_data[0] is not None:
+            randomized_data = post_data[0]
+        for value, label in choices:
+            if value in correct:
+                correct_indexes.append(index)
+            if value in initial:
+                initial_indexes.append(index)
+            index += 1
+        incorrect_indexes = [x for x in range(len(choices)) if x not in correct_indexes]
+
+        if randomized_data:
+            self.disabled = True
+            field_nonce = randomized_data.get(name+'_nonce')
+            field_sample = randomized_data.get(name+'_sample')
+            field_checksum = randomized_data.get(name+'_checksum')
+            if self.samples_hash(field_nonce, field_sample) != field_checksum:
+                raise PermissionDenied('Invalid checksum')
+            samples = [int(i) for i in field_sample.split('-')]
+        else:
+            samples = self.current_sample(True, config.get('randomized'),
+                    len(choices), config.get('correct_count'),
+                    correct_indexes, incorrect_indexes)
+
+        selected_choices = [choices[i] for i in samples]
+        correct_choices = [choices[i][0] for i in samples if i in correct_indexes]
+        initial_choices = [choices[i][0] for i in samples if i in initial_indexes]
+        random_attributes = {
+            'nonce': random_ascii(16),
+            'sample': '-'.join(str(x) for x in samples),
+        }
+        random_attributes['checksum'] = self.samples_hash(
+            random_attributes['nonce'], random_attributes['sample'])
+        return selected_choices, correct_choices, initial_choices, random_attributes
