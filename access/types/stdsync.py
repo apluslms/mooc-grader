@@ -131,7 +131,7 @@ def createForm(request, course, exercise, post_url):
         last = max_n > 0 and n >= max_n
 
     form = GradedForm(request.POST or None, request.FILES or None,
-        exercise=exercise, show_correct_once=last)
+        exercise=exercise, show_correct_once=last, request=request)
 
     # Support caching of non personalized forms.
     if not form.randomized and not_modified_since(request, exercise):
