@@ -155,7 +155,7 @@
 	{% if field.field.close_set %}
 	</fieldset>
 	{% endif %}
-	{% if field.field.randomized %}
+	{% if field.field.randomized and not result.accepted %}
 	<input type="hidden" name="{{ field.field.name }}_nonce" value="{{ field.field.random_nonce }}" />
 	<input type="hidden" name="{{ field.field.name }}_sample" value="{{ field.field.random_sample }}" />
 	<input type="hidden" name="{{ field.field.name }}_checksum" value="{{ field.field.random_checksum }}" />

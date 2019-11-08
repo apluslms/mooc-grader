@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-15 12:37+0000\n"
+"POT-Creation-Date: 2019-11-09 18:03+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -34,7 +34,7 @@ msgstr ""
 #: access/templates/access/accept_general_form.html:42
 #: access/templates/access/accept_git_form.html:16
 #: access/templates/access/accept_post_form.html:17
-#: access/templates/access/graded_form.html:166
+#: access/templates/access/graded_form.html:173
 msgid "Submit"
 msgstr "Lähetä"
 
@@ -71,12 +71,11 @@ msgid "Request grading of my repository"
 msgstr "Pyydä versiosäilöni arvostelua"
 
 #: access/templates/access/active_element_default.html:17
-#: access/templates/access/exercise_frame.html:37
+#: access/templates/access/exercise_frame.html:39
 msgid "Invalid address entered."
 msgstr "Syötetty osoite ei kelpaa."
 
 #: access/templates/access/active_element_default.html:21
-#: access/templates/access/exercise_frame.html:41
 msgid ""
 "The same form can obly be submitted once. Start again from exercise "
 "description."
@@ -84,7 +83,7 @@ msgstr ""
 "Sama lomake voidaan lähettää vain kerran. Aloita uudelleen tehtävänannosta."
 
 #: access/templates/access/active_element_default.html:25
-#: access/templates/access/exercise_frame.html:45
+#: access/templates/access/exercise_frame.html:51
 msgid "Missing required fields."
 msgstr "Täytä kaikki pakolliset kentät."
 
@@ -222,7 +221,7 @@ msgstr ""
 "Voit vaihtaa vastauksiasi ja lähettää ne uudelleen arvosteltavaksi.\n"
 "Huomaa kuitenkin jäljellä olevien palautuskertojen määrä!"
 
-#: access/templates/access/exercise_frame.html:21
+#: access/templates/access/exercise_frame.html:20
 #, python-format
 msgid ""
 "\n"
@@ -239,13 +238,26 @@ msgstr[1] ""
 "\n"
 "Sinun täytyy palauttaa %(num_files)s tiedostoa."
 
-#: access/templates/access/exercise_frame.html:27
+#: access/templates/access/exercise_frame.html:26
 msgid "Every file is required for a submission."
 msgstr "Palautus vaatii kaikki tiedostot."
 
 #: access/templates/access/exercise_frame.html:33
 msgid "Unknown file received (no file name configured)."
 msgstr "Tuntematon tiedosto vastaanotettu (tiedostonimeä ei ole asetuksissa)."
+
+#: access/templates/access/exercise_frame.html:45
+msgid ""
+"The same form can only be submitted once. Start again from the exercise "
+"description."
+msgstr ""
+"Sama lomake voidaan lähettää vain kerran. Aloita uudelleen tehtävänannosta."
+
+#: access/templates/access/exercise_frame.html:57
+msgid "Missing or invalid checksum. Do not tamper with the hidden form fields!"
+msgstr ""
+"Tarkistesumma puuttuu tai on epäkelpo. Älä muokkaa lomakkeen piilotettuja "
+"kenttiä!"
 
 #: access/templates/access/feedback_template_did_not_use_result_alert.html:3
 msgid ""
@@ -281,15 +293,15 @@ msgstr ""
 "    </p>\n"
 "    "
 
-#: access/templates/access/graded_form.html:35
+#: access/templates/access/graded_form.html:37
 msgid "Incorrect"
 msgstr "Väärin"
 
-#: access/templates/access/graded_form.html:37
+#: access/templates/access/graded_form.html:39
 msgid "Correct"
 msgstr "Oikein"
 
-#: access/templates/access/graded_form.html:45
+#: access/templates/access/graded_form.html:47
 #, python-format
 msgid ""
 "\n"
@@ -306,7 +318,7 @@ msgstr[1] ""
 "\n"
 "%(points)s pistettä"
 
-#: access/templates/access/graded_form.html:132
+#: access/templates/access/graded_form.html:134
 msgid "Correct answer"
 msgstr "Oikea vastaus"
 
@@ -378,6 +390,6 @@ msgstr ""
 "Pahoittelemme häiriötä.\n"
 "Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."
 
-#: access/types/forms.py:532
+#: access/types/forms.py:655
 msgid "Multiple choices are selectable."
 msgstr "Voit valita useita vaihtoehtoja."

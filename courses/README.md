@@ -279,6 +279,10 @@ course specific exercise view in a course specific Python module.
 				* `label`: the message
 				* `value`: show when this value is posted
 				* `not`: `true` to show when given value is NOT posted
+			* `randomized` (optional): int. The number of answer choices that are randomly
+				selected out of all choices in a checkbox question.
+			* `correct_count` (optional): int. Used with `randomized`. The number of
+				correct answer choices that are randomly selected in a checkbox question.
 	* `template` (default `access/create_form_default.html`): name of a template to present
 	* `accepted_message` (optional): overrides the default message displayed when
 		submission is accepted
