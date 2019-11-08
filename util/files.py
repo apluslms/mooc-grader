@@ -11,8 +11,12 @@ if not os.path.exists(META_PATH):
     os.makedirs(META_PATH)
 
 
-def random_ascii(length):
-    return ''.join([random.choice(string.ascii_letters) for _ in range(length)])
+def random_ascii(length, rng=None):
+    if not rng:
+        # Use the functions in the random module without manually creating
+        # an instance of the random.Random class.
+        rng = random
+    return ''.join([rng.choice(string.ascii_letters) for _ in range(length)])
 
 def create_submission_dir(course, exercise):
     '''

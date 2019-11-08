@@ -16,6 +16,7 @@ from util.files import random_ascii
 from util.templates import template_to_str
 from util import forms as custom_forms
 from .auth import make_hash
+from .auth import user_ids_from_string
 from ..config import ConfigError
 
 
@@ -42,8 +43,10 @@ class GradedForm(forms.Form):
 
         self.disabled = self.show_correct
         self.randomized = False
+        self.rng = random.Random()
         self.multipart = False
         samples = []
+        pick_randomly_nonce = 0
         g = 0
         i = 0
 
@@ -60,11 +63,13 @@ class GradedForm(forms.Form):
             # Randomly pick fields to include.
             if "pick_randomly" in group:
                 self.randomized = True
-                # Check that sample is unmodified in a randomized form.
+                # Check that sample is unmodified in a randomized form when the user submits.
                 if args[0] is not None:
                     nonce = args[0].get('_nonce', '')
                     sample = args[0].get('_sample', '')
-                    if self.samples_hash(nonce, sample) != args[0].get('_checksum', ''):
+                    if self.samples_hash(nonce, sample) != args[0].get('_checksum', '') or (
+                        not nonce or not sample or not args[0].get('_checksum', '')
+                    ):
                         raise PermissionDenied('Invalid checksum')
                     post_samples = sample.split('/')
                     self.disabled = True
@@ -73,7 +78,14 @@ class GradedForm(forms.Form):
                     else:
                         indexes = []
                 else:
-                    indexes = self.current_sample(False, int(group["pick_randomly"]), len(group["fields"]))
+                    # Multiple different fieldgroups may use pick_randomly, so set
+                    # the question_key for each fieldgroup in self.current_sample()
+                    # in order to generate different random samples.
+                    indexes = self.current_sample(False, int(group["pick_randomly"]),
+                        len(group["fields"]), question_key="_fieldgroup" + str(g))
+                    # Generate the nonce after the sample since the seed for
+                    # self.rng is deterministically set in self.current_sample().
+                    pick_randomly_nonce = random_ascii(16, rng=self.rng)
                     samples.append('-'.join([str(i) for i in indexes]))
                 group["_fields"] = [group["fields"][i] for i in indexes]
             else:
@@ -91,9 +103,13 @@ class GradedForm(forms.Form):
                 # Create a field by type.
                 choices, initial, correct = self.create_choices(field)
                 if t == "checkbox":
+                    if 'randomized' in field and args[0] is not None:
+                        # grading a randomized question
+                        self.disabled = True
+
                     i, f = self.add_field(i, field,
                         forms.MultipleChoiceField, forms.CheckboxSelectMultiple,
-                        initial, correct, choices, True, {}, args)
+                        initial, correct, choices, True, {}, args[0])
                 elif t == "radio":
                     i, f = self.add_field(i, field,
                         forms.ChoiceField, forms.RadioSelect,
@@ -151,7 +167,7 @@ class GradedForm(forms.Form):
 
         # Protect sample used in a randomized form.
         if len(samples) > 0:
-            self.nonce = random_ascii(16)
+            self.nonce = pick_randomly_nonce
             self.sample = '/'.join(samples)
             self.checksum = self.samples_hash(self.nonce, self.sample)
 
@@ -238,21 +254,22 @@ class GradedForm(forms.Form):
 
         if choices is not None:
             if 'randomized' in config and multiple:
-                selected_choices, correct_choices, initial_choices, random_attributes \
-                = self.get_randomized_checkbox_attributes(i, config, initial,
-                                        correct, name, choices, post_data)
+                selected_choices, correct_choices, initial_choices, random_attributes = (
+                    self.get_randomized_checkbox_attributes(i, config, initial,
+                            correct, name, choices, post_data)
+                )
             args['choices'] = selected_choices
 
         if self.show_correct:
             if correct:
-                args['initial'] = correct_choices if multiple else correct[0]
+                args['initial'] = correct_choices if multiple else correct_choices[0]
             elif config.get('model', False):
                 args['initial'] = config['model']
             elif config.get('correct', False):
                 args['initial'] = config['correct']
         else:
             if initial:
-                args['initial'] = initial_choices if multiple else initial[0]
+                args['initial'] = initial_choices if multiple else initial_choices[0]
             elif config.get('initial', False):
                 args['initial'] = config['initial']
 
@@ -260,10 +277,11 @@ class GradedForm(forms.Form):
         field.type = config['type']
         field.name = name
         if 'title' in config:
-            field.label = mark_safe(config['title'].replace('{#}', str(i+1)))
+            field.label = mark_safe(config['title'].replace('{#}', str(i + 1)))
         field.more = self.create_more(config)
         field.points = config.get('points', 0)
         field.choice_list = choices is not None and widget_class != forms.Select
+
         if random_attributes:
             field.randomized = True
             field.random_nonce = random_attributes['nonce']
@@ -338,28 +356,36 @@ class GradedForm(forms.Form):
     def is_enrollment_exercise(self):
         return self.exercise.get('status', '') in ('enrollment', 'enrollment_ext')
 
-    # calculate a sample for pick_randomly or randomized checkbox
     def current_sample(self, is_checkbox_question, how_many, index_range,
-                correct_count=None, correct_indexes=None, incorrect_indexes=None):
+                correct_count=None, correct_indexes=None, incorrect_indexes=None,
+                question_key=''):
+        '''Calculate a random sample (selection of choices) for a pick_randomly
+        questionnaire or a randomized checkbox question.
+        '''
         # Model answers show all questions
         if not self.request:
             return range(index_range)
-        # Int overflow error is technically possible
-        random.seed(sum(
-            [int(uid) for uid in self.request.GET.get('uid', '1').split('-')]
-        ))
-        calculated_seed = int(self.request.GET.get('ordinal_number', 1)) + random.randrange(10000000000)
 
-        random.seed(calculated_seed)
-        random_sample = []
+        # Set a deterministic random seed based on the user IDs, the ordinal number,
+        # and the exercise key so that the random choices change for different
+        # users, exercises, and submissions, but they do not change when the user
+        # just reloads the exercise description.
+        # Use a Random instance so that the seed does not affect other uses of
+        # the random module elsewhere in the code.
+        self.rng.seed(self.exercise['key'] + question_key + self.request.GET.get('uid', '1'))
+        calculated_seed = int(self.request.GET.get('ordinal_number', 1)) + self.rng.randrange(10000000000)
+        self.rng.seed(calculated_seed)
+
         if is_checkbox_question:
             if correct_count is not None:
-                random_sample = random.sample(correct_indexes, correct_count) \
-                    + random.sample(incorrect_indexes, how_many - correct_count)
+                random_sample = self.rng.sample(correct_indexes, correct_count) \
+                    + self.rng.sample(incorrect_indexes, how_many - correct_count)
+                # Shuffle the list so that the correct choices are not always listed first.
+                self.rng.shuffle(random_sample)
             else:
-                random_sample = random.sample(range(index_range), how_many)
+                random_sample = self.rng.sample(range(index_range), how_many)
         else:
-            random_sample = random.sample(range(index_range), how_many)
+            random_sample = self.rng.sample(range(index_range), how_many)
         return random_sample
 
     def bind_initial(self):
@@ -604,7 +630,7 @@ class GradedForm(forms.Form):
         correct = True
         i = 0
         for opt in configuration.get("options", []):
-            if i in sample:
+            if not is_randomized or i in sample:
                 name = self.option_name(i, opt)
                 correct_answer = opt.get("correct", False)
                 # correct_answer may be boolean or string "neutral"
@@ -689,14 +715,12 @@ class GradedForm(forms.Form):
         return json.dumps(data), files
 
     def get_randomized_checkbox_attributes(self, i, config, initial, correct,
-                                name, choices, post_data):
+            name, choices, post_data):
         self.randomized = True
         index = 0
         correct_indexes = []
         initial_indexes = []
-        randomized_data = None
-        if post_data is not None and post_data[0] is not None:
-            randomized_data = post_data[0]
+        randomized_data = post_data
         for value, label in choices:
             if value in correct:
                 correct_indexes.append(index)
@@ -706,25 +730,38 @@ class GradedForm(forms.Form):
         incorrect_indexes = [x for x in range(len(choices)) if x not in correct_indexes]
 
         if randomized_data:
-            self.disabled = True
-            field_nonce = randomized_data.get(name+'_nonce')
-            field_sample = randomized_data.get(name+'_sample')
-            field_checksum = randomized_data.get(name+'_checksum')
-            if self.samples_hash(field_nonce, field_sample) != field_checksum:
+            # grading a submission
+            field_nonce = randomized_data.get(name + '_nonce', '')
+            field_sample = randomized_data.get(name + '_sample', '')
+            field_checksum = randomized_data.get(name + '_checksum', '')
+            if self.samples_hash(field_nonce, field_sample) != field_checksum or (
+                not field_nonce or not field_sample or not field_checksum
+            ):
                 raise PermissionDenied('Invalid checksum')
             samples = [int(i) for i in field_sample.split('-')]
+            nonce = field_nonce
         else:
+            # loading the exercise description
             samples = self.current_sample(True, config.get('randomized'),
                     len(choices), config.get('correct_count'),
-                    correct_indexes, incorrect_indexes)
+                    correct_indexes, incorrect_indexes, name)
+            nonce = random_ascii(16, rng=self.rng)
 
-        selected_choices = [choices[i] for i in samples]
-        correct_choices = [choices[i][0] for i in samples if i in correct_indexes]
-        initial_choices = [choices[i][0] for i in samples if i in initial_indexes]
+        selected_choices = []
+        correct_choices = []
+        initial_choices = []
+        for i in samples:
+            selected_choices.append(choices[i])
+            if i in correct_indexes:
+                correct_choices.append(choices[i][0])
+            if i in initial_indexes:
+                initial_choices.append(choices[i][0])
+
         random_attributes = {
-            'nonce': random_ascii(16),
+            'nonce': nonce,
             'sample': '-'.join(str(x) for x in samples),
         }
         random_attributes['checksum'] = self.samples_hash(
-            random_attributes['nonce'], random_attributes['sample'])
+            nonce, random_attributes['sample'])
         return selected_choices, correct_choices, initial_choices, random_attributes
+
