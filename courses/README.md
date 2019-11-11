@@ -286,6 +286,9 @@ course specific exercise view in a course specific Python module.
 	* `template` (default `access/create_form_default.html`): name of a template to present
 	* `accepted_message` (optional): overrides the default message displayed when
 		submission is accepted
+	* `reveal_model_at_max_submissions` (optional): if false, the questionnaire feedback
+		does not reveal model solutions after the user has consumed all submission
+		attempts. By default false.
 
 7. ### access.types.stdsync.comparePostValues
 	Synchronous check against posted values. Requires `max_points` in the
