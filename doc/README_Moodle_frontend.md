@@ -1,6 +1,7 @@
 # Notes about using the Moodle frontend (Astra plugin) with the mooc-grader
 
-Astra behaves mostly in the same way as A+, however, there are some differences.
+[Astra](https://github.com/Aalto-LeTech/moodle-mod_astra) behaves mostly in
+the same way as A+, however, there are some differences.
 
 ## Moodle activities and course sections
 
@@ -10,15 +11,16 @@ Activities are listed in the Moodle course page. Each activity belongs to
 a section (numbered 0...N) in the course.
 
 Automatic setup of the course is accessed via the links in the "Astra exercises setup"
-block (the block needs to added to the Moodle course first).
+block (the block needs to be added to the Moodle course first).
 Astra supports importing the course configuration from the mooc-grader like A+.
 The teacher defines the Moodle section which new Astra activities are inserted into.
 
 ## Differences in course or learning object configurations (see [courses/README.md](../courses/README.md))
 
-* `use_wide_column` learning object setting is not (yet) supported in Astra
-* `min_group_size` and `max_group_size`: Astra does not (yet) support group submissions
-* Astra recognizes an additional setting `submission_file_max_size` for exercises
+The [Astra README](https://github.com/Aalto-LeTech/moodle-mod_astra/blob/master/astra/README.md)
+describes the A+ features that Astra does not support.
+
+* Astra recognizes an additional setting `submission_file_max_size` for exercises.
 * `assistants`: Astra tries to find Moodle users with an `idnumber` matching the
   values in the `assistants` list. The users are then enrolled to the Moodle course
   as non-editing teachers. They gain non-editing teacher privileges in the course
@@ -40,6 +42,7 @@ by correct delimiters: which delimiters are recognized depends on the Moodle
 site configuration. If the rendering of mathematics is enabled in Moodle, the
 content from the exercise service should not include its own version of, e.g.,
 the MathJax library (in a `<script>` element within the exercise HTML content).
+Including the MathJax.js library twice in the same page breaks it completely.
 
 By default, the Moodle MathJax filter recognizes two sets of delimiters:
 inline formulas use `\( equation \)` and centered formulas use `$$ equation $$`.
@@ -118,19 +121,56 @@ document.addEventListener("DOMContentLoaded", function(loadevent) {
 });
 ```
 
+If the exercise is embedded in a learning content chapter page, the exercise is
+loaded with AJAX. Its JavaScript code is executed later than at the page load
+time, hence the `DOMContentLoaded` event has already been triggered before the
+exercise JS is loaded. This can be circumvented by checking the `document.readyState`
+like in this example:
 
-## Bootstrap frontend framework
+```javascript
+;(function(document, window, undefined) {
+
+const init = function($, window, document) {
+    // Insert your code here. jQuery is available via the $ variable.
+    // ...
+};
+
+const pageLoadedHandler = function() {
+    // the DOM is ready so we may load jQuery in a safe way
+    if (typeof require === 'function') {
+        // In a require.js environment (Moodle). Import jQuery.
+        require(["jquery"], function(jQuery) {
+            init(jQuery, window, document);
+        });
+    } else {
+        // in A+ (jQuery defined in the global namespace)
+        init(jQuery, window, document);
+    }
+};
+
+/* Event listeners for DOMContentLoaded must be added before the event triggers,
+otherwise they do nothing. On A+ content chapters, embedded exercises are loaded
+with AJAX and the DOMContentLoaded event has probably already triggered. However,
+on normal exercise pages, the page should not be loaded yet when this script activates. */
+if (document.readyState == 'loading') {
+    // Still loading, add an event listener.
+    document.addEventListener('DOMContentLoaded', pageLoadedHandler, false);
+} else {
+    // DOM already loaded, continue immediately.
+    pageLoadedHandler();
+}
+})(document, window);
+```
+
+## Bootstrap frontend CSS/JS framework
 
 A+ and MOOC grader templates use the Bootstrap 3 framework. Moodle core includes
-a base theme `bootstrapbase` that uses the deprecated Bootstrap version 2.
-Astra uses the Bootstrap version from the `bootstrapbase` theme. In addition,
-Astra includes selected parts of the Bootstrap 3 CSS rules. The result is that
-most of the important Bootstrap 3 components work in Astra, e.g., tooltips, modals,
-and dropdowns. Exercise services should use Bootstrap 3 normally in their course
-contents and see if it works in Astra (if not, you may need to simplify the content
-so that it uses only working components).
+a default theme Boost that uses the Bootstrap version 4.0 (since Moodle 3.5).
+Many Bootstrap components work the same way in both versions, but there are also
+differences and some components have been completely revised. If exercises should
+work with both the A+ frontend and Astra, then the exercise contents must avoid
+the Bootstrap structures that do not work in both Bootstrap 3 and 4.
 
 Different Moodle sites may have different themes. Other themes may have a different
-version of Bootstrap or no Bootstrap at all. Moodle 3.2 includes a new theme called
-Boost that is based on Bootstrap 4.
+version of Bootstrap or no Bootstrap at all.
 
