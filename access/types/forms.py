@@ -67,7 +67,8 @@ class GradedForm(forms.Form):
                 # the question_key for each fieldgroup in self.current_sample()
                 # in order to generate different random samples.
                 indexes = self.current_sample(False, int(group["pick_randomly"]),
-                    len(group["fields"]), question_key="_fieldgroup" + str(g))
+                    len(group["fields"]), question_key="_fieldgroup" + str(g),
+                    resample_after_attempt=group.get('resample_after_attempt', True))
                 if args[0] is not None:
                     # Check that sample is unmodified in a randomized form when the user submits.
                     # The sample is stored in the POST data for only debugging purposes.
@@ -351,9 +352,12 @@ class GradedForm(forms.Form):
 
     def current_sample(self, is_checkbox_question, how_many, index_range,
                 correct_count=None, correct_indexes=None, incorrect_indexes=None,
-                question_key=''):
+                question_key='', resample_after_attempt=True):
         '''Calculate a random sample (selection of choices) for a pick_randomly
         questionnaire or a randomized checkbox question.
+
+        The parameter resample_after_attempt controls whether the sample changes
+        after each submission attempt or whether it remains the same.
         '''
         # Model answers show all questions
         if not self.request:
@@ -363,10 +367,15 @@ class GradedForm(forms.Form):
         # and the exercise key so that the random choices change for different
         # users, exercises, and submissions, but they do not change when the user
         # just reloads the exercise description.
+        # If resample_after_attempt is False, then the submission ordinal number
+        # does not affect the random sample. Thus, the same random questions
+        # are used for multiple submission attempts.
         # Use a Random instance so that the seed does not affect other uses of
         # the random module elsewhere in the code.
         self.rng.seed(self.exercise['key'] + question_key + self.request.GET.get('uid', '1'))
-        calculated_seed = int(self.request.GET.get('ordinal_number', 1)) + self.rng.randrange(10000000000)
+        calculated_seed = self.rng.randrange(10000000000)
+        if resample_after_attempt:
+            calculated_seed += int(self.request.GET.get('ordinal_number', 1))
         self.rng.seed(calculated_seed)
 
         if is_checkbox_question:
@@ -735,7 +744,8 @@ class GradedForm(forms.Form):
         # deterministically in the server.
         samples = self.current_sample(True, config.get('randomized'),
             len(choices), config.get('correct_count'),
-            correct_indexes, incorrect_indexes, name)
+            correct_indexes, incorrect_indexes, name,
+            resample_after_attempt=config.get('resample_after_attempt', True))
 
         selected_choices = []
         correct_choices = []

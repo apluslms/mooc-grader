@@ -245,6 +245,10 @@ course specific exercise view in a course specific Python module.
 	* `fieldgroups`: list of field groups
 		* `name` (optional): group name (fieldset legend)
 		* `pick_randomly` (optional): number of fields to randomly sample
+		* `resample_after_attempt` (optional): boolean. Should the questions be
+			resampled or preserved after a submission attempt in a `pick_randomly`
+			questionnaire? `true` by default, which means that the questions are
+			resampled after attempts.
 		* `group_errors` (optional): `true` to hide individual failed fields
 		* `fields`: list of fields
 			* `title` (optional): field title or label
@@ -283,6 +287,10 @@ course specific exercise view in a course specific Python module.
 				selected out of all choices in a checkbox question.
 			* `correct_count` (optional): int. Used with `randomized`. The number of
 				correct answer choices that are randomly selected in a checkbox question.
+			* `resample_after_attempt` (optional): boolean. Should the answer choices be
+				resampled or preserved after a submission attempt in a `randomized`
+				question? `true` by default, which means that the choices are resampled
+				after attempts.
 	* `template` (default `access/create_form_default.html`): name of a template to present
 	* `accepted_message` (optional): overrides the default message displayed when
 		submission is accepted
