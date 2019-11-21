@@ -20,46 +20,11 @@ Functions take arguments:
 '''
 from django.core.exceptions import PermissionDenied
 
-from util.cache import InProcessCache
 from util.http import not_modified_since, not_modified_response, cache_headers
 from util.templates import render_configured_template, render_template
 from .forms import GradedForm
 from .auth import make_hash, get_uid
 from ..config import ConfigError
-
-
-# Hold on to nonces for some time.
-nonces = InProcessCache(limit=100)
-
-
-def acceptNonce(request):
-    '''
-    Post containing unique _nonce is only accepted once.
-    '''
-    # This is a bad implementation. Nonces should be remembered for as long as
-    # they could be used, and since random questionnaires do not use any
-    # timestamps, the nonces should be remembered for at least the duration of
-    # the course. However, the InProcessCache will drop used nonces rather quickly
-    # if there are many random questionnaires. Then the students may reuse old
-    # nonces and the previously seen sample and checksum values in order to change
-    # the random question they are submitting to (i.e., they can answer the same
-    # question again even though the question is supposed to change randomly).
-    #
-    # The nonces should be stored in the server when they are generated in the
-    # server. Currently, students may insert fake nonces to POST data and fill
-    # the nonce cache even if the course has no random questionnaires.
-    if request.method == 'POST':
-        nonce_found = False
-        for key in request.POST:
-            # "pick_randomly" uses the value "_nonce" and random checkbox
-            # questions use the varying value "<field-name>_nonce"
-            if key.endswith('_nonce'):
-                nonce = str(request.POST[key])
-                if nonce in nonces:
-                    raise PermissionDenied('Repeating nonce')
-                nonces[nonce] = True
-                nonce_found = True
-        return nonce_found
 
 
 def noGrading(request, course, exercise, post_url):
@@ -131,11 +96,6 @@ def createForm(request, course, exercise, post_url):
     '''
     if "max_points" not in exercise:
         raise ConfigError("Missing required \"max_points\" in exercise configuration")
-    try:
-        acceptNonce(request)
-    except PermissionDenied:
-        return render_template(request, course, exercise, post_url,
-            'access/exercise_frame.html', { "rejected": True, "nonce_used": True })
 
     last = False
     if request.method == 'POST':
@@ -151,7 +111,7 @@ def createForm(request, course, exercise, post_url):
             exercise=exercise, show_correct_once=last, request=request)
     except PermissionDenied:
         # Randomized forms raise PermissionDenied when the POST data contains
-        # forged checksums, nonces, or samples. It could be cleaner to check those
+        # forged checksums or samples. It could be cleaner to check those
         # in the form validation, but the old code raises an exception like this.
         return render_template(request, course, exercise, post_url,
             'access/exercise_frame.html', { "rejected": True, "invalid_checksum": True })

@@ -40,12 +40,6 @@
 		</div>
 		{% endif %}
 
-		{% if result.nonce_used %}
-		<div class="alert alert-danger">
-		{% trans "The same form can only be submitted once. Start again from the exercise description." %}
-		</div>
-		{% endif %}
-
 		{% if result.fields %}
 		<div class="alert alert-danger">
 		{% trans "Missing required fields." %}

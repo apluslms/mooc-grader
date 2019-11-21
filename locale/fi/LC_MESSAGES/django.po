@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-09 18:03+0000\n"
+"POT-Creation-Date: 2019-11-21 09:45+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -34,7 +34,7 @@ msgstr ""
 #: access/templates/access/accept_general_form.html:42
 #: access/templates/access/accept_git_form.html:16
 #: access/templates/access/accept_post_form.html:17
-#: access/templates/access/graded_form.html:173
+#: access/templates/access/graded_form.html:171
 msgid "Submit"
 msgstr "Lähetä"
 
@@ -83,7 +83,7 @@ msgstr ""
 "Sama lomake voidaan lähettää vain kerran. Aloita uudelleen tehtävänannosta."
 
 #: access/templates/access/active_element_default.html:25
-#: access/templates/access/exercise_frame.html:51
+#: access/templates/access/exercise_frame.html:45
 msgid "Missing required fields."
 msgstr "Täytä kaikki pakolliset kentät."
 
@@ -246,14 +246,7 @@ msgstr "Palautus vaatii kaikki tiedostot."
 msgid "Unknown file received (no file name configured)."
 msgstr "Tuntematon tiedosto vastaanotettu (tiedostonimeä ei ole asetuksissa)."
 
-#: access/templates/access/exercise_frame.html:45
-msgid ""
-"The same form can only be submitted once. Start again from the exercise "
-"description."
-msgstr ""
-"Sama lomake voidaan lähettää vain kerran. Aloita uudelleen tehtävänannosta."
-
-#: access/templates/access/exercise_frame.html:57
+#: access/templates/access/exercise_frame.html:51
 msgid "Missing or invalid checksum. Do not tamper with the hidden form fields!"
 msgstr ""
 "Tarkistesumma puuttuu tai on epäkelpo. Älä muokkaa lomakkeen piilotettuja "
@@ -390,6 +383,6 @@ msgstr ""
 "Pahoittelemme häiriötä.\n"
 "Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."
 
-#: access/types/forms.py:655
+#: access/types/forms.py:659
 msgid "Multiple choices are selectable."
 msgstr "Voit valita useita vaihtoehtoja."

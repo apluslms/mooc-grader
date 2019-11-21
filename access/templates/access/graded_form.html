@@ -156,7 +156,6 @@
 	</fieldset>
 	{% endif %}
 	{% if field.field.randomized and not result.accepted %}
-	<input type="hidden" name="{{ field.field.name }}_nonce" value="{{ field.field.random_nonce }}" />
 	<input type="hidden" name="{{ field.field.name }}_sample" value="{{ field.field.random_sample }}" />
 	<input type="hidden" name="{{ field.field.name }}_checksum" value="{{ field.field.random_checksum }}" />
 	{% endif %}
@@ -164,8 +163,7 @@
 
 	{% if post_url or not result.accepted %}
 	<div class="form-group">
-		{% if result.form.nonce or result.form.sample or result.form.checksum %}
-		<input type="hidden" name="_nonce" value="{{ result.form.nonce }}" />
+		{% if result.form.sample or result.form.checksum %}
 		<input type="hidden" name="_sample" value="{{ result.form.sample }}" />
 		<input type="hidden" name="_checksum" value="{{ result.form.checksum }}" />
 		{% endif %}

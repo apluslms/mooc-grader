@@ -12,7 +12,6 @@ from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
-from util.files import random_ascii
 from util.templates import template_to_str
 from util import forms as custom_forms
 from .auth import make_hash
@@ -48,7 +47,6 @@ class GradedForm(forms.Form):
         self.rng = random.Random()
         self.multipart = False
         samples = []
-        pick_randomly_nonce = 0
         g = 0
         i = 0
 
@@ -65,29 +63,24 @@ class GradedForm(forms.Form):
             # Randomly pick fields to include.
             if "pick_randomly" in group:
                 self.randomized = True
-                # Check that sample is unmodified in a randomized form when the user submits.
+                # Multiple different fieldgroups may use pick_randomly, so set
+                # the question_key for each fieldgroup in self.current_sample()
+                # in order to generate different random samples.
+                indexes = self.current_sample(False, int(group["pick_randomly"]),
+                    len(group["fields"]), question_key="_fieldgroup" + str(g))
                 if args[0] is not None:
-                    nonce = args[0].get('_nonce', '')
+                    # Check that sample is unmodified in a randomized form when the user submits.
+                    # The sample is stored in the POST data for only debugging purposes.
+                    # The random sample used in grading is computed again
+                    # deterministically in the server.
                     sample = args[0].get('_sample', '')
-                    if self.samples_hash(nonce, sample) != args[0].get('_checksum', '') or (
-                        not nonce or not sample or not args[0].get('_checksum', '')
+                    checksum = args[0].get('_checksum', '')
+                    if self.samples_hash(sample) != checksum or (
+                        not sample or not checksum
                     ):
                         raise PermissionDenied('Invalid checksum')
-                    post_samples = sample.split('/')
                     self.disabled = True
-                    if len(post_samples) > 0:
-                        indexes = [int(i) for i in post_samples.pop(0).split('-')]
-                    else:
-                        indexes = []
                 else:
-                    # Multiple different fieldgroups may use pick_randomly, so set
-                    # the question_key for each fieldgroup in self.current_sample()
-                    # in order to generate different random samples.
-                    indexes = self.current_sample(False, int(group["pick_randomly"]),
-                        len(group["fields"]), question_key="_fieldgroup" + str(g))
-                    # Generate the nonce after the sample since the seed for
-                    # self.rng is deterministically set in self.current_sample().
-                    pick_randomly_nonce = random_ascii(16, rng=self.rng)
                     samples.append('-'.join([str(i) for i in indexes]))
                 group["_fields"] = [group["fields"][i] for i in indexes]
             else:
@@ -169,9 +162,8 @@ class GradedForm(forms.Form):
 
         # Protect sample used in a randomized form.
         if len(samples) > 0:
-            self.nonce = pick_randomly_nonce
             self.sample = '/'.join(samples)
-            self.checksum = self.samples_hash(self.nonce, self.sample)
+            self.checksum = self.samples_hash(self.sample)
 
 
     def _get_text_field_type(self, field):
@@ -185,10 +177,10 @@ class GradedForm(forms.Form):
         else:
             return forms.CharField
 
-    def samples_hash(self, nonce, sample):
+    def samples_hash(self, sample):
         return make_hash(
             self.exercise.get('secret') or settings.AJAX_KEY,
-            nonce + sample
+            sample
         )
 
     def add_table_fields(self, i, config, field_class, widget_class, multiple=False):
@@ -286,7 +278,6 @@ class GradedForm(forms.Form):
 
         if random_attributes:
             field.randomized = True
-            field.random_nonce = random_attributes['nonce']
             field.random_sample = random_attributes['sample']
             field.random_checksum = random_attributes['checksum']
         else:
@@ -722,7 +713,6 @@ class GradedForm(forms.Form):
         index = 0
         correct_indexes = []
         initial_indexes = []
-        randomized_data = post_data
         for value, label in choices:
             if value in correct:
                 correct_indexes.append(index)
@@ -731,23 +721,21 @@ class GradedForm(forms.Form):
             index += 1
         incorrect_indexes = [x for x in range(len(choices)) if x not in correct_indexes]
 
-        if randomized_data:
+        if post_data:
             # grading a submission
-            field_nonce = randomized_data.get(name + '_nonce', '')
-            field_sample = randomized_data.get(name + '_sample', '')
-            field_checksum = randomized_data.get(name + '_checksum', '')
-            if self.samples_hash(field_nonce, field_sample) != field_checksum or (
-                not field_nonce or not field_sample or not field_checksum
+            field_sample = post_data.get(name + '_sample', '')
+            field_checksum = post_data.get(name + '_checksum', '')
+            if self.samples_hash(field_sample) != field_checksum or (
+                not field_sample or not field_checksum
             ):
                 raise PermissionDenied('Invalid checksum')
-            samples = [int(i) for i in field_sample.split('-')]
-            nonce = field_nonce
-        else:
-            # loading the exercise description
-            samples = self.current_sample(True, config.get('randomized'),
-                    len(choices), config.get('correct_count'),
-                    correct_indexes, incorrect_indexes, name)
-            nonce = random_ascii(16, rng=self.rng)
+
+        # The sample is stored in the POST data for only debugging purposes.
+        # The random sample used in grading is computed again
+        # deterministically in the server.
+        samples = self.current_sample(True, config.get('randomized'),
+            len(choices), config.get('correct_count'),
+            correct_indexes, incorrect_indexes, name)
 
         selected_choices = []
         correct_choices = []
@@ -760,10 +748,8 @@ class GradedForm(forms.Form):
                 initial_choices.append(choices[i][0])
 
         random_attributes = {
-            'nonce': nonce,
             'sample': '-'.join(str(x) for x in samples),
         }
-        random_attributes['checksum'] = self.samples_hash(
-            nonce, random_attributes['sample'])
+        random_attributes['checksum'] = self.samples_hash(random_attributes['sample'])
         return selected_choices, correct_choices, initial_choices, random_attributes
 
