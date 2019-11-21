@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-21 09:45+0000\n"
+"POT-Creation-Date: 2019-11-30 13:27+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -383,6 +383,14 @@ msgstr ""
 "Pahoittelemme häiriötä.\n"
 "Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."
 
-#: access/types/forms.py:659
+#: access/types/forms.py:681
 msgid "Multiple choices are selectable."
 msgstr "Voit valita useita vaihtoehtoja."
+
+#: access/types/forms.py:799
+msgid "Multiple correct answers accepted."
+msgstr "Useita oikeita vastauksia."
+
+#: access/types/forms.py:803
+msgid "Correct parts in your answer: "
+msgstr "Oikeat osat vastauksessasi: "

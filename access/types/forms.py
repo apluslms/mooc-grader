@@ -2,6 +2,7 @@ import math
 import random
 import re
 import json
+import difflib
 
 from django import forms
 from django.conf import settings
@@ -574,6 +575,8 @@ class GradedForm(forms.Form):
             earned_points = 0
 
         # Apply new feedback definitions.
+        methods = method.split("-")
+        mods = methods[1:]
         for fb in configuration.get("feedback", []):
             new_hint = fb.get('label', None)
             comparison = fb.get('value', '')
@@ -583,7 +586,17 @@ class GradedForm(forms.Form):
             if comparison == "%100%":
                 add = ok
             else:
-                r = self.compare_values(method, value, comparison)
+                # Freetext questions with 'string', 'subdiff' or 'regexp'
+                # compare method can have reqular expression based hints.
+                if methods[0] in ('string', 'regexp', 'subdiff'):
+                    if fb.get('compare_regexp', False):
+                        methods_used = 'regexp'
+                    else:
+                        methods_used = 'string'
+                    methods_used = '-'.join([methods_used] + mods)
+                else:
+                    methods_used = method
+                r = self.compare_values(methods_used, value, comparison)
                 add = not r if fb.get('not', False) else r
             if add:
                 for j in range(len(hints)):
@@ -690,7 +703,7 @@ class GradedForm(forms.Form):
 
     def grade_text(self, configuration, value, hints=None):
         hints = hints or []
-        correct = True
+        correct = False
         accept = None
         method = configuration.get('compare_method', 'string')
         if "regex" in configuration:
@@ -698,8 +711,24 @@ class GradedForm(forms.Form):
             method = "regexp"
         elif "correct" in configuration:
             accept = configuration["correct"]
-        if not accept is None:
+            # subdiff method may have multiple correct answers.
+            if method.startswith('subdiff'):
+                mods = method[7:]
+                correct_answers = accept.split('|')
+                for model in correct_answers:
+                    ok = self.compare_values('string' + mods, value, model)
+                    if ok:
+                        correct = True
+                if not correct:
+                    # Show matching parts in the feedback.
+                    for hint in get_subdiff_hints(value, accept):
+                        hints.append(hint)
+                return correct, hints, method
+        if accept is not None:
             correct = self.compare_values(method, value, accept)
+        else:
+            # Answer counts as correct if there is no model solution.
+            correct = True
         if not correct:
             self.append_hint(hints, configuration)
         return correct, hints, method
@@ -763,3 +792,20 @@ class GradedForm(forms.Form):
         random_attributes['checksum'] = self.samples_hash(random_attributes['sample'])
         return selected_choices, correct_choices, initial_choices, random_attributes
 
+
+def get_subdiff_hints(value, all_solutions):
+    solutions = all_solutions.split('|')
+    if len(solutions) > 1:
+        matching_parts = [_("Multiple correct answers accepted.")]
+    else:
+        matching_parts = []
+    for solution in solutions:
+        parts = _("Correct parts in your answer: ")
+        matches = difflib.SequenceMatcher(None, value, solution).get_matching_blocks()
+        i = 0
+        for match in matches:
+            parts += '-' * (match.b - i)
+            i = match.b + match.size
+            parts += value[match.a:match.a + match.size]
+        matching_parts.append(parts)
+    return matching_parts

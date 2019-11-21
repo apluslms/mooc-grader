@@ -230,14 +230,14 @@ course specific exercise view in a course specific Python module.
 	* `accepted_message` etc as in type 1.
 
 5. ### access.types.stdsync.acceptGeneralForm
-  Accepts a general form submission (can also include files) asynchronous 
-  grading queue. Extended attributes:
+	Accepts a general form submission (can also include files) asynchronous
+	grading queue. Extended attributes:
 	* `files`: list of expected files as in type 1
 	* `fields`: list of text fields as in type 2
 	* `template` (default `access/accept_general_default.html`):
 		name of a template to present
 	* `accepted_message` etc as in type 1.
-			
+
 6. ### access.types.stdsync.createForm
 	Synchronous form checker. Requires `max_points` in the
 	exercise configuration. If form has no points configured then maximum
@@ -261,13 +261,16 @@ course specific exercise view in a course specific Python module.
 			* `points` (optional): number of points to grant
 			* `required` (optional): `true` to require an answer
 			* `correct` (optional): correct answer for text fields
-			* `compare_method` (optional): `int`/`float`/`string`/`regexp`/`string-(modifier)`
-				Decides how posted value is compared to correct and feedback.
+			* `compare_method` (optional): `int`/`float`/`string`/`regexp`/`string-(modifier)`/`subdiff-(modifier)`
+				Decides how posted value is compared to correct and feedback. The `subdiff`
+				method works like `string`, but it can have multiple correct solutions delimited
+				with `|` and it shows the difference of the submission compared
+				to the correct solutions as feedback.
 				Modifiers include:
-				* ignorews: ignore white space
-        * ignorequotes: iqnore "quotes" around
-        * requirecase: require identical lower and upper cases
-        * ignorerepl: ignore REPL prefixes
+				* `ignorews`: ignore white space
+				* `ignorequotes`: iqnore "quotes" around
+				* `requirecase`: require identical lower and upper cases
+				* `ignorerepl`: ignore REPL prefixes
 			* `regex` (deprecated): regex to match correct answer for text fields (use compare_method instead)
 			* `options` list of options for choice fields
 				* `label`: option label
@@ -283,6 +286,7 @@ course specific exercise view in a course specific Python module.
 				* `label`: the message
 				* `value`: show when this value is posted
 				* `not`: `true` to show when given value is NOT posted
+				* `compare_regexp`: `true` to match the posted answer to the `value` as regexp
 			* `randomized` (optional): int. The number of answer choices that are randomly
 				selected out of all choices in a checkbox question.
 			* `correct_count` (optional): int. Used with `randomized`. The number of
