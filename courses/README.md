@@ -301,6 +301,9 @@ course specific exercise view in a course specific Python module.
 	* `reveal_model_at_max_submissions` (optional): if false, the questionnaire feedback
 		does not reveal model solutions after the user has consumed all submission
 		attempts. By default false.
+	* `show_model_answer` (optional): if false, A+ does not show the model solution
+		to students after the module deadline. (In other words, mooc-grader does
+		not export a link to the model solution in aplus-json.) By default true.
 
 7. ### access.types.stdsync.comparePostValues
 	Synchronous check against posted values. Requires `max_points` in the

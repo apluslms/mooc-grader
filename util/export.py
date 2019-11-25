@@ -83,7 +83,11 @@ def exercise(request, course, exercise_root, of):
         model_url = url_to_model(
             request, course['key'], exercise['key']
         )
-        if len(languages) == 1:
+        if not exercise.get('show_model_answer', True):
+            # Set the empty string here so that an existing value may be
+            # removed from the A+ database when the course is imported there.
+            of['model_answer'] = ''
+        elif len(languages) == 1:
             of['model_answer'] = model_url
         else:
             of['model_answer'] = {
