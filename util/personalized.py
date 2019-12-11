@@ -146,7 +146,7 @@ def read_generated_exercise_file(course, exercise, instance, filename):
     generated_dir = pregenerated_exercises_directory_path(course, exercise)
     path = os.path.join(generated_dir, instance, filename)
     try:
-        with open(path) as f:
+        with open(path, 'rb') as f:
             return f.read()
     except IOError as e:
         LOGGER.error('Generated exercise instance file %s could not be read. Error: %s', path, str(e))

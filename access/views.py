@@ -271,7 +271,7 @@ def generated_exercise_file(request, course_key, exercise_key, exercise_instance
         import magic
         for gen_file_conf in exercise["generated_files"]:
             if gen_file_conf["file"] == filename:
-                if "allow_download" in gen_file_conf and gen_file_conf["allow_download"]:
+                if gen_file_conf.get("allow_download", False):
                     file_content = read_generated_exercise_file(course, exercise,
                                                                 exercise_instance, filename)
                     response = HttpResponse(file_content,
