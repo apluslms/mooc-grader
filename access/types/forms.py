@@ -292,6 +292,14 @@ class GradedForm(forms.Form):
                 field.correct = config['model']
             elif config.get('correct', False):
                 field.correct = config['correct']
+            if 'options' in config:
+                neutral = []
+                a = 0
+                for opt in config['options']:
+                    if opt.get('correct') == 'neutral':
+                        neutral.append(self.option_name(a, opt))
+                    a += 1
+                field.neutral = neutral
 
         if 'extra_info' in config and 'class' in config['extra_info']:
             field.html_class = config['extra_info']['class']
@@ -326,7 +334,8 @@ class GradedForm(forms.Form):
                 label = opt.get('label', "")
                 value = self.option_name(i, opt)
                 choices.append((value, mark_safe(label)))
-                if opt.get('correct', False):
+                if opt.get('correct', False) is True:
+                    # Not always boolean; string "neutral" is a possible value.
                     correct.append(value)
                 if opt.get('selected', False) or opt.get('initial', False):
                     initial.append(value)
