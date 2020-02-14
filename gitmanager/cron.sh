@@ -2,7 +2,7 @@
 
 FLAG="/tmp/mooc-grader-manager-clean"
 LOG="/tmp/mooc-grader-log"
-SQL="sqlite3 -batch -noheader -column db.sqlite3 "
+SQL="sqlite3 -batch -noheader db.sqlite3"
 TRY_PYTHON="/srv/grader/venv/bin/activate"
 
 cd `dirname $0`/..
@@ -25,32 +25,49 @@ if [ -f $TRY_PYTHON ]; then
 fi
 
 # Handle each scheduled course key.
-keys="`$SQL "select r.key from gitmanager_courseupdate as u left join gitmanager_courserepo r on u.course_repo_id=r.id where u.updated=0;"`"
-for key in $keys; do
-  echo "Update $key" > $LOG
-  vals=(`$SQL "select id,git_origin,git_branch from gitmanager_courserepo where key='$key';"`)
-  id=${vals[0]}
+$SQL "SELECT DISTINCT r.key
+      FROM gitmanager_courseupdate AS u LEFT JOIN gitmanager_courserepo AS r ON u.course_repo_id=r.id
+      WHERE u.updated=0
+      ORDER BY u.request_time DESC;" | \
+while read key; do
+  IFS=$'\n' read -d '' -r repo_id url branch < <($SQL -separator $'\n' "
+    SELECT id,git_origin,git_branch FROM gitmanager_courserepo WHERE key='$key';")
+  if [ -z "$repo_id" ]; then
+    echo "No db entry for key '$key'" >&2
+    continue
+  fi
+  IFS=$'\n' read -d '' -r update_id request_time < <($SQL -separator $'\n' "
+    SELECT id,request_time FROM gitmanager_courseupdate
+    WHERE course_repo_id=$repo_id and updated=0 ORDER BY request_time DESC LIMIT 1;")
 
-  sudo -u $USER -H gitmanager/cron_pull_build.sh $TRY_PYTHON $key ${vals[@]} >> $LOG 2>&1 || continue
+  # reset/start log
+  echo "Updating '$key' (update_id=$update_id, request_time=$request_time)" > "$LOG"
+
+  sudo -u $USER -H gitmanager/cron_pull_build.sh "$TRY_PYTHON" "$key" "$url" "$branch" >> "$LOG" 2>&1 || continue
 
   # Update sandbox.
-  if [ -d /var/sandbox_$key ]; then
-    ./manage_sandbox.sh -d /var/sandbox_$key -q create $key >> $LOG 2>&1
+  if [ -d "/var/sandbox_$key" ]; then
+    ./manage_sandbox.sh -d "/var/sandbox_$key" -q create "$key" >> "$LOG" 2>&1
   else
     if [ -d /var/sandbox ]; then
-      ./manage_sandbox.sh -q create $key >> $LOG 2>&1
+      ./manage_sandbox.sh -q create "$key" >> "$LOG" 2>&1
     fi
   fi
 
-  # Write to database.
-  $SQL "update gitmanager_courseupdate set log=readfile('$LOG'),updated_time=CURRENT_TIMESTAMP,updated=1 where course_repo_id=$id and updated=0;"
-
-  # Clean up old entries.
-  vals=(`$SQL "select request_time from gitmanager_courseupdate where id=$id order by request_time desc limit 4,1;"`)
-  last=${vals[0]}
-  if [ "$last" != "" ]; then
-    $SQL "delete from gitmanager_courseupdate where id=$id and request_time > '$last';"
-  fi
+  # Update database
+  $SQL >/dev/null <<SQL
+    -- add log file and set updated
+    UPDATE gitmanager_courseupdate SET log=readfile('$LOG'),updated_time=CURRENT_TIMESTAMP,updated=1
+      WHERE id=$update_id;
+    -- mark all skipped (not updated, but older) to be updated (there shouldn't be any)
+    UPDATE gitmanager_courseupdate SET log='skipped',updated_time=CURRENT_TIMESTAMP,updated=1
+      WHERE request_time < '$request_time' AND course_repo_id=$repo_id AND updated=0;
+    -- keep only 10 logs in the history
+    DELETE FROM gitmanager_courseupdate
+      WHERE request_time < '$request_time' AND course_repo_id=$repo_id
+      ORDER BY request_time DESC
+      LIMIT -1 OFFSET 10;
+SQL
 done
 
 # Reload course configuration by restarting uwsgi processes

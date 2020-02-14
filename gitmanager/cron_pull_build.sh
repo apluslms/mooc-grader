@@ -2,12 +2,11 @@
 
 TRY_PYTHON=$1
 key=$2
-id=$3
-url=$4
-branch=$5
-echo "Processing key=$key id=$id url=$url branch=$branch python=$TRY_PYTHON"
+url=$3
+branch=$4
+echo "Processing key=$key url=$url branch=$branch python=$TRY_PYTHON"
 
-if [ -z "$key" -o -z "$id" -o -z "$url" -o -z "$branch" ]; then
+if [ -z "$key" -o -z "$url" -o -z "$branch" ]; then
     echo "  Some arguments are missing, skipping..."
 fi
 
