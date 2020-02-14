@@ -8,6 +8,7 @@ echo "Processing key=$key url=$url branch=$branch python=$TRY_PYTHON"
 
 if [ -z "$key" -o -z "$url" -o -z "$branch" ]; then
     echo "  Some arguments are missing, skipping..."
+    exit 1
 fi
 
 if [ -d exercises ]; then
