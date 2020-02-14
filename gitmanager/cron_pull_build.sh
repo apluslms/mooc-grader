@@ -32,6 +32,7 @@ if [ -e $dir ]; then
     git checkout -q $branch
   fi
   git reset -q --hard origin/$branch
+  git submodule sync --recursive
   git submodule update --init --recursive
   git --no-pager log --pretty=format:"------------;Commit metadata;;Hash:;%H;Subject:;%s;Body:;%b;Committer:;%ai;%ae;Author:;%ci;%cn;%ce;------------;" -1 | tr ';' '\n'
 else
