@@ -5,11 +5,8 @@ any record other than service logs. The grader is designed to serve exercises
 for the A+ learning system. A farm of individual grading servers can be setup
 to handle large amount of submissions.
 
-The grader is implemented on Django 1.9 (`grader/settings.py`) and grading
-queue on Celery 3.1 (`grader/tasks.py`). The application is tested on both
-Python 2.7 and 3.4. Actual grading is typically executed via shell scripts in
-a Linux chroot sandbox. On an Ubuntu system the sandbox can be created with
-the `manage_sandbox.sh` script.
+The grader is implemented on Django 1.9 (`grader/settings.py`). The application 
+is tested on both Python 2.7 and 3.4. 
 
 The grader can be run stand alone without the full stack to test graders in
 the local system environment. The grader is designed to be extended for
@@ -134,53 +131,7 @@ Installing the full stack
 		sudo apt-get install apache2 libapache2-mod-uwsgi
 		# Configure based on doc/etc-apache2-sites-available-grader
 
-
-2. ### Chroot sandbox creation
-
-	Creates a chroot environment to `/var/sandbox/` where tests
-	can not escape the enclosing directory. The script can be run
-	again to update the sandbox with changes.
-
-		sudo mooc-grader/manage_sandbox.sh create all
-
-	Changing the sandbox location requires changing path in
-	`scripts/chroot_execvp.c` and using an argument with the
-	management script.
-
-3. ### Asynchronous grading queue
-
-	Install rabbitmq and enable HTTP management interface.
-
-		sudo apt-get install rabbitmq-server
-		sudo /usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
-
-	Create `mooc-grader/grader/local_settings.py` and override necessary configuration, e.g.
-
-	* `CELERY_BROKER`: the queue URL (RabbitMQ service)
-	* `CELERY_TASK_LIMIT_SEC`: the timeout for grading a task
-	* `QUEUE_ALERT_LENGTH`: the error log threshold
-	* `SANDBOX_LIMITS`: the default time/memory limits for sandbox
-
-	The celery queue worker can now be tested in console.
-	(Inside the mooc-grader directory with the virtual environment activated.)
-
-		celery -A grader.celery worker
-
-4. ### Run Celery as daemon on boot
-
-	Following copies daemon configuration and script in their place
-	and registers the daemon for default run levels and starts it up.
-	The **mooc-grader directory and user must** be set in the
-	`/etc/default/celeryd`.
-
-		sudo cp doc/etc-default-celeryd /etc/default/celeryd
-		# EDIT /etc/default/celeryd
-		sudo cp doc/etc-init.d-celeryd /etc/init.d/celeryd
-		sudo chmod a+x /etc/init.d/celeryd
-		sudo update-rc.d celeryd defaults
-		sudo /etc/init.d/celeryd start
-
-5. ### Django application settings for deployment
+2. ### Django application settings for deployment
 
 	When deploying, overwrite necessary configurations in `mooc-grader/grader/local_settings.py`.
 
@@ -204,7 +155,7 @@ Installing the full stack
 		sudo crontab -u root doc/gitmanager-root-crontab
 
 
-6. ### X virtual frame buffer (if required)
+3. ### X virtual frame buffer (if required)
 
 	For tests requiring X display server xvfb can be used at DISPLAY=:0.
 	Such tests typically run GUI code or WWW browser using Selenium.

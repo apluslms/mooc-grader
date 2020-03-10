@@ -4,7 +4,6 @@ from access import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^queue-length$', views.queue_length, name='queue-length'),
     url(r'^test-result$', views.test_result, name='test-result'),
     url(r'^container-post$', views.container_post, name='container-post'),
     url(r'^ajax/([\w-]+)/([\w-]+)$', views.exercise_ajax, name='ajax'),

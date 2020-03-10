@@ -20,7 +20,6 @@ from util.http import post_data
 from util.importer import import_named
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
-from util.queue import queue_length as qlength
 from util.templates import template_to_str
 
 
@@ -230,13 +229,6 @@ def aplus_json(request, course_key):
     if "gitmanager" in settings.INSTALLED_APPS:
         data["build_log_url"] = request.build_absolute_uri(reverse("build-log-json", args=(course_key, )))
     return JsonResponse(data)
-
-
-def queue_length(request):
-    '''
-    Reports the current queue length.
-    '''
-    return HttpResponse(qlength())
 
 
 def test_result(request):

@@ -20,3 +20,13 @@ scripts/chroot_execvp
 .DS_Store
 *~
 venv
+
+#### Development Environment ####
+ 
+# symbolic link exercises to /srv/courses 
+# Important!! This symbolic link should be created in order to debug the mooc grader
+exercises
+
+# automatic generated keys
+grader/ajax_key.py
+grader/secret_key.py

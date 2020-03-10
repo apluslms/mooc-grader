@@ -45,15 +45,6 @@ while read key; do
 
   sudo -u $USER -H gitmanager/cron_pull_build.sh "$TRY_PYTHON" "$key" "$url" "$branch" >> "$LOG" 2>&1 || continue
 
-  # Update sandbox.
-  if [ -d "/var/sandbox_$key" ]; then
-    ./manage_sandbox.sh -d "/var/sandbox_$key" -q create "$key" >> "$LOG" 2>&1
-  else
-    if [ -d /var/sandbox ]; then
-      ./manage_sandbox.sh -q create "$key" >> "$LOG" 2>&1
-    fi
-  fi
-
   # Update database
   $SQL >/dev/null <<SQL
     -- add log file and set updated

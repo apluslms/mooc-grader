@@ -71,8 +71,3 @@ class ConfigTestCase(TestCase):
         self.assertGreater(root["mtime"], mtime)
         self.assertGreater(root["ptime"], ptime)
 
-    def test_shell_invoke(self):
-        r = invoke_script(settings.PREPARE_SCRIPT, {})
-        self.assertEqual(1, r["code"])
-        r = invoke_script(settings.PREPARE_SCRIPT, { "course_key": "foo", "dir": settings.SUBMISSION_PATH })
-        self.assertEqual(0, r["code"])

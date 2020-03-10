@@ -131,28 +131,11 @@ STATIC_ROOT = join(BASE_DIR, 'static')
 
 # Task queue settings
 ##########################################################################
-CONTAINER_MODE = False
 CONTAINER_SCRIPT = join(BASE_DIR, "scripts/docker-run.sh")
-CELERY_BROKER = False #'amqp://guest@localhost/'
-RABBITMQ_MANAGEMENT = { "port": 55672, "password": "guest" }
-CELERY_TASK_LIMIT_SEC = 2 * 60
-CELERY_TASK_KILL_SEC = CELERY_TASK_LIMIT_SEC + 5
-CELERY_AFFINITIES = []
-
-# Task queue alert length via logging error.
-QUEUE_ALERT_LENGTH = 20
 
 # HTTP
 DEFAULT_EXPIRY_MINUTES = 15
 
-# Sandbox process default limits.
-# CELERY_TASK_LIMIT_SEC is enforced over this time limit.
-SANDBOX_LIMITS = {
-    "time": "-",
-    "memory": "-",
-    "files": "100",
-    "disk": "1m",
-}
 
 # Course configuration path:
 # Every directory under this directory is expected to be a course configuration
@@ -176,15 +159,6 @@ PERSONALIZED_CONTENT_PATH = join(BASE_DIR, 'exercises-meta')
 # exercise instance files. Enabling and using personal directories makes the
 # grader stateful, which at least increases the amount of disk space used.
 ENABLE_PERSONAL_DIRECTORIES = False
-
-# Grading action scripts.
-PREPARE_SCRIPT = join(BASE_DIR, "scripts/prepare.sh")
-GITCLONE_SCRIPT = join(BASE_DIR, "scripts/gitclone.sh")
-SANDBOX_RUNNER = join(BASE_DIR, "scripts/chroot_execvp")
-SANDBOX_FALLBACK = join(BASE_DIR, "scripts/no_sandbox.sh")
-EXPACA_SCRIPT = join(BASE_DIR, "scripts/expaca_grade.sh")
-STORE_USER_FILES_SCRIPT = join(BASE_DIR, "scripts/store_user_files.sh")
-
 
 # Logging
 # https://docs.djangoproject.com/en/1.7/topics/logging/
