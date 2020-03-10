@@ -8,16 +8,6 @@ mooc-grader/exercises-meta/<course_key>/pregenerated/<exercise_key>/ is created
 when the personalized exercises are generated and holds the different instances
 of the exercise. The exercise instances are generated with a manage.py command
 "pregenerate_exercises".
-
-mooc-grader/exercises-meta/<course_key>/users/<user_ids>/<exercise_key>/ is
-a user's personal directory in which personal files can be stored after grading
-(see action grader.actions.store_user_files). The personal directory is never
-created (and cannot be used) if the project settings have not enabled it
-(see settings.ENABLE_PERSONAL_DIRECTORIES).
-
-See grader.actions.prepare for how to copy generated instance and personal files
-into the submission directory so that they can be used by the grader program
-(in the sandbox).
 '''
 from django.conf import settings
 from django.core.urlresolvers import reverse
