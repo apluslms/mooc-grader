@@ -342,6 +342,7 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
 
     return render_template(request, course, exercise, post_url,
         "access/async_accepted.html", {
+            "error": r['code'] != 0,
             "accepted": True,
             "wait": True,
             "missing_url": surl_missing,

@@ -13,6 +13,16 @@
 	{{ result.feedback }}
 </div>
 
+{% elif result.error %}
+<div class="alert alert-danger">
+	<h1>{% trans "Submission failed" %}</h1>
+	<p>
+		{% blocktrans %}
+		Error occurred while handling the submission. Please, contact course staff.
+		{% endblocktrans %}
+	</p>
+</div>
+
 {% else %}
 <h1>{% trans "Submission accepted" %}</h1>
 

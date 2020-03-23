@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-30 13:27+0000\n"
+"POT-Creation-Date: 2020-03-23 14:43+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -34,7 +34,7 @@ msgstr ""
 #: access/templates/access/accept_general_form.html:42
 #: access/templates/access/accept_git_form.html:16
 #: access/templates/access/accept_post_form.html:17
-#: access/templates/access/graded_form.html:171
+#: access/templates/access/graded_form.html:173
 msgid "Submit"
 msgstr "Lähetä"
 
@@ -119,11 +119,27 @@ msgstr ""
 "synkronisesti, mikä estää muita palveluja toimimasta samaan aikaan. EI "
 "VALMIS TUOTANTOKÄYTTÖÖN!"
 
-#: access/templates/access/async_accepted.html:17
+#: access/templates/access/async_accepted.html:18
+msgid "Submission failed"
+msgstr "Palautuksen vastaanottaminen epäonnistui"
+
+#: access/templates/access/async_accepted.html:20
+msgid ""
+"\n"
+"\t\tError occurred while handling the submission. Please, contact course "
+"staff.\n"
+"\t\t"
+msgstr ""
+"\n"
+"\t\tPalautuksen käsittelyssä tapahtui virhe. Ota yhteys "
+"kurssihenkilökuntaan.\n"
+"\t\t"
+
+#: access/templates/access/async_accepted.html:27
 msgid "Submission accepted"
 msgstr "Palautus on vastaanotettu"
 
-#: access/templates/access/async_accepted.html:22
+#: access/templates/access/async_accepted.html:32
 #, python-format
 msgid ""
 "\n"
@@ -136,7 +152,7 @@ msgstr ""
 "Tuloksia voi väliaikaisesti katsella osoitteessa <a href=\"%(url)s\">"
 "%(url)s</a>."
 
-#: access/templates/access/async_accepted.html:34
+#: access/templates/access/async_accepted.html:44
 msgid ""
 "\n"
 "\t\tYour submission is being graded. The result will be available on this "
@@ -152,7 +168,7 @@ msgstr ""
 "Huomioi, että arvostelu voi kestää useita kymmeniä sekunteja.\n"
 "Voit lisäksi joutua lataamaan tämän sivun uudestaan nähdäksesi palautteen."
 
-#: access/templates/access/async_accepted.html:40
+#: access/templates/access/async_accepted.html:50
 #, python-format
 msgid ""
 "\n"
@@ -311,7 +327,7 @@ msgstr[1] ""
 "\n"
 "%(points)s pistettä"
 
-#: access/templates/access/graded_form.html:134
+#: access/templates/access/graded_form.html:136
 msgid "Correct answer"
 msgstr "Oikea vastaus"
 
@@ -383,14 +399,14 @@ msgstr ""
 "Pahoittelemme häiriötä.\n"
 "Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."
 
-#: access/types/forms.py:681
+#: access/types/forms.py:690
 msgid "Multiple choices are selectable."
 msgstr "Voit valita useita vaihtoehtoja."
 
-#: access/types/forms.py:799
+#: access/types/forms.py:808
 msgid "Multiple correct answers accepted."
 msgstr "Useita oikeita vastauksia."
 
-#: access/types/forms.py:803
+#: access/types/forms.py:812
 msgid "Correct parts in your answer: "
 msgstr "Oikeat osat vastauksessasi: "
