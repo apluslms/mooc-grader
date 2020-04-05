@@ -6,3 +6,4 @@ lxml ~= 4.3.2
 PyYAML==3.11
 docutils==0.12
 python-magic==0.4.11
+colorlog==4.1.0

@@ -163,18 +163,23 @@ ENABLE_PERSONAL_DIRECTORIES = False
 # Logging
 # https://docs.djangoproject.com/en/1.7/topics/logging/
 ##########################################################################
+from colorlog import ColoredFormatter
+
 LOGGING = {
   'version': 1,
   'disable_existing_loggers': False,
+  # Formatters configuration
   'formatters': {
     'verbose': {
-      'format': '[%(asctime)s: %(levelname)s/%(module)s] %(message)s'
+      '()': 'colorlog.ColoredFormatter',
+      'format': '%(log_color)s[%(asctime)s: %(levelname)s/%(module)s] %(message)s',
     },
   },
+  # Handlers configuration
   'handlers': {
     'console': {
       'level': 'DEBUG',
-      'class': 'logging.StreamHandler',
+      'class': 'colorlog.StreamHandler',
       'stream': 'ext://sys.stdout',
       'formatter': 'verbose',
     },
@@ -183,6 +188,7 @@ LOGGING = {
       'class': 'django.utils.log.AdminEmailHandler',
     },
   },
+  # Loggers Configuration
   'loggers': {
     '': {
       'level': 'DEBUG',
@@ -195,9 +201,6 @@ LOGGING = {
     },
   },
 }
-
-
-
 
 
 ###############################################################################
