@@ -358,8 +358,6 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
         surl = request.build_absolute_uri(reverse('test-result'))
         surl_missing = True
 
-    _acceptSubmission.counter += 1
-
     # Order container for grading.
     c = _requireContainer(exercise)
 
@@ -407,5 +405,3 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
             "missing_url": surl_missing,
             "queue": qlen
         })
-
-_acceptSubmission.counter = 0
