@@ -205,19 +205,6 @@ course specific exercise view in a course specific Python module.
 		name of a template to present
 	* `accepted_message` etc as in type 1.
 
-4. ### access.types.stdasync.acceptAttachedExercise
-	Accepts attached exercise rules and user files for asynchronous
-	grading queue. Extended attributes:
-	* `template` (default `access/accept_files_default.html`):
-		name of a template to present.
-		This test is used with exercises configured externally
-		where also the creation of the form should be taken care off.
-		Post should include several file fields named `content_N` where
-		`content_0` is an exercise rule attachment and rest are
-		user files which are named by `file_N` post fields.
-		(Format is used by A+ exercises with attachments).
-	* `accepted_message` etc as in type 1.
-
 5. ### access.types.stdsync.acceptGeneralForm
 	Accepts a general form submission (can also include files) asynchronous
 	grading queue. Extended attributes:

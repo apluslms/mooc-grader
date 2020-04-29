@@ -127,64 +127,6 @@ def acceptFiles(request, course, exercise, post_url):
     )
 
 
-def acceptAttachedExercise(request, course, exercise, post_url):
-    '''
-    Accepts attached exercise rules and user files for queue.
-    '''
-    if not_modified_since(request, exercise):
-        return not_modified_response(request, exercise)
-
-    result = None
-
-    # Receive post.
-    if request.method == "POST":
-
-        # Search for file contents.
-        if "file[]" in request.FILES:
-            file_list = request.FILES.getlist("file[]")
-        else:
-            file_list = []
-            i = 0
-            while "content_%d" % (i) in request.FILES:
-                file_list.append(request.FILES["content_%d" % (i)])
-                i += 1
-
-        # Store submitted files.
-        if not file_list:
-            result = { "rejected":True, "missing_files":True }
-        else:
-            sdir = create_submission_dir(course, exercise)
-            i = 0
-            for content in file_list:
-                if i > 0:
-                    key = "file_%d" % (i)
-                    if not key in request.POST or not request.POST[key]:
-                        result = { "error": True, "missing_file_name": True }
-                        clean_submission_dir(sdir)
-                        break
-                    save_submitted_file(sdir, request.POST[key], content)
-                else:
-                    save_submitted_file(sdir, "exercise_attachment", content)
-                i += 1
-            if result is None:
-                return _acceptSubmission(request, course, exercise, post_url, sdir)
-
-    # Add the attachment as a hint to the default view form.
-    if result is None:
-        import copy
-        exercise = copy.deepcopy(exercise)
-        exercise["files"] = [ { "field": "content_0", "name": "exercise_attachment" } ]
-
-    return cache_headers(
-        render_configured_template(
-            request, course, exercise, post_url,
-            "access/accept_files_default.html", result
-        ),
-        request,
-        exercise
-    )
-
-
 def acceptGitAddress(request, course, exercise, post_url):
     '''
     Presents a template and accepts Git URL for grading.
