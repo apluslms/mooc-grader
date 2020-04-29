@@ -6,9 +6,6 @@
 	<h1>{% trans "Grader ready" %}</h1>
 </div>
 <p>
-	<a href="{% url 'queue-length' %}" class="btn btn-default btn-sm">
-		{% trans "Current queue length" %}
-	</a>
 	{% if manager %}
 	<a href="{% url 'manager-repos' %}" class="btn btn-default btn-sm">
 		{% trans "Git manager" %}
