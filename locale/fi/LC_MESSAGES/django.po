@@ -2,56 +2,74 @@
 # Copyright (C) 2015 Teemu Lehtinen
 # This file is distributed under the same license as the MOOC-grader package.
 # Teemu Lehtinen <teemu.t.lehtinen@aalto.fi>, 2015.
+# Jaakko Kantojärvi <jaakko.kantojarvi@aalto.fi>, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-02 17:18+0000\n"
-"PO-Revision-Date: 2019-10-12 20:00+0300\n"
-"Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
+"POT-Creation-Date: 2020-05-01 15:30+0000\n"
+"PO-Revision-Date: 2020-05-01 18:31+0300\n"
+"Last-Translator: Jaakko Kantojärvi <jaakko.kantojarvi@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
 "Language: fi_FI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 19.12.0\n"
 
-#: access/templates/access/accept_files_default.html:8
-msgid "Select your files for grading"
-msgstr "Valitse arvosteltavat tiedostot"
-
+#: access/templates/access/accept_async_form.html:6
 #: access/templates/access/accept_files_form.html:6
+#: access/templates/access/accept_general_form.html:6
+#: access/templates/access/accept_post_form.html:6
 #, python-format
-msgid ""
-"\n"
-"\t\t\tSubmit only %(num_files)s of the following files.\n"
-"\t\t"
-msgstr ""
-"\n"
-"Palauta vain %(num_files)s seuraavista tiedostoista."
+msgid "Submit at least %(num_files)s of the following files."
+msgstr "Palauta ainakin %(num_files)s seuraavista tiedostoista."
 
-#: access/templates/access/accept_files_form.html:24
+#: access/templates/access/accept_async_form.html:42
+#: access/templates/access/accept_files_form.html:42
 #: access/templates/access/accept_general_form.html:42
+#: access/templates/access/accept_post_form.html:42
+msgid "Can contain an integer number"
+msgstr "Voi sisältää kokonaisluvun"
+
+#: access/templates/access/accept_async_form.html:45
+#: access/templates/access/accept_files_form.html:45
+#: access/templates/access/accept_general_form.html:45
+#: access/templates/access/accept_post_form.html:45
+msgid "Can contain a decimal number"
+msgstr "Voi sisältää liukuluvun"
+
+#: access/templates/access/accept_async_form.html:47
+#: access/templates/access/accept_files_form.html:47
+#: access/templates/access/accept_general_form.html:47
+#: access/templates/access/accept_post_form.html:47
+#, python-format
+msgid "Content must match regular expression '%(pattern)s'"
+msgstr "Sisällön tulee vastata säännöllistä lauseketta '%(pattern)s'"
+
+#: access/templates/access/accept_async_form.html:60
+#: access/templates/access/accept_files_form.html:60
+#: access/templates/access/accept_general_form.html:60
+#: access/templates/access/accept_post_form.html:60
+msgid "This field is required"
+msgstr "Kenttä on pakollinen"
+
+#: access/templates/access/accept_async_form.html:62
+#: access/templates/access/accept_files_form.html:62
+#: access/templates/access/accept_general_form.html:62
+#: access/templates/access/accept_post_form.html:62
+msgid "Current content is not acceptable"
+msgstr "Nykyinen sisältö ei kelpaa"
+
+#: access/templates/access/accept_async_form.html:73
+#: access/templates/access/accept_files_form.html:73
+#: access/templates/access/accept_general_form.html:73
 #: access/templates/access/accept_git_form.html:16
-#: access/templates/access/accept_post_form.html:17
+#: access/templates/access/accept_post_form.html:73
 #: access/templates/access/graded_form.html:173
 msgid "Submit"
 msgstr "Lähetä"
-
-#: access/templates/access/accept_general_default.html:17
-#: access/templates/access/accept_post_default.html:15
-msgid "Enter your submission"
-msgstr "Kirjoita ratkaisusi"
-
-#: access/templates/access/accept_general_form.html:23
-#, python-format
-msgid ""
-"\n"
-"\t\t\t\tSubmit only %(num_files)s of the following files.\n"
-"\t\t\t"
-msgstr ""
-"\n"
-"Palauta vain %(num_files)s seuraavista tiedostoista."
 
 #: access/templates/access/accept_git_form.html:5
 msgid "Enter your Git repository address for grading"
@@ -232,36 +250,32 @@ msgstr ""
 "Tehtävän asetuksissa on virhe. Ole ystävällinen ja ilmoita asiasta "
 "henkilökunnalle. Liitä mukaan seuraava viesti:"
 
-#: access/templates/access/exercise_frame.html:20
-#, python-format
-msgid ""
-"\n"
-"\t\t\tYou must submit %(num_files)s file.\n"
-"\t\t\t"
-msgid_plural ""
-"\n"
-"\t\t\tYou must submit %(num_files)s files.\n"
-"\t\t\t"
-msgstr[0] ""
-"\n"
-"Sinun täytyy palauttaa %(num_files)s tiedosto."
-msgstr[1] ""
-"\n"
-"Sinun täytyy palauttaa %(num_files)s tiedostoa."
+#: access/templates/access/exercise_frame.html:17
+msgid "Submission was not accepted for grading"
+msgstr "Palautusta ei hyväksytty arvioitavaksi"
 
-#: access/templates/access/exercise_frame.html:26
+#: access/templates/access/exercise_frame.html:22
+#, python-format
+msgid "You must submit at least %(num_files)s file."
+msgid_plural "You must submit at least %(num_files)s files."
+msgstr[0] "Sinun täytyy palauttaa ainakin %(num_files)s tiedosto."
+msgstr[1] "Sinun täytyy palauttaa ainakin %(num_files)s tiedostoa."
+
+#: access/templates/access/exercise_frame.html:24
 msgid "Every file is required for a submission."
 msgstr "Palautus vaatii kaikki tiedostot."
 
-#: access/templates/access/exercise_frame.html:33
+#: access/templates/access/exercise_frame.html:30
 msgid "Invalid address entered."
 msgstr "Syötetty osoite ei kelpaa."
 
-#: access/templates/access/exercise_frame.html:39
-msgid "Missing required fields."
-msgstr "Täytä kaikki pakolliset kentät."
+#: access/templates/access/exercise_frame.html:34
+msgid ""
+"Some required fields are empty or content of some fields is not acceptable"
+msgstr ""
+"Jotkin pakolliset kentän ovat tyhjiä tai joidenkin kenttien sisältö ei kelpaa"
 
-#: access/templates/access/exercise_frame.html:45
+#: access/templates/access/exercise_frame.html:38
 msgid "Missing or invalid checksum. Do not tamper with the hidden form fields!"
 msgstr ""
 "Tarkistesumma puuttuu tai on epäkelpo. Älä muokkaa lomakkeen piilotettuja "

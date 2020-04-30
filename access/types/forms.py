@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.utils import ErrorDict
 from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
+from django.utils.crypto import get_random_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
@@ -38,6 +39,8 @@ class GradedForm(forms.Form):
             self.show_correct_once = False
         self.request = kwargs.pop('request') if 'request' in kwargs else None
         kwargs['label_suffix'] = ''
+        self.form_random_id = random_id = get_random_string(length=8)
+        kwargs['auto_id'] = 'exercise-{}-field-%s'.format(random_id)
         super(forms.Form, self).__init__(*args, **kwargs)
 
         if "fieldgroups" not in self.exercise:

@@ -1,0 +1,76 @@
+{% load i18n %}
+<form id="exercise-{{ form_random_id }}-form" data-form-nonce="{{ form_random_id }}"
+	method="post" action="{{ post_url }}" enctype="multipart/form-data">
+	{% if exercise.required_number_of_files %}
+		<p {% if result.missing_files %}class="text-danger"{% endif %}>
+			{% blocktrans with num_files=exercise.required_number_of_files %}Submit at least {{ num_files }} of the following files.{% endblocktrans %}
+		</p>
+	{% endif %}
+
+	{% for field in result.fields %}
+	{% with field_id="exercise-"|add:form_random_id|add:"-field-"|add:field.name %}
+	<div class="form-group{% if field.error or field.type == 'file' and exercise.required_number_of_files and result.missing_files %} has-error{% endif %}">
+		{% if field.type == 'file' %}
+			{% if field.title %}
+				<label class="control-label">{{ field.title|safe }}</label>
+			{% endif %}
+			<div class="input-group">
+			<label for="{{ field_id }}" class="input-group-addon">
+				<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+				<strong>{{ field.filename }}</strong>
+			</label>
+		{% elif field.title %}
+			<label for="{{ field_id }}" class="control-label">{{ field.title|safe }}</label>
+		{% endif %}
+		{% if field.more %}{{ field.more|safe }}{% endif %}
+		{% if field.type == 'file' %}
+			<input type="file" id="{{ field_id }}" name="{{ field.name }}" class="form-control"
+				{% if field.accept %}accept="{{ field.accept }}"{% endif %}
+				{% if field.required %}required{% endif %}
+			>
+		{% elif field.type == 'text' %}
+			<textarea id="{{ field_id }}" name="{{ field.name }}" class="form-control"
+				rows="{{ field.rows|default:"6" }}"
+				{% if field.required %}required{% endif %}
+				{% if field.value %}value="{{ value }}"{% endif %}
+			></textarea>
+		{% else %}
+			<input type="text" id="{{ field_id }}" name="{{ field.name }}" class="form-control"
+				placeholder="{{ field.title|default:field.name|striptags }}"
+				{% if field.type == 'integer' %}
+					inputmode="numeric"
+					title="{% trans "Can contain an integer number" %}"
+				{% elif field.type == 'number' %}
+					inputmode="decimal"
+					title="{% trans "Can contain a decimal number" %}"
+				{% elif field.pattern %}
+					title="{% blocktrans with pattern=field.pattern %}Content must match regular expression '{{pattern}}'{% endblocktrans %}"
+				{% endif %}
+				{% if field.pattern %}pattern="{{ field.pattern }}"{% endif %}
+				{% if field.value %}value="{{ field.value }}"{% endif %}
+				{% if field.required %}required{% endif %}
+			>
+		{% endif %}
+		{% if field.type == 'file' %}
+			</div>{# class="input-group" #}
+		{% endif %}
+		{% if field.error %}
+			<span class="help-block">
+				{% if field.error == 'missing' %}
+					{% trans "This field is required" %}
+				{% elif field.error == 'invalid' %}
+					{% trans "Current content is not acceptable" %}
+				{% endif %}
+			</span>
+		{% endif %}
+	</div>
+	{% endwith %}
+	{% endfor %}
+
+	{# TODO: remove this check when A+ doesn't use modal dialogs and can handle update form #}
+	{% if not post_url or not result.error and not result.rejected %}
+	<div class="form-group">
+		<input type="submit" value="{% trans 'Submit' %}" class="btn btn-primary aplus-submit" />
+	</div>
+	{% endif %}
+</form>

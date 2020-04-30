@@ -6,46 +6,39 @@
 {% endblock %}
 
 {% block body %}
-<div id="exercise">
+<div id="exercise" class="exercise exercise-mooc-grader-v1">
 
 	{% if exercise.title and not hide_exercise_title %}
 	<h3 class="exercise-title">{{ exercise.title }}</h3>
 	{% endif %}
 
 	{% if result.error or result.rejected %}
+	<div class="alert alert-danger">
+		<p>{% trans "Submission was not accepted for grading" %}</p>
 
 		{% if result.missing_files %}
-		<div class="alert alert-danger">
-		{% if exercise.required_number_of_files %}
-			{% blocktrans count num_files=exercise.required_number_of_files %}
-			You must submit {{ num_files }} file.
-			{% plural %}
-			You must submit {{ num_files }} files.
-			{% endblocktrans %}
-		{% else %}
-			{% trans "Every file is required for a submission." %}
-		{% endif %}
-		</div>
+		<li>
+			{% if exercise.required_number_of_files %}
+				{% blocktrans count num_files=exercise.required_number_of_files %}You must submit at least {{ num_files }} file.{% plural %}You must submit at least {{ num_files }} files.{% endblocktrans %}
+			{% else %}
+				{% trans "Every file is required for a submission." %}
+			{% endif %}
+		</li>
 		{% endif %}
 
 		{% if result.invalid_address %}
-		<div class="alert alert-danger">
-		{% trans "Invalid address entered." %}
-		</div>
+		<li>{% trans "Invalid address entered." %}</li>
 		{% endif %}
 
-		{% if result.fields %}
-		<div class="alert alert-danger">
-		{% trans "Missing required fields." %}
-		</div>
+		{% if result.invalid_fields %}
+		<li>{% trans "Some required fields are empty or content of some fields is not acceptable" %}</li>
 		{% endif %}
 
 		{% if result.invalid_checksum %}
-		<div class="alert alert-danger">
-		{% trans "Missing or invalid checksum. Do not tamper with the hidden form fields!" %}
-		</div>
+		<li>{% trans "Missing or invalid checksum. Do not tamper with the hidden form fields!" %}</li>
 		{% endif %}
 
+	</div>
 	{% endif %}
 
 	{% block exercise %}

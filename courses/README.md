@@ -160,16 +160,50 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 ## Exercise view types
 
 Common exercise views are implemented in `access.types` and they should fit most
-purposes by configuration and templating. However, it is possible to implement a
-course specific exercise view in a course specific Python module.
+purposes by configuration and templating.
+However, it is technically possible to implement a course specific exercise view in a course specific Python module,
+but this should be avoided and no documentation is provided for it.
 
-1. ### access.types.stdasync.acceptFiles
-	Accepts named files for asynchronous grading queue. Extended attributes:
-	* `files`: list of expected files
-		* `field`: file field name
-		* `name`: actual file name, may include subdirectories
-		* `required`: (optional, default true) if true, the user must submit this file,
-			otherwise it can be left empty
+
+1. ### access.types.stdasync.acceptAsync
+
+	Accepts form data for asynchronous grading. Extended attributes:
+
+	* `fields`: list of all fields
+		* `name`: field name
+		* `type` (optional, defaults to `string`):
+			* `file` renders HTML file input, check extra keys below
+			* `integer` renders HTML text input field with inputmode `numeric`
+				and value is converted with `int()`
+			* `number` renders HTML text input field with inputmode `decimal`
+				and value is converted with `float()`
+			* `string` renders HTML text input field
+			* `text` renders HTML textarea
+		* `title` (optional, defaults to `name`):
+			field title rendered in the label element and placeholder attribute, may contain HTML
+		* `more` (optional): more instructions, may contain HTML
+		* `required` (optional, defaults to true for file type and false for rest):
+			if true, the user must add value to this field, otherwise they can leave it empty
+		* `pattern` (optional, has defaults for integer and number types):
+			value for HTML attribute `pattern` for the text input field,
+			which is also used on server side to validate the input using `re.match('^<pattern>$', value)`
+		* `rows` (optional): changes default value of `type` to `text` and
+			changes HTML attribute `rows` from default 6 to the one provided
+
+		Only for `file` type:
+
+		* `filename` (optional, defaults to `name`): actual file name, may include subdirectories
+		* `accept` (optional, defaults to `.<extension of name>`):
+			value for HTML attrbute `accept` for the file input field
+
+	* `files` (deprecated): list of expected files;
+		exists to support existing configurations and can be replaced with `fields`
+		* `name`: actual file name, may include subdirectories (`filename` in `fields`)
+		* `field` (optional, defaults to `name`): name of the file input field;
+			when there exists a field in `fields` with this as `name`,
+			then it is updated with values from this entry
+		* `title`, `required`, and `accept`: as described under `fields`
+
 	* `required_number_of_files`: (optional, integer) if not all files are required,
 		define how many files must be submitted. The number should be less than the
 		length of the `files` list.
@@ -181,18 +215,38 @@ course specific exercise view in a course specific Python module.
 		asynchronous submissions (normally occurs if queue is shorter than 3)
 	* `feedback_template` (default `access/task_success.html`):
 		name of a template used to format the feedback
-	* `actions`: list of asynchronous test actions
 
-2. ### access.types.stdasync.acceptPost
-	Accepts form text for asynchronous grading queue. Extended attributes:
-	* `fields`: list of text fields
-		* `name`: field name and written file name
-		* `title` (optional): field title or label
-		* `more` (optional): more instructions
-		* `required` (optional): `true` to require an answer
-	* `template` (default `access/accept_post_default.html`):
-		name of a template to present
-	* `accepted_message` etc as in type 1.
+	* `container` (required): configuration for asynchronous container environment
+		* `image` (required): assestment environment as a docker image, e.g., `apluslms/grade-python:version-tag`
+		* `mount` (required): location relative to course root, which should be copied to `/exercise` inside the container
+		* `cmd` (required): command to be executed within the container, which should do the assessing
+
+		More information about container environment in [grading-base repository](https://github.com/apluslms/grading-base).
+
+
+1. ### access.types.stdasync.acceptFiles
+
+	*deprecated*
+
+	This view type did accept only form fields with file inputs.
+	It is now alias for `acceptAsync`, which does support old configurations.
+
+
+1. ### access.types.stdasync.acceptPost
+
+	*deprecated*
+
+	This view type did accept only form fields with textarea inputs.
+	It is now alias for `acceptAsync`, which does support old configurations.
+
+
+1. ### access.types.stdasync.acceptGeneralForm
+
+	*deprecated*
+
+	This view type did accept form fields with textarea inputs and files.
+	It is now alias for `acceptAsync`, which does support old configurations.
+
 
 3. ### access.types.stdasync.acceptGitAddress
 	Writes the Git address into user/gitsource file for asynchronous grading
@@ -202,15 +256,6 @@ course specific exercise view in a course specific Python module.
 		Makes sure that the address is an SSH repo path or any HTTP URL
 		in given Gitlab host. Stores the standard SSH path for key access.
 	* `template` (default: `access/accept_git_default.html`):
-		name of a template to present
-	* `accepted_message` etc as in type 1.
-
-5. ### access.types.stdsync.acceptGeneralForm
-	Accepts a general form submission (can also include files) asynchronous
-	grading queue. Extended attributes:
-	* `files`: list of expected files as in type 1
-	* `fields`: list of text fields as in type 2
-	* `template` (default `access/accept_general_default.html`):
 		name of a template to present
 	* `accepted_message` etc as in type 1.
 
@@ -298,11 +343,25 @@ course specific exercise view in a course specific Python module.
 	
 ## Templates
 
-Many type views can use a named template. The templates can be placed in
-exercise directory and use subdirectories. The available variables are
-listed below.
+Many view types can use a named template.
+A course can use public templates from MOOC-Grader or it can provide custom templates.
+Custom templates can be stored in the course directory and must be referenced in the configuration like `template: ./exercises/accept.html`,
+which is relative to course root.
+
+### Public templates
+
+* `access/accept_async_default.html`: default for `access.types.stdasync.acceptAsync`
+* `access/accept_files_default.html`: deprecated, alias for `access/accept_async_default.html`
+* `access/accept_general_default.html`: deprecated, alias for `access/accept_async_default.html`
+* `access/accept_git_default.html`: default for `access.types.stdasync.acceptGitAddress`
+* `access/accept_post_default.html`: deprecated, alias for `access/accept_async_default.html`
+* `access/active_element_default.html`: used for active elements
+* `access/create_form_default.html`: default for `access.types.stdsync.createForm`
+
+### Available template variables
 
 1. ### All templates
+
 	* `course`: course configuration dictionary
 	* `exercise`: exercise configuration dictionary
 	* If the exercise is personalized and the exercise settings include
@@ -314,41 +373,42 @@ listed below.
 	Note that you can add any new keys to configuration and utilize them in templates.
 
 2. ### Templates for asynchronous submissions
+
 	* `result`: object holding POST results or None
-		* `error`: True on failed POST
-		* `missing_url`: True if no submission_url provided
-		* `missing_files`: True if files missing
-		* `invalid_address`: True if Gitlab address is rejected
 		* `accepted`: True if accepted for grading
-		* `wait`: True if the grading should be finished in a moment
-	A default file submission form can be included with
+		* `rejected`: True if POST was not accepted for grading,
+			e.g., if some of the input fields are missing or include invalid data
+		* `error`: True if system was unable to handle the request,
+			e.g., the exercise or the backend is not configured correctly
+		* `invalid_address` (rejected): True if Git address is rejected
+		* `invalid_fields` (rejected): True if some fields are invalid,
+			e.g., required fields have empty values
+		* `missing_files` (rejected): True if files missing
+		* `missing_url` (error): True if no submission_url provided
+		* `wait`: True if the grading should be finished in a moment,
+			i.e., LMS should show a waiting screen
 
-		{% include 'access/accept_files_form.html' %}
+	A default submission form can be included with
+	(check `access/accept_async_default.html` for more details)
 
-3. ### Feedback templates for asynchronous submissions
-	* `result`: object holding test results
-		* `points`: total points granted
-		* `max_points`: total maximum points
-		* `tests`: entry for each test action
-			* `points`: points granted
-			* `max_points`: maximum points
-			* `out`: test output
-			* `err`: test errors
-			* `stop`: True when rest of the actions
-				were cancelled
+		{% include 'access/accept_async_form.html' %}
+
 
 4. ### Templates for createForm
+
 	* `result`: object holding form and results
 		* `form`: a Django form object
 		* `accepted`: True if valid form POST was graded
 		* `points`: granted points
 		* `error_groups`: list of group_N names having errors
 		* `error_fields`: list of field_N names having errors
+
 	A default form can be included with
 
 		{% include 'access/graded_form.html' %}
 
 5. ### Templates for comparePostValues
+
 	* `result`: object holding POST results or None
 		* `accepted`: True
 		* `received`: map of received POST fields => values

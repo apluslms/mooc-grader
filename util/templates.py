@@ -2,8 +2,10 @@
 Utility functions for exercise templates.
 
 '''
-from django.template import loader, Context
 from django.shortcuts import render
+from django.template import loader, Context
+from django.utils.crypto import get_random_string
+
 from access.config import ConfigError
 from .personalized import personalized_template_context
 
@@ -91,6 +93,7 @@ def _exercise_context(course, exercise, post_url, result=None, request=None):
         "course": course,
         "exercise": exercise,
         "post_url": post_url or "",
+        'form_random_id': get_random_string(length=8),
         "static_url": course['static_url'],
         "result": result,
     }
