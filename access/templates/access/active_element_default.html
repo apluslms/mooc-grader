@@ -1,34 +1,12 @@
-{% extends 'frame.html' %}
+{% extends 'access/exercise_frame.html' %}
 {% load i18n %}
 
-{% block head %}
-{% include 'access/exercise_head.html' %}
+{% block body %}
+    {% with hide_exercise_title=True %}
+        {{ block.super }}
+    {% endwith %}
 {% endblock %}
 
-{% block body %}
-<div id="exercise">
-
-
-
-	{% if result.error %}
-	<div class="alert alert-danger">
-
-		{% if result.invalid_address %}
-		<p>{% trans "Invalid address entered." %}</p>
-		{% endif %}
-
-		{% if result.nonce_used %}
-		<p>{% trans "The same form can obly be submitted once. Start again from exercise description." %}</p>
-		{% endif %}
-
-		{% if result.fields %}
-		<p>{% trans "Missing required fields." %}</p>
-		{% endif %}
-
-	</div>
-	{% endif %}
-
+{% block exercise %}
   <div class="ae_result form-control" data-expected-inputs="{% for field in exercise.fields %}{{ field.name }} {% endfor %}{% for file in exercise.files %}{{ file.field }} {% endfor %}"></div>
-
-</div>
 {% endblock %}

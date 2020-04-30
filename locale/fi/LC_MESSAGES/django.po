@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-01 15:19+0000\n"
+"POT-Creation-Date: 2020-05-01 15:20+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -69,23 +69,6 @@ msgstr "Anna käyttäjätunnuksesi arvostelua varten"
 #: access/templates/access/accept_git_user.html:31
 msgid "Request grading of my repository"
 msgstr "Pyydä versiosäilöni arvostelua"
-
-#: access/templates/access/active_element_default.html:17
-#: access/templates/access/exercise_frame.html:33
-msgid "Invalid address entered."
-msgstr "Syötetty osoite ei kelpaa."
-
-#: access/templates/access/active_element_default.html:21
-msgid ""
-"The same form can obly be submitted once. Start again from exercise "
-"description."
-msgstr ""
-"Sama lomake voidaan lähettää vain kerran. Aloita uudelleen tehtävänannosta."
-
-#: access/templates/access/active_element_default.html:25
-#: access/templates/access/exercise_frame.html:39
-msgid "Missing required fields."
-msgstr "Täytä kaikki pakolliset kentät."
 
 #: access/templates/access/active_element_feedback.html:10
 #: access/templates/access/task_success.html:16
@@ -265,6 +248,14 @@ msgstr[1] ""
 #: access/templates/access/exercise_frame.html:26
 msgid "Every file is required for a submission."
 msgstr "Palautus vaatii kaikki tiedostot."
+
+#: access/templates/access/exercise_frame.html:33
+msgid "Invalid address entered."
+msgstr "Syötetty osoite ei kelpaa."
+
+#: access/templates/access/exercise_frame.html:39
+msgid "Missing required fields."
+msgstr "Täytä kaikki pakolliset kentät."
 
 #: access/templates/access/exercise_frame.html:45
 msgid "Missing or invalid checksum. Do not tamper with the hidden form fields!"

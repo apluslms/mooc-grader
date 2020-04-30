@@ -8,7 +8,7 @@
 {% block body %}
 <div id="exercise">
 
-	{% if exercise.title %}
+	{% if exercise.title and not hide_exercise_title %}
 	<h3 class="exercise-title">{{ exercise.title }}</h3>
 	{% endif %}
 
