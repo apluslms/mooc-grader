@@ -9,7 +9,7 @@ import copy
 import os
 import json
 
-from access.config import config, DEFAULT_LANG
+from access.config import DEFAULT_LANG, ConfigError, config
 from util import export
 from util.files import (
     clean_submission_dir,
@@ -72,7 +72,17 @@ def exercise(request, course_key, exercise_key):
     (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
 
     # Try to call the configured view.
-    return import_named(course, exercise['view_type'])(request, course, exercise, post_url)
+    try:
+        return import_named(course, exercise['view_type'])(request, course, exercise, post_url)
+    except ConfigError as error:
+        return render(request, 'access/exercise_config_error.html', {
+            'course': course,
+            'exercise': exercise,
+            'config_error': str(error),
+            'result': {
+                'error': True,
+            },
+        })
 
 
 def exercise_ajax(request, course_key, exercise_key):

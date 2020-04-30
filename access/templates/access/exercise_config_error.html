@@ -1,0 +1,9 @@
+{% extends 'access/exercise_frame.html' %}
+{% load i18n %}
+
+{% block exercise %}
+<div class="alert alert-danger">
+	<h3>{% trans "The exercise configuration has an error. Please, notify the course staff and provide the following message:" %}</h3>
+<pre>{{ config_error }}</pre>
+</div>
+{% endblock %}
