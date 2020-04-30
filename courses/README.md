@@ -318,7 +318,6 @@ listed below.
 		* `error`: True on failed POST
 		* `missing_url`: True if no submission_url provided
 		* `missing_files`: True if files missing
-		* `missing_file_name`: True if file name missing
 		* `invalid_address`: True if Gitlab address is rejected
 		* `accepted`: True if accepted for grading
 		* `wait`: True if the grading should be finished in a moment

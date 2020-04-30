@@ -258,10 +258,6 @@ msgstr[1] ""
 msgid "Every file is required for a submission."
 msgstr "Palautus vaatii kaikki tiedostot."
 
-#: access/templates/access/exercise_frame.html:33
-msgid "Unknown file received (no file name configured)."
-msgstr "Tuntematon tiedosto vastaanotettu (tiedostonimeä ei ole asetuksissa)."
-
 #: access/templates/access/exercise_frame.html:51
 msgid "Missing or invalid checksum. Do not tamper with the hidden form fields!"
 msgstr ""

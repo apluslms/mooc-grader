@@ -28,12 +28,6 @@
 		</div>
 		{% endif %}
 
-		{% if result.missing_file_name %}
-		<div class="alert alert-danger">
-		{% trans "Unknown file received (no file name configured)." %}
-		</div>
-		{% endif %}
-
 		{% if result.invalid_address %}
 		<div class="alert alert-danger">
 		{% trans "Invalid address entered." %}
