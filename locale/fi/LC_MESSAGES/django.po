@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-23 14:43+0000\n"
+"POT-Creation-Date: 2020-05-01 15:05+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -339,15 +339,11 @@ msgstr "Lataa"
 msgid "Grader ready"
 msgstr "Arvostelija on valmiina"
 
-#: access/templates/access/ready.html:10
-msgid "Current queue length"
-msgstr "Tämänhetkinen jonon pituus"
-
-#: access/templates/access/ready.html:14
+#: access/templates/access/ready.html:11
 msgid "Git manager"
 msgstr "Git-hallinnointi"
 
-#: access/templates/access/ready.html:18
+#: access/templates/access/ready.html:15
 msgid "Available courses"
 msgstr "Saatavilla olevat kurssit"
 

@@ -153,17 +153,3 @@ Installing the full stack
 	The `gitmanager` requires a crontab for the root account:
 
 		sudo crontab -u root doc/gitmanager-root-crontab
-
-
-3. ### X virtual frame buffer (if required)
-
-	For tests requiring X display server xvfb can be used at DISPLAY=:0.
-	Such tests typically run GUI code or WWW browser using Selenium.
-	Following installs xvfb and copies the daemon script in place and
-	registers the daemon for default run levels and starts it up.
-
-		sudo apt-get install xvfb
-		sudo cp doc/etc-init.d-xvfb /etc/init.d/xvfb
-		sudo chmod a+x /etc/init.d/xvfb
-		sudo update-rc.d xvfb defaults
-		sudo /etc/init.d/xvfb start

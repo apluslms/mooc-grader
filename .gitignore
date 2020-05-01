@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.mo
 
 gitpull.log
 
@@ -8,7 +9,9 @@ db.sqlite3
 uploads/
 settings_local.py
 local_settings.py
-scripts/chroot_execvp
+grader/local_settings.py
+grader/ajax_key.py
+grader/secret_key.py
 
 .idea
 .settings
@@ -26,7 +29,3 @@ venv
 # symbolic link exercises to /srv/courses 
 # Important!! This symbolic link should be created in order to debug the mooc grader
 exercises
-
-# automatic generated keys
-grader/ajax_key.py
-grader/secret_key.py
