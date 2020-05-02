@@ -1,0 +1,55 @@
+---
+title: Arithmetic
+description: Some arithmetic multiple choice questions
+max_points: 9
+
+view_type: access.types.stdsync.createForm
+
+fieldgroups:
+
+  - title:
+    fields:
+
+      - title: 1. <var>1 + 1 = ?</var>
+        type: radio
+        points: 2
+        options:
+          - label: "1"
+            hint: Maby more?
+          - label: "2"
+            correct: true
+          - label: "3"
+            hint: Maby less?
+
+      - title: 2. <var>2 * 7 = ?</var>
+        type: dropdown
+        points: 2
+        options:
+          - label: "7"
+          - label: "14"
+            correct: true
+          - label: "21"
+
+      - title: 3. <var>2 * x = y</var>
+        type: checkbox
+        points: 2
+        options:
+          - label: x=3, y=6
+            correct: true
+            hint: More than one is correct.
+          - label: x=4, y=7
+            hint: Check your arithmetic.
+          - label: x=5, y=10
+            correct: true
+            hint: More than one is correct.
+
+      - title: 4. <var>3 * 5 = ?</var>
+        more: |
+          <p class="help-block">
+            Type the answer using numbers.
+          </p>
+        type: text
+        points: 3
+        compare_method: int
+        correct: 15
+        hint: Check your arithmetic and exact answer text.

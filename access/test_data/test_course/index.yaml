@@ -1,0 +1,67 @@
+---
+name: A test course
+description: This is a sample course for testing
+language:
+ - en
+ - fi
+static_dir: static
+start: 2015-01-01
+end: 2055-01-01
+modules:
+  - key: programming
+    name: Sample exercises
+    introduction: This round presents different sample exercises.
+    type: def
+    points_to_pass: 100
+    children:
+      - key: arithmetic
+        config: arithmetic_mcq.yaml
+        type: mcq
+      - key: hello_python
+        config: hello_python/config.yaml
+        type: prg
+
+  - key: chapter
+    name: Sample chapters
+    introduction: This module includes one sample chapter.
+    type: def
+    children:
+      - key: chp1
+        title: Chapter 1
+        static_content: chapter.html
+        category: chpcat
+        children:
+          - key: arithmetic
+            config: arithmetic_mcq.yaml
+            type: mcq
+            status: unlisted
+
+module_types:
+  def:
+    open: 2015-01-01 12:00
+    duration: 50y
+    points_to_pass: 0
+    late_duration: 2d
+    late_penalty: 0.5
+exercise_types:
+  mcq:
+    category: mcqcat
+    max_submissions: 3
+    max_points: 10
+    points_to_pass: 10
+  prg:
+    category: prgcat
+    max_submissions: 10
+    max_points: 50
+    points_to_pass: 30
+    allow_assistant_grading: yes
+
+categories:
+  mcqcat:
+    name: Multiple choice questionnaires
+    points_to_pass: 0
+  prgcat:
+    name: Programming exercises
+    points_to_pass: 0
+  chpcat:
+    name: Chapters

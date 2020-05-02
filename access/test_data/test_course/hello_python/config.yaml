@@ -1,0 +1,21 @@
+---
+title|i18n:
+  en: Hello Python!
+  fi: Hei Python!
+description|i18n:
+  en: An example of grading with Python code
+  fi: Esimerkki Pythonilla tarkistamisesta
+instructions: |
+    <p>
+        In this exercise you must implement a function <var>hello</var>
+        that returns a string "<samp>Hello Python!</samp>".
+    </p>
+view_type: access.types.stdasync.acceptFiles
+files:
+  - field: file1
+    name: functions.py
+
+container:
+  image: apluslms/grade-python
+  mount: hello_python
+  cmd: /exercise/run.sh

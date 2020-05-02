@@ -23,6 +23,8 @@ class ConfigTestCase(TestCase):
     }
 
     def setUp(self):
+        import access
+        access.config.DIR = os.path.join(os.path.dirname(__file__), 'test_data')
         self.config = ConfigParser()
 
     def get_course_key(self):
@@ -35,8 +37,8 @@ class ConfigTestCase(TestCase):
         self.assertEqual(get_rst_as_html('A **foobar**.'), '<p>A <strong>foobar</strong>.</p>\n')
 
     def test_parsing(self):
-        course = { "lang": "en" }
-        data = self.config._process_exercise_data(course, self.TEST_DATA)
+        course_root = {'lang': 'en'}
+        data = self.config._process_exercise_data(course_root, self.TEST_DATA)
         self.assertEqual(data["en"]["text"], data["fi"]["text"])
         self.assertEqual(data["en"]["title"], "A Title")
         self.assertEqual(data["en"]["nested"]["number"], 1)
@@ -64,7 +66,7 @@ class ConfigTestCase(TestCase):
         ptime = root["ptime"]
         self.assertGreater(ptime, mtime)
 
-        time.sleep(1.5)
+        time.sleep(0.01)
         os.utime(root["file"])
         root = self.config._course_root(course_key)
         self.assertGreater(root["ptime"], root["mtime"])
