@@ -16,7 +16,7 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 		* URLs: `/course_key`
 	* `name`: A public complete course name
 	* `description` (optional): A private course description
-	* `lang` (optional/a+): The default language.
+	* `language`: (optional, defaults to `en`): The course language or a list of languages, where first is the default
 	* `contact`: (optional/a+) A private contact email for course configuration
 	* `contact_phone`: (optional) A private contact phone number for course responsible
 	* `assistants`: (optional/a+) A list of assistant student ids

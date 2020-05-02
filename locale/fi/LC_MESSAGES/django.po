@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-01 15:20+0000\n"
+"POT-Creation-Date: 2020-05-02 17:18+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -167,23 +167,27 @@ msgstr ""
 "Tulos näytetään tällä sivulla, kun arvosteluprosessi on suoritettu.\n"
 "Joudut lataamaan sivun uudelleen nähdäksesi palautteen."
 
-#: access/templates/access/course.html:10
+#: access/templates/access/course.html:11
+msgid "Back to the course list"
+msgstr "Takaisin kurssilistaukseen"
+
+#: access/templates/access/course.html:14
 msgid "Service URLs for A+"
 msgstr "Palveluosoitteet A+:aa varten"
 
-#: access/templates/access/course.html:13
+#: access/templates/access/course.html:17
 msgid "A+ configuration JSON"
 msgstr "A+:n konfiguraatio-JSON"
 
-#: access/templates/access/course.html:21
+#: access/templates/access/course.html:25
 msgid "Build/make output retrieval"
 msgstr "Kurssin kääntämisen tulosteen haku"
 
-#: access/templates/access/course.html:28
+#: access/templates/access/course.html:32
 msgid "Requires the gitmanager plugin"
 msgstr "Vaatii gitmanager-liitännäisen"
 
-#: access/templates/access/course.html:33
+#: access/templates/access/course.html:37
 msgid "Available exercises"
 msgstr "Saatavilla olevat tehtävät"
 

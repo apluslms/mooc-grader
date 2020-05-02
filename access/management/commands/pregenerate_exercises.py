@@ -37,6 +37,7 @@ class Command(BaseCommand):
             raise CommandError("Course not found for key: %s" % (course_key))
         
         if exercise_key:
+            # FIXME: no support for multiple languages, we should iterate through all languages. must check paths so they don't overlap
             (_course, exercise) = config.exercise_entry(course_key, exercise_key)
             if exercise is None:
                 raise CommandError("Exercise not found for key: %s/%s" % (course_key, exercise_key))
