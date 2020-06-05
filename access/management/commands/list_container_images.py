@@ -8,19 +8,20 @@ class Command(BaseCommand):
         images = {}
         for course in config.courses():
             course_name = course['key']
-            (_, exercises) = config.exercises(course_name)
-            for exercise in exercises:
-                container = exercise.get('container', {})
-                image = container.get("image")
-                if image:
-                    base, has_tag, tag = image.rpartition(':')
-                    if not has_tag:
-                        base, tag = tag, 'latest'
-                    course_counts = images.setdefault(base, {}).setdefault(tag, {})
-                    if course_name in course_counts:
-                        course_counts[course_name] += 1
-                    else:
-                        course_counts[course_name] = 1
+            (_, exercises) = config.exercises(course_name, lang='_root')
+            for exercise_root in exercises:
+                for lang, exercise in exercise_root.items():
+                    container = exercise.get('container', {})
+                    image = container.get("image")
+                    if image:
+                        base, has_tag, tag = image.rpartition(':')
+                        if not has_tag:
+                            base, tag = tag, 'latest'
+                        course_counts = images.setdefault(base, {}).setdefault(tag, {})
+                        if course_name in course_counts:
+                            course_counts[course_name] += 1
+                        else:
+                            course_counts[course_name] = 1
         image_counts = []
         for image, tags in images.items():
             image_count = 0

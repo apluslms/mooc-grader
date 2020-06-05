@@ -1,0 +1,14 @@
+{% extends 'access/exercise_frame.html' %}
+{% load i18n %}
+
+{% block exercise %}
+{% if exercise.instructions or exercise.instructions_file %}
+<div class="exercise-instructions">
+	{% if exercise.instructions %}{{ exercise.instructions|safe }}{% endif %}
+	{% if exercise.instructions_file %}{% include exercise.instructions_file %}{% endif %}
+</div>
+{% endif %}
+
+{% include 'access/personalized_content_default.html' %}
+{% include 'access/accept_async_form.html' %}
+{% endblock %}

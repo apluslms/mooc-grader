@@ -104,7 +104,7 @@ class ConfigParser:
         return None if root is None else root["data"]
 
 
-    def exercises(self, course_key):
+    def exercises(self, course_key, lang=None):
         '''
         Gets course exercises for a course key.
 
@@ -119,12 +119,15 @@ class ConfigParser:
 
         # Pick exercise data into list.
         exercise_list = []
+        keys_seen = set()
         for exercise_key in course_root["data"]["exercises"]:
-            _, exercise = self.exercise_entry(course_root, exercise_key)
-            if exercise is None:
-                raise ConfigError('Invalid exercise key "%s" listed in "%s"'
-                    % (exercise_key, course_root["file"]))
-            exercise_list.append(exercise)
+            if exercise_key not in keys_seen:
+                keys_seen.add(exercise_key)
+                _, exercise = self.exercise_entry(course_root, exercise_key, lang=lang)
+                if exercise is None:
+                    raise ConfigError('Invalid exercise key "%s" listed in "%s"'
+                        % (exercise_key, course_root["file"]))
+                exercise_list.append(exercise)
         return (course_root["data"], exercise_list)
 
 
@@ -150,7 +153,7 @@ class ConfigParser:
             return course_root["data"], None
 
         exercise_root = self._exercise_root(course_root, exercise_key)
-        if not exercise_root or "data" not in exercise_root or not exercise_root["data"]:
+        if not exercise_root or not exercise_root.get('data'):
             return course_root["data"], None
 
         if lang == '_root':
@@ -159,12 +162,15 @@ class ConfigParser:
         # Try to find version for requested or configured language.
         for lang in (lang, course_root["lang"]):
             if lang in exercise_root["data"]:
-                exercise = exercise_root["data"][lang]
-                exercise["lang"] = lang
-                return course_root["data"], exercise
+                return course_root["data"], exercise_root["data"][lang]
+
+        # Try to find a language in priority order
+        for lang in course_root['langauges']:
+            if lang in exercise_root['data']:
+                return course_root['data'], exercise_root['data'][lang]
 
         # Fallback to any existing language version.
-        return course_root["data"], list(exercise_root["data"].values())[0]
+        return course_root["data"], next(iter(exercise_root["data"].values()), None)
 
 
     def _course_root(self, course_key):
@@ -239,27 +245,28 @@ class ConfigParser:
         if "exercise_loader" in data:
             exercise_loader = import_named(data, data["exercise_loader"])
 
+        languages = data.get('language') or data.get('lang') or DEFAULT_LANG
+        if isinstance(languages, str):
+            languages = [languages]
+        elif not isinstance(languages, list):
+            raise ConfigError(
+                "Invalid tyope for `language` (%r) or `lang` (%r) in course %s" % (
+                    data.get('language'), data.get('lang'), course_key))
+        data['language'] = languages
+        data['languages'] = languages
         self._courses[course_key] = course_root = {
             "meta": meta,
             "file": f,
             "mtime": t,
             "ptime": time.time(),
             "data": data,
-            "lang": self._default_lang(data),
+            'languages': languages,
+            'lang': languages[0],
             "exercise_loader": exercise_loader,
             "exercises": {}
         }
         symbolic_link(DIR, data)
         return course_root
-
-
-    def _default_lang(self, data):
-        l = data.get('language')
-        if type(l) == list:
-            data['lang'] = l[0]
-        elif l == str:
-            data['lang'] = l
-        return data.get('lang', DEFAULT_LANG)
 
 
     def _exercise_root(self, course_root, exercise_key):
@@ -492,7 +499,7 @@ class ConfigParser:
         @param data: a config data dictionary to process (in-place)
         '''
         default_lang = course_root['lang']
-        lang_keys = []
+        lang_keys = set()
         tags_processed = []
 
         def recursion(n, lang, collect_lang=False):
@@ -506,7 +513,7 @@ class ConfigParser:
                         k, tag = m.groups()
                         tags_processed.append(tag)
                         if collect_lang and tag == 'i18n' and type(v) == dict:
-                            lang_keys.extend(v.keys())
+                            lang_keys.update(v.keys())
                         if tag not in self.TAG_PROCESSOR_DICT:
                             raise ConfigError('Unsupported processor tag "%s"' % (tag))
                         v = self.TAG_PROCESSOR_DICT[tag](d, n, v, lang=lang)
@@ -519,9 +526,12 @@ class ConfigParser:
                 return n
 
         default = recursion(data, default_lang, True)
+        default['lang'] = default_lang
         root = { default_lang: default }
-        for lang in (set(lang_keys) - set([default_lang])):
-            root[lang] = recursion(data, lang)
+        for lang in (lang_keys - set([default_lang])):
+            config = recursion(data, lang)
+            config['lang'] = lang
+            root[lang] = config
 
         LOGGER.debug('Processed %d tags.', len(tags_processed))
         return root

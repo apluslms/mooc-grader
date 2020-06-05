@@ -30,8 +30,15 @@ def index(request):
     courses = config.courses()
     if request.is_ajax():
         return JsonResponse({
-            "ready": True,
-            "courses": _filter_fields(courses, ["key", "name"])
+            'ready': True,
+            'courses': [
+                {
+                    'key': course['key'],
+                    'name': course['name'],
+                    'languages': course['language'],
+                }
+                for course in courses
+            ],
         })
     return render(request, 'access/ready.html', {
         "courses": courses,
@@ -43,14 +50,31 @@ def course(request, course_key):
     '''
     Signals that the course is ready to be graded and lists available exercises.
     '''
-    (course, exercises) = config.exercises(course_key)
+    (course, exercises) = config.exercises(course_key, lang='_root')
     if course is None:
         raise Http404()
     if request.is_ajax():
+        map_ = {}
+        all_ = []
+        for exercise_root in exercises:
+            for lang, exercise in exercise_root.items():
+                key = exercise['key']
+                entry = map_.get(key)
+                if entry:
+                    entry['title'][lang] = exercise['title']
+                    entry['languages'].append(lang)
+
+                else:
+                    map_[key] = entry = {
+                        'key': key,
+                        'title': {lang: exercise['title']},
+                        'languages': [lang]
+                    }
+                    all_.append(entry)
         return JsonResponse({
-            "ready": True,
-            "course_name": course["name"],
-            "exercises": _filter_fields(exercises, ["key", "title"]),
+            'ready': True,
+            'course_name': course['name'],
+            'exercises': all_,
         })
     render_context = {
         'course': course,
@@ -202,7 +226,6 @@ def aplus_json(request, course_key):
         "enrollment_start",
         "head_urls",
         "index_mode",
-        "lang",
         "lifesupport_time",
         "module_numbering",
         "name",
@@ -210,8 +233,7 @@ def aplus_json(request, course_key):
         "start",
         "view_content_to",
     ])
-    if "language" in course:
-        data["lang"] = course["language"]
+    data['lang'] = course['languages']
 
     def children_recursion(parent):
         if not "children" in parent:
@@ -290,30 +312,9 @@ def _get_course_exercise_lang(course_key, exercise_key, lang_code):
     (course, exercise) = config.exercise_entry(course_key, exercise_key, lang=lang_code)
     if course is None or exercise is None:
         raise Http404()
-    if not lang_code:
-        lang_code = course.get('lang', DEFAULT_LANG)
+    lang_code = exercise['lang']
     translation.activate(lang_code)
     return (course, exercise, lang_code)
-
-
-def _filter_fields(dict_list, pick_fields):
-    '''
-    Filters picked fields from a list of dictionaries.
-
-    @type dict_list: C{list}
-    @param dict_list: a list of dictionaries
-    @type pick_fields: C{list}
-    @param pick_fields: a list of field names
-    @rtype: C{list}
-    @return: a list of filtered dictionaries
-    '''
-    result = []
-    for entry in dict_list:
-        new_entry = {}
-        for name in pick_fields:
-            new_entry[name] = entry[name]
-        result.append(new_entry)
-    return result
 
 
 def _copy_fields(dict_item, pick_fields):

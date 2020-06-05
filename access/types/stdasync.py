@@ -19,23 +19,25 @@ Functions take arguments:
     @return: a response
 
 '''
-import logging
 import copy
-import os
 import json
+import logging
+import os
+import re
+from collections import OrderedDict
+
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from django.utils import translation
 
 from util.files import create_submission_dir, save_submitted_file, \
     clean_submission_dir, write_submission_file, write_submission_meta
-from util.http import not_modified_since, not_modified_response, cache_headers
+from util.http import cached_view_type
 from util.personalized import select_generated_exercise_instance, \
     user_personal_directory_path
 from util.shell import invoke
-from util.templates import render_configured_template, render_template, \
-    template_to_str
+from util.templates import render_configured_template, render_template
 from .auth import make_hash, get_uid
 from ..config import ConfigError, DIR
 
@@ -43,97 +45,190 @@ from ..config import ConfigError, DIR
 LOGGER = logging.getLogger('main')
 
 
-def acceptPost(request, course, exercise, post_url):
-    '''
-    Presents a template and accepts post value for grading queue.
-    '''
-    if not_modified_since(request, exercise):
-        return not_modified_response(request, exercise)
+def _parse_fields_and_files(exercise):
+    fields = OrderedDict()
 
-    fields = copy.deepcopy(exercise.get("fields", []))
-    if request.method == "POST":
+    for i, field in enumerate(exercise.get('fields', ())):
+        try:
+            name = field['name']
+        except KeyError:
+            raise ConfigError("Invalid field, missing name at index %d." % (i,))
+        while name in fields:
+            # NOTE: this is an ugly hack. The problem of duplicate names will
+            # be fixed when yaml files are validated at the course compile time
+            name += '_'
 
-        # Parse submitted values.
-        miss = False
-        for entry in fields:
-            entry["value"] = request.POST.get(entry["name"], "").strip()
-            if "required" in entry and entry["required"] and not entry["value"]:
-                entry["missing"] = True
-                miss = True
-        if miss:
-            result = { "fields": fields, "rejected": True }
+        ftype = field.get('type', None)
+        if ftype is None:
+            ftype = 'text' if 'rows' in field else 'string'
+        if ftype not in ('file', 'number', 'integer', 'string', 'text'):
+            raise ConfigError("Invalid field type '%s' for field '%s'." % (ftype, name))
+
+        fields[name] = entry = {
+            k: field[k] for k in (
+                'title',
+                'more',
+                'required',
+                'pattern',
+                'rows',
+                'filename',
+                'accept',
+            ) if k in field
+        }
+        entry['name'] = name
+        entry['type'] = ftype
+
+    for i, field in enumerate(exercise.get('files', ())):
+        try:
+            filename = field['name']
+        except KeyError:
+            raise ConfigError("Invalid file, missing name at index %d." % (i,))
+        name = field.get('field', filename)
+        entry = fields.setdefault(name, {})
+        entry['name'] = name
+        entry['type'] = 'file'
+        entry['filename'] = filename
+        for k in ('title', 'required', 'accept'):
+            if k in field:
+                entry[k] = field[k]
+
+    seen_filenames = set()
+    duplicate_filenames = []
+    for name, field in fields.items():
+        ftype = field['type']
+
+        filename = field.setdefault('filename', name)
+        if filename in seen_filenames:
+            duplicate_filenames.append('(%s -> %s)' % (name, filename))
         else:
+            seen_filenames.add(filename)
 
-            # Store submitted values.
-            sdir = create_submission_dir(course, exercise)
-            for entry in fields:
-                write_submission_file(sdir, entry["name"], entry["value"])
-            return _acceptSubmission(request, course, exercise, post_url, sdir)
+        if field.get('required', None) is None:
+            field['required'] = ftype == 'file'
+
+        pattern = field.get('pattern', None)
+        if pattern is None:
+            if ftype == 'number':
+                pattern = r'[-+]?[0-9]*(\.[0-9]+)?([eE][-+]?[0-9]+)?'
+            elif ftype == 'integer':
+                pattern = r'[-+]?[0-9]*'
+        field['pattern'] = pattern
+        field['pattern_re'] = re.compile(r'^' + pattern + r'$') if pattern else None
+
+        if ftype == 'file' and not field.get('accept', None):
+            ext = field['filename'].rpartition('.')[2]
+            if ext:
+                field['accept'] = '.' + ext
+
+    if not fields:
+        raise ConfigError("No fields parsed from `fields` or `files`. Have you configured either?")
+    if duplicate_filenames:
+        raise ConfigError("Multiple fields point to the same filename: %s" % (', '.join(duplicate_filenames),))
+    return tuple(fields.values())
+
+
+def _parse_post_and_validate(request, fields):
+    # gather result used by templates, non-empty means there are errors!
+    result = {}
+    # gather list of tuples (error, value), used like: zip(values, fields)
+    values = []
+    # gather list of tuples (filename, file object)
+    files = []
+
+    # Parse POST fields
+    for field in fields:
+        name = field['name']
+        ftype = field['type']
+        error = None
+        if ftype == 'file':
+            value = name in request.FILES
+            if value:
+                files.append((field['filename'], request.FILES[name]))
+            elif field['required']:
+                error = 'missing'
+        else:
+            value = request.POST.get(name, '').strip()
+            if value:
+                if ftype == 'number':
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        error = 'invalid'
+                elif ftype == 'integer':
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        error = 'invalid'
+                elif field['pattern'] and field['pattern_re'].match(value) is None:
+                    error = 'invalid'
+            elif field['required']:
+                error = 'missing'
+        values.append((error, value))
+        if error:
+            # error -> post should be rejected
+            if ftype == 'file':
+                result['missing_files'] = True
+            else:
+                result['invalid_fields'] = True
+
+    return result, values, files
+
+
+@cached_view_type
+def acceptAsync(request, course, exercise, post_url, *, template=None):
+    if template is None:
+        template = 'access/accept_async_default.html'
+
+    if '__fields__' in exercise:
+        field_defs = exercise['__fields__']
     else:
-        result = { "fields": fields }
+        exercise['__fields__'] = field_defs = _parse_fields_and_files(exercise)
 
-    return cache_headers(
-        render_configured_template(
-            request, course, exercise, post_url,
-            'access/accept_post_default.html', result
-        ),
-        request,
-        exercise
-    )
+    # for GET and HEAD return cached form
+    if request.method != "POST":
+        result = {'fields': field_defs}
+        return render_configured_template(
+            request, course, exercise, post_url, template, result)
 
+    # for POST, validate data: valid -> asyncjob; invalid -> non-cached form
+    result, values, files = _parse_post_and_validate(request, field_defs)
 
-def acceptFiles(request, course, exercise, post_url):
-    '''
-    Presents a template and accepts files for grading queue.
-    '''
-    if not_modified_since(request, exercise):
-        return not_modified_response(request, exercise)
+    if exercise.get('required_number_of_files', 0) > len(files):
+        result['missing_files'] = True
 
-    result = None
+    # When form data is invalid, return the form (no cache)
+    if result:
+        result['rejected'] = True
+        # merge field definitions and posted values..
+        result['fields'] = [
+            dict(error=error, value=value, **field)
+            for field, (error, value) in zip(field_defs, values)
+        ]
+        return render_configured_template(
+            request, course, exercise, post_url, template, result)
 
-    # Receive post.
-    if request.method == "POST" and "files" in exercise:
+    # When form data is valid, proceed
+    sdir = create_submission_dir(course, exercise)
+    for field, (error, value) in zip(field_defs, values):
+        if field['type'] != 'file':
+            write_submission_file(sdir, field['filename'], str(value))
+    for filename, fileobj in files:
+        save_submitted_file(sdir, filename, fileobj)
 
-        # Confirm that all required files were submitted.
-        files_submitted = [] # exercise["files"] entries for the files that were really submitted
-        for entry in exercise["files"]:
-            # by default, all fields are required
-            required = ("required" not in entry or entry["required"])
-            if entry["field"] not in request.FILES:
-                if required:
-                    result = { "rejected": True, "missing_files": True }
-                    break
-            else:
-                files_submitted.append(entry)
-
-        if result is None:
-            if "required_number_of_files" in exercise and \
-                    exercise["required_number_of_files"] > len(files_submitted):
-                result = { "rejected": True, "missing_files": True }
-            else:
-                # Store submitted files.
-                sdir = create_submission_dir(course, exercise)
-                for entry in files_submitted:
-                    save_submitted_file(sdir, entry["name"], request.FILES[entry["field"]])
-                return _acceptSubmission(request, course, exercise, post_url, sdir)
-
-    return cache_headers(
-        render_configured_template(
-            request, course, exercise, post_url,
-            "access/accept_files_default.html", result
-        ),
-        request,
-        exercise
-    )
+    return _acceptSubmission(request, course, exercise, post_url, sdir)
 
 
+# Old interfaces merged by acceptAsync
+acceptFiles = acceptAsync
+acceptGeneralForm = acceptAsync
+acceptPost = acceptAsync
+
+
+@cached_view_type
 def acceptGitAddress(request, course, exercise, post_url):
     '''
     Presents a template and accepts Git URL for grading.
     '''
-    if not_modified_since(request, exercise):
-        return not_modified_response(request, exercise)
-
     result = None
 
     # Receive post.
@@ -165,14 +260,9 @@ def acceptGitAddress(request, course, exercise, post_url):
             write_submission_file(sdir, "gitsource", source)
             return _acceptSubmission(request, course, exercise, post_url, sdir)
 
-    return cache_headers(
-        render_configured_template(
-            request, course, exercise, post_url,
-            "access/accept_git_default.html", result
-        ),
-        request,
-        exercise
-    )
+    return render_configured_template(
+        request, course, exercise, post_url,
+        "access/accept_git_default.html", result)
 
 
 def acceptGitUser(request, course, exercise, post_url):
@@ -201,67 +291,6 @@ def acceptGitUser(request, course, exercise, post_url):
             "hash": make_hash(auth_secret, user)
         })
 
-
-def acceptGeneralForm(request, course, exercise, post_url):
-    '''
-    Presents a template and accepts form containing any input types 
-    (text, file, etc) for grading queue.
-    '''
-    if not_modified_since(request, exercise):
-        return not_modified_response(request, exercise)
-
-    fields = copy.deepcopy(exercise.get("fields", []))
-    result = None
-    miss = False
-    
-    if request.method == "POST":
-        # Parse submitted values.
-        for entry in fields:        
-            entry["value"] = request.POST.get(entry["name"], "").strip()
-            if "required" in entry and entry["required"] and not entry["value"]:
-                entry["missing"] = True
-                miss = True
-        
-        files_submitted = [] 
-        if "files" in exercise:
-            # Confirm that all required files were submitted.
-            #files_submitted = [] # exercise["files"] entries for the files that were really submitted
-            for entry in exercise["files"]:
-                # by default, all fields are required
-                required = ("required" not in entry or entry["required"])
-                if entry["field"] not in request.FILES:
-                    if required:
-                        result = { "rejected": True, "missing_files": True }
-                        break
-                else:
-                    files_submitted.append(entry)
-                   
-        if miss:
-            result = { "fields": fields, "rejected": True }
-        elif result is None:
-            # Store submitted values.
-            sdir = create_submission_dir(course, exercise)
-            for entry in fields:
-                write_submission_file(sdir, entry["name"], entry["value"])
-                               
-            if "files" in exercise:
-                if "required_number_of_files" in exercise and \
-                        exercise["required_number_of_files"] > len(files_submitted):
-                    result = { "rejected": True, "missing_files": True }
-                else:
-                    # Store submitted files.
-                    for entry in files_submitted:
-                        save_submitted_file(sdir, entry["name"], request.FILES[entry["field"]])             
-            return _acceptSubmission(request, course, exercise, post_url, sdir)
-    
-    return cache_headers(
-        render_configured_template(
-            request, course, exercise, post_url,
-            "access/accept_general_default.html", result
-        ),
-        request,
-        exercise
-    )    
 
 def _requireContainer(exercise):
     c = exercise.get("container", {})

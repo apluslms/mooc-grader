@@ -6,6 +6,8 @@ import logging
 import requests
 import time
 import urllib
+from functools import wraps
+
 from django.conf import settings
 from django.http import HttpResponseNotModified
 from django.utils.http import http_date, parse_http_date_safe
@@ -128,3 +130,19 @@ def not_modified_since(request, exercise):
 
 def not_modified_response(request, exercise):
     return cache_headers(HttpResponseNotModified(), request, exercise)
+
+
+def cached_view_type(func):
+    @wraps(func)
+    def wrapped(request, course, exercise, *args, **kwargs):
+        if not_modified_since(request, exercise):
+            return not_modified_response(request, exercise)
+
+        response = func(request, course, exercise, *args, **kwargs)
+
+        if response.streaming or response.status_code not in (200, 304):
+            return response
+        if any(response.has_header(x) for x in ('Cache-Control', 'Last-Modified', 'Expires')):
+            return response
+        return cache_headers(response, request, exercise)
+    return wrapped

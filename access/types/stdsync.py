@@ -120,7 +120,10 @@ def createForm(request, course, exercise, post_url):
     if not form.randomized and not_modified_since(request, exercise):
         return not_modified_response(request, exercise)
 
-    result = { "form": form, "rejected": True }
+    result = {
+        'form': form,
+        'rejected': request.method == 'POST',
+    }
 
     # Grade valid form posts.
     if form.is_valid():
