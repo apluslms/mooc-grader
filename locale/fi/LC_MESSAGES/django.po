@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-17 13:22+0000\n"
+"POT-Creation-Date: 2020-07-21 06:57+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Saara Satokangas <saara.satokangas@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -34,7 +34,7 @@ msgstr ""
 #: access/templates/access/accept_general_form.html:42
 #: access/templates/access/accept_git_form.html:16
 #: access/templates/access/accept_post_form.html:17
-#: access/templates/access/graded_form.html:173
+#: access/templates/access/graded_form.html:194
 msgid "Submit"
 msgstr "Lähetä"
 
@@ -331,17 +331,25 @@ msgstr[1] ""
 "\n"
 "%(points)s pistettä"
 
-#: access/templates/access/graded_form.html:155
-msgid "Correct answer"
-msgstr "Oikea vastaus"
+#: access/templates/access/graded_form_feedback.html:9
+msgid "Above you can see which would have been the correct options."
+msgstr "Yllä näet oikeat vastaukset."
 
-#: access/templates/access/graded_form_feedback.html:22
+#: access/templates/access/graded_form_feedback.html:11
+msgid "Neutral options which do not affect grading are marked with a question mark."
+msgstr "Kysymysmerkillä varustetut vaihtoehdot eivät vaikuta kokonaispisteisiin."
+
+#: access/templates/access/graded_form_feedback.html:14
+msgid "Correct answer is"
+msgstr "Oikea vastaus on"
+
+#: access/templates/access/graded_form_feedback.html:37
 msgid "Correct!"
 msgstr "Oikein!"
 
-#: access/templates/access/graded_form_feedback.html:25
+#: access/templates/access/graded_form_feedback.html:40
 msgid "Your answer to this question is not correct"
-msgstr "Vastaus on väärin"
+msgstr "Vastauksesi on väärin"
 
 #: access/templates/access/personalized_content_default.html:6
 msgid "Download"
@@ -407,14 +415,14 @@ msgstr ""
 "Pahoittelemme häiriötä.\n"
 "Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."
 
-#: access/types/forms.py:690
-msgid "Multiple choices are selectable."
-msgstr "Voit valita useita vaihtoehtoja."
+#: access/types/forms.py:646
+msgid "Multiple choices are selectable"
+msgstr "Voit valita useita vaihtoehtoja"
 
-#: access/types/forms.py:808
+#: access/types/forms.py:832
 msgid "Multiple correct answers accepted."
 msgstr "Useita oikeita vastauksia."
 
-#: access/types/forms.py:812
+#: access/types/forms.py:836
 msgid "Correct parts in your answer: "
 msgstr "Oikeat osat vastauksessasi: "

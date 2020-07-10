@@ -14,7 +14,8 @@
 		{% else %}
 
 		{% if not field.field.row_label or field.field.open_table %}
-		<div class="{{ field.field.html_class }} {% if field.errors %} has-error{% endif %}">
+		<!-- Individual question heading (individual form-group) -->
+		<div class="question-area {{ field.field.html_class }} {% if field.errors %} has-error{% endif %}">
 
 			{% if field.field.required %}<span class="required">*</span>{% endif %}
 
@@ -98,20 +99,25 @@
 			{% elif field.field.choice_list %}
 			{% for choice in field %}
 			<div class="{{ field.field.type }}">
-				<label>
-					{% if choice.choice_value in field.field.correct %}
-					<span data-aplus-once="yes" class="correct-option glyphicon glyphicon-ok" aria-hidden="true"></span>
-					{% elif choice.choice_value in field.field.neutral %}
-					<span data-aplus-once="yes" class="neutral-option glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-					{% endif %}
+				<label for="{{ choice.id_for_label }}" class="{% if choice.choice_value in choice.value %}option-checked{% endif %}">
 					{{ choice.tag }}
 					{{ choice.choice_label|safe }}
 				</label>
+				{% if not field.field.answer_correct %}
+					{# Marking the correct radio- or checkbox-options for after max-submissions, if "reveal-model" set to true and answer is not correct #}
+					{% if choice.choice_value in field.field.correct %}
+						<i data-aplus-once="yes" class="quiz1-icon-correct" aria-hidden="true"></i>
+					{% elif choice.choice_value in field.field.neutral %}
+						<i data-aplus-once="yes" class="quiz1-icon-neutral" aria-hidden="true"></i>
+					{% endif %}
+					{# end of correct answer #}
+				{% endif %}
+
 				{% if field.field.type == "checkbox" and choice.choice_value in choice.value and field.field.hints %}
 					<div>
 						{% with hint=field.field.hints|find_checkbox_hints:choice.choice_value %}
 							{% if hint %}
-								<p class="help-block help-block-checkbox">
+								<p class="question-hint hint-checkbox">
 									{{ hint|safe }}
 								</p>
 							{% endif %}
@@ -126,40 +132,25 @@
 
 			{% else %}
 			{{ field }}
-
 			{% if field.errors %}
 				{% include "access/field_errors.html" with errors=field.errors %}
 			{% endif %}
-
-			{% if field.field.correct %}
-				<div data-aplus-once="yes" class="question-feedback">
-					<p class="help-block">
-						{% trans "Correct answer" %}:
-						{{ field.field.correct }}
-					</p>
-				</div>
 			{% endif %}
 
-			{% endif %}
+		{% if result.accepted and not result.form.show_correct and not field.field.row_label or field.field.close_table %}
+			<div>
+				{% if field.field.type == "checkbox" %}
+					{% include "access/graded_form_feedback.html" with field=field.field hints=field.field.hints|find_common_hints:field.value %}
+				{% else %}
+					{% include "access/graded_form_feedback.html" with field=field.field hints=field.field.hints %}
+				{% endif %}
+			</div>
+		{% endif %}
 
-		{% if not field.field.row_label or field.field.close_table %}
-			{% if field.field.hints %}
-				<div class="question-feedback">
-					{% if field.field.type == "checkbox" %}
-						{% for hint in field.field.hints|find_common_hints:field.value %}
-							<p class="help-block">{{ hint|safe }}</p>
-						{% endfor %}
-					{% else %}
-						{% for hint in field.field.hints %}
-							<p class="help-block">{{ hint|safe }}</p>
-						{% endfor %}
-					{% endif %}
-				</div>
-			{% endif %}
+
 		</div>
 		{% endif %}
 
-		{% endif %}
 
 	{% if field.field.close_set %}
 	</fieldset>
