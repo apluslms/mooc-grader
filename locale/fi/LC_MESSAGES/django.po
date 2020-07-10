@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-01 15:19+0000\n"
+"POT-Creation-Date: 2020-07-17 13:22+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
-"Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
+"Last-Translator: Saara Satokangas <saara.satokangas@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
 "Language: fi_FI\n"
 "MIME-Version: 1.0\n"
@@ -331,9 +331,17 @@ msgstr[1] ""
 "\n"
 "%(points)s pistettä"
 
-#: access/templates/access/graded_form.html:136
+#: access/templates/access/graded_form.html:155
 msgid "Correct answer"
 msgstr "Oikea vastaus"
+
+#: access/templates/access/graded_form_feedback.html:22
+msgid "Correct!"
+msgstr "Oikein!"
+
+#: access/templates/access/graded_form_feedback.html:25
+msgid "Your answer to this question is not correct"
+msgstr "Vastaus on väärin"
 
 #: access/templates/access/personalized_content_default.html:6
 msgid "Download"

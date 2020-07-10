@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load access %}
 <form method="post" action="{{ post_url }}"{% if result.form.multipart %} enctype="multipart/form-data"{% endif %} class="aplus-quiz1">
 	{% for field in result.form %}
 	{% if field.field.open_set %}
@@ -113,6 +114,17 @@
 					{{ choice.tag }}
 					{{ choice.choice_label|safe }}
 				</label>
+				{% if field.field.type == "checkbox" and choice.choice_value in choice.value and field.field.hints %}
+					<div>
+						{% with hint=field.field.hints|find_checkbox_hints:choice.choice_value %}
+							{% if hint %}
+								<p class="help-block help-block-checkbox">
+									{{ hint|safe }}
+								</p>
+							{% endif %}
+						{% endwith %}
+					</div>
+				{% endif %}
 			</div>
 			{% endfor %}
 			{% if field.errors %}
@@ -131,23 +143,29 @@
 			{% endif %}
 
 			{% if field.field.correct %}
-			<ul data-aplus-once="yes" class="question-feedback-item">
-				<li class="question-feedback-item">
-					{% trans "Correct answer" %}:
-					{{ field.field.correct }}
-				</li>
-			</ul>
+				<div data-aplus-once="yes" class="question-feedback">
+					<p class="help-block">
+						{% trans "Correct answer" %}:
+						{{ field.field.correct }}
+					</p>
+				</div>
 			{% endif %}
 
 			{% endif %}
 
 		{% if not field.field.row_label or field.field.close_table %}
 			{% if field.field.hints %}
-			<ul class="question-feedback">
-				{% for hint in field.field.hints %}
-				<li class="question-feedback-item">{{ hint|safe }}</li>
-				{% endfor %}
-			</ul>
+				<div class="question-feedback">
+					{% if field.field.type == "checkbox" %}
+						{% for hint in field.field.hints|find_common_hints:field.value %}
+							<p class="help-block">{{ hint|safe }}</p>
+						{% endfor %}
+					{% else %}
+						{% for hint in field.field.hints %}
+							<p class="help-block">{{ hint|safe }}</p>
+						{% endfor %}
+					{% endif %}
+				</div>
 			{% endif %}
 		</div>
 		{% endif %}
