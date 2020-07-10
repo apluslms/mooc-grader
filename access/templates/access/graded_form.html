@@ -14,16 +14,16 @@
 		{% else %}
 
 		{% if not field.field.row_label or field.field.open_table %}
-		<div class="{{ field.field.html_class }} {% if field.errors %} has-error{% elif not field.field.group_errors and field.field.name in result.error_fields %} has-error{% endif %}">
+		<div class="{{ field.field.html_class }} {% if field.errors %} has-error{% endif %}">
 
 			{% if field.field.required %}<span class="required">*</span>{% endif %}
 
 			{% if field.label %}
-			{% if field.field.choice_list %}
-			<label>{{ field.label }}</label>
-			{% else %}
-			{{ field.label_tag }}
-			{% endif %}
+				{% if field.field.choice_list %}
+					<label class="control-label">{{ field.label }}</label>
+				{% else %}
+					<label class="control-label">{{ field.label_tag }}</label>
+				{% endif %}
 			{% endif %}
 
 			{% if not field.field.group_errors %}
@@ -89,14 +89,7 @@
 			{% endif %}
 
 			{% if field.errors %}
-			<tr>
-				<td>&nbsp;</td>
-				<td colspan="{{ field|length }}">
-					<div class="alert alert-danger">
-						{{ field.errors|safe }}
-					</div>
-				</td>
-			</tr>
+				{% include "access/field_errors.html" with errors=field.errors type="table" %}
 			{% endif %}
 			{% if field.field.close_table %}
 			</table>
@@ -128,18 +121,14 @@
 			</div>
 			{% endfor %}
 			{% if field.errors %}
-			<div class="alert alert-danger">
-				{{ field.errors|safe }}
-			</div>
+				{% include "access/field_errors.html" with errors=field.errors %}
 			{% endif %}
 
 			{% else %}
 			{{ field }}
 
 			{% if field.errors %}
-			<div class="alert alert-danger">
-				{{ field.errors|safe }}
-			</div>
+				{% include "access/field_errors.html" with errors=field.errors %}
 			{% endif %}
 
 			{% if field.field.correct %}
