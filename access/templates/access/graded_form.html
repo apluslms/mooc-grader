@@ -1,21 +1,30 @@
 {% load i18n %}
 {% load access %}
-<form method="post" action="{{ post_url }}"{% if result.form.multipart %} enctype="multipart/form-data"{% endif %} class="aplus-quiz1">
+<form
+	method="post"
+	action="{{ post_url }}"
+	{% if result.form.multipart %} enctype="multipart/form-data"{% endif %}
+	class="aplus-quiz1"
+>
 	{% for field in result.form %}
+
 	{% if field.field.open_set %}
-	<fieldset id="{{ field.field.open_set }}"{% if result.accepted and field.field.group_errors %} class="alert {% if field.field.open_set in result.error_groups %}alert-danger{% else %}alert-success{% endif %}"{% endif %}>
+	<!-- Beginning of all questions -->
+		<fieldset id="{{ field.field.open_set }}"{% if result.accepted and field.field.group_errors %} class="alert {% if field.field.open_set in result.error_groups %}alert-danger{% else %}alert-success{% endif %}"{% endif %}>
 		{% if field.field.set_title %}<legend>{{ field.field.set_title }}</legend>{% endif %}
 	{% endif %}
 
 		{% if field.field.type == "static" %}
-		{{ field.field.more|safe }}
+		<div class="question-description">
+			{{ field.field.more|safe }}
+		</div>
 		{% elif field.field.type == "hidden" %}
 			{{ field }}
 		{% else %}
 
 		{% if not field.field.row_label or field.field.open_table %}
 		<!-- Individual question heading (individual form-group) -->
-		<div class="question-area {{ field.field.html_class }} {% if field.errors %} has-error{% endif %}">
+		<div class="question-area {{ field.field.html_class }} {% if field.errors %}has-error{% endif %}">
 
 			{% if field.field.required %}<span class="required">*</span>{% endif %}
 
@@ -29,6 +38,7 @@
 
 			{% if not field.field.group_errors %}
 			{% if result.accepted %}
+			<!-- Points badge -->
 				{% if not exercise.feedback or field.field.points > 0 %}
 				<span class="badge badge-{% if field.field.grade_points > 0 and field.field.grade_points < field.field.max_points %}warning{% elif field.field.name in result.error_fields %}danger{% else %}success{% endif %}">
 					{{ field.field.grade_points }} / {{ field.field.max_points }}
@@ -53,16 +63,26 @@
 				{% endblocktrans %}
 				</span>
 				{% endif %}
+
+			<!-- End of points badge -->
 			{% endif %}
 			{% endif %}
 
 			{% if field.field.more %}
-			{{ field.field.more|safe }}
+			<!-- Description of a question -->
+			<div class="question-description">
+				{{ field.field.more|safe }}
+			</div>
+			<!-- End of description -->
 			{% endif %}
+
+
+		<!-- End of an individual question heading -->
 		{% endif %}
 
 			{% if field.field.row_label %}
 			{% if field.field.open_table %}
+			<!-- An input field: Table-checkbox or table-radio-field -->
 			<table class="table">
 			<tr>
 				<td>&nbsp;</td>
@@ -94,9 +114,11 @@
 			{% endif %}
 			{% if field.field.close_table %}
 			</table>
+			<!-- End of a table-field -->
 			{% endif %}
 
 			{% elif field.field.choice_list %}
+			<!-- An input-field: Checkbox- or radio-field -->
 			{% for choice in field %}
 			<div class="{{ field.field.type }}">
 				<label for="{{ choice.id_for_label }}" class="{% if choice.choice_value in choice.value %}option-checked{% endif %}">
@@ -129,15 +151,18 @@
 			{% if field.errors %}
 				{% include "access/field_errors.html" with errors=field.errors %}
 			{% endif %}
-
+			<!-- End of a checkbox- or radio-field -->
 			{% else %}
+			<!-- An input-field: (mainly) Text-field -->
 			{{ field }}
 			{% if field.errors %}
 				{% include "access/field_errors.html" with errors=field.errors %}
 			{% endif %}
+			<!-- End of a text-field -->
 			{% endif %}
 
 		{% if result.accepted and not result.form.show_correct and not field.field.row_label or field.field.close_table %}
+			<!-- Question feedback -->
 			<div>
 				{% if field.field.type == "checkbox" %}
 					{% include "access/graded_form_feedback.html" with field=field.field hints=field.field.hints|find_common_hints:field.value %}
@@ -145,15 +170,16 @@
 					{% include "access/graded_form_feedback.html" with field=field.field hints=field.field.hints %}
 				{% endif %}
 			</div>
+			<!-- End of question feedback -->
 		{% endif %}
 
 
 		</div>
 		{% endif %}
 
-
 	{% if field.field.close_set %}
-	</fieldset>
+	<!-- End of all questions -->
+		</fieldset>
 	{% endif %}
 	{% if field.field.randomized and not result.accepted %}
 	<input type="hidden" name="{{ field.field.name }}_sample" value="{{ field.field.random_sample }}" />
