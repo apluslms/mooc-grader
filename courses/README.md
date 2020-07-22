@@ -154,6 +154,9 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 		defines how many times the student may submit before the personalized exercise is
 		regenerated (the exercise instance is changed to another one). If unset,
 		the exercise is never regenerated.
+	* `model_files`: It is a list of model answers that are available only after the deadline has passed.
+		The `model_files` take file paths as input. These paths are relative to the root of the course repository,
+		e.g., `exercises/hello_world/model.py`.
 
 	Rest of the attributes are exercise type specific.
 
