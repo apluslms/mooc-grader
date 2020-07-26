@@ -238,19 +238,6 @@ class GradedForm(forms.Form):
         if self.disabled:
             args['widget'].attrs['disabled'] = 'disabled'
 
-        if args['required'] and (
-            widget_class is not forms.CheckboxSelectMultiple or len(choices) == 1
-        ):
-            # The required HTML attribute should not be set to a question with
-            # multiple checkboxes since the browser would require that the user
-            # selects every checkbox.
-            # Note: newer Django versions include the required HTML attribute
-            # automatically when the "required" parameter is given to the Field
-            # constructor (like is done here with the args variable).
-            # When Django is upgraded, we don't need to set the "required" attr
-            # to the widget here anymore.
-            args['widget'].attrs['required'] = True
-
         name = self.field_name(i, config)
         selected_choices = choices
         correct_choices = correct
