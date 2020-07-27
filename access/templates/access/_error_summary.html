@@ -1,0 +1,18 @@
+{% load i18n %}
+
+
+<div class="error-summary">
+	<div class="error-summary__text">
+		<h4>{% trans "Submission failed" %}</h4>
+		<p>{% trans "Check your answers before trying again:" %}</p>
+		{% for field in result.form %}
+			{% if field.errors %}
+				<p>{{ field.label }}:
+				{% for error in field.errors %}
+					{{ error }}
+				{% endfor %}
+				</p>
+			{% endif %}
+		{% endfor %}
+	</div>
+</div>

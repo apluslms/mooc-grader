@@ -4,18 +4,20 @@
 {% block exercise %}
 
 {% if result.accepted and exercise.accepted_message %}
-  <div class="alert alert-default">
-    <p>{{ exercise.accepted_message|safe }}</p>
-  </div>
+	<div class="alert alert-default">
+		<p>{{ exercise.accepted_message|safe }}</p>
+	</div>
+{% elif result.form.errors %}
+	{% include "access/_error_summary.html" %}
 {% endif %}
 
 {% if exercise.instructions %}
 <div class="instructions">
-  {{ exercise.instructions|safe }}
+	{{ exercise.instructions|safe }}
 </div>
 {% endif %}
 {% if exercise.instructions_file %}
-  {% include exercise.instructions_file %}
+	{% include exercise.instructions_file %}
 {% endif %}
 
 {% include 'access/graded_form.html' %}
