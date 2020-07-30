@@ -69,8 +69,11 @@ exercises can be tested from command line.
 On a server, one can install mooc-grader for a specific grader
 user account.
 
-    sudo useradd -mUrd /srv/grader grader
-    cd
+    sudo adduser --system --group \
+      --shell /bin/bash --home /srv/grader \
+      --gecos "A-plus mooc-gracer service" \
+      grader
+    su - grader
 
 **Then follow the "Installing for development" and continue from here.**
 
