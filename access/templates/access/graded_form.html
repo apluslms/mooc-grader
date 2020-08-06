@@ -10,7 +10,7 @@
 
 	{% if field.field.open_set %}
 	<!-- Beginning of all questions -->
-		<fieldset id="{{ field.field.open_set }}"{% if result.accepted and field.field.group_errors %} class="alert {% if field.field.open_set in result.error_groups %}alert-danger{% else %}alert-success{% endif %}"{% endif %}>
+		<fieldset id="{{ field.field.open_set }}">
 		{% if field.field.set_title %}<legend>{{ field.field.set_title }}</legend>{% endif %}
 	{% endif %}
 
