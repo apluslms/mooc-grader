@@ -1,0 +1,21 @@
+{% load i18n %}
+
+
+{% if type == "table" %}
+	<tr>
+		<td>&nbsp;</td>
+		<td colspan="{{ field|length }}">
+			{% for error in errors %}
+				<p class="error-text">
+					{{ error|safe }}
+				</p>
+			{% endfor %}
+		</td>
+	</tr>
+{% else %}
+	{% for error in errors %}
+		<p class="error-text">
+			{{ error|safe }}
+		</p>
+	{% endfor %}
+{% endif %}
