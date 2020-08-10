@@ -34,10 +34,10 @@ class GradedForm(forms.Form):
         if "exercise" not in kwargs:
             raise ConfigError("Missing exercise configuration from form arguments.")
         self.exercise = kwargs.pop("exercise")
-        self.show_correct = kwargs.pop('show_correct') if 'show_correct' in kwargs else False
-        self.show_correct_once = kwargs.pop('show_correct_once') if 'show_correct_once' in kwargs else False
+        self.model_answer = kwargs.pop('model_answer') if 'model_answer' in kwargs else False
+        self.reveal_correct = kwargs.pop('reveal_correct') if 'reveal_correct' in kwargs else False
         if not self.exercise.get('reveal_model_at_max_submissions', False):
-            self.show_correct_once = False
+            self.reveal_correct = False
         self.request = kwargs.pop('request') if 'request' in kwargs else None
         kwargs['label_suffix'] = ''
 
@@ -52,7 +52,7 @@ class GradedForm(forms.Form):
 
         self.form_id = "exercise-{}-form".format(random_id)
         self.form_nonce = random_id
-        self.disabled = self.show_correct
+        self.disabled = self.model_answer
         self.randomized = False
         self.rng = random.Random()
         self.multipart = False
@@ -199,7 +199,7 @@ class GradedForm(forms.Form):
         choices, initial, correct = self.create_choices(config)
         for row in config.get('rows', []):
 
-            if self.show_correct:
+            if self.model_answer:
                 correct = []
                 corr = self.row_options(config, row)['options']
                 for i,choice in enumerate(choices):
@@ -252,7 +252,7 @@ class GradedForm(forms.Form):
                 )
             args['choices'] = selected_choices
 
-        if self.show_correct:
+        if self.model_answer:
             if correct:
                 args['initial'] = correct_choices if multiple else correct_choices[0]
             elif config.get('model', False):
@@ -281,7 +281,7 @@ class GradedForm(forms.Form):
         else:
             field.random_sample = ''
 
-        if self.show_correct_once:
+        if self.reveal_correct:
             if correct:
                 field.correct = correct
             elif config.get('model', False):

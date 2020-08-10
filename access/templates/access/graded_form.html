@@ -161,7 +161,7 @@
 			<!-- End of a text-field -->
 			{% endif %}
 
-		{% if result.accepted and not result.form.show_correct and not field.field.row_label or field.field.close_table %}
+		{% if result.accepted and not result.model_answer and not field.field.row_label or field.field.close_table %}
 			<!-- Question feedback -->
 			<div>
 				{% if field.field.type == "checkbox" %}
