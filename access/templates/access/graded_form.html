@@ -125,26 +125,26 @@
 					{{ choice.tag }}
 					{{ choice.choice_label|safe }}
 				</label>
-				{% if not field.field.answer_correct %}
-					{# Marking the correct radio- or checkbox-options for after max-submissions, if "reveal-model" set to true and answer is not correct #}
-					{% if choice.choice_value in field.field.correct %}
+				{% if result.form.reveal_correct or result.model_answer %}
+					{# Indicating the correct and neutral answers and hiding hints, if the form is a model answer #}
+					{% if choice.choice_value in field.field.correct and not field.field.answer_correct %}
 						<i data-aplus-once="yes" class="quiz1-icon-correct" aria-hidden="true"></i>
 					{% elif choice.choice_value in field.field.neutral %}
 						<i data-aplus-once="yes" class="quiz1-icon-neutral" aria-hidden="true"></i>
 					{% endif %}
 					{# end of correct answer #}
-				{% endif %}
-
-				{% if field.field.type == "checkbox" and choice.choice_value in choice.value and field.field.hints %}
-					<div>
-						{% with hint=field.field.hints|find_checkbox_hints:choice.choice_value %}
-							{% if hint %}
-								<p class="question-hint hint-checkbox">
-									{{ hint|safe }}
-								</p>
-							{% endif %}
-						{% endwith %}
-					</div>
+				{% else %}
+					{% if field.field.type == "checkbox" and choice.choice_value in choice.value and field.field.hints %}
+						<div>
+							{% with hint=field.field.hints|find_checkbox_hints:choice.choice_value %}
+								{% if hint %}
+									<p class="question-hint hint-checkbox">
+										{{ hint|safe }}
+									</p>
+								{% endif %}
+							{% endwith %}
+						</div>
+					{% endif %}
 				{% endif %}
 			</div>
 			{% endfor %}

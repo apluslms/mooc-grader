@@ -154,9 +154,14 @@ def createFormModel(request, course, exercise, parameter):
     form = GradedForm(None, exercise=exercise, model_answer=True)
     form.bind_initial()
     points,error_groups,error_fields = form.grade()
-    result = { "form": form, "accepted": True, "points": points,
-        "error_groups": error_groups, "error_fields": error_fields,
-        "model_answer": True }
+    result = {
+        "form": form,
+        "accepted": True,
+        "points": points,
+        "error_groups": error_groups,
+        "error_fields": error_fields,
+        "model_answer": True,
+    }
     return render_template(request, course, exercise, None,
         'access/graded_form.html', result)
 

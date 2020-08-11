@@ -1,36 +1,42 @@
 {% load i18n %}
 
 
-{# if model answer is not be shown to the user, possible hints and default messages of correctness are shown instead #}
-{% if hints and not field.correct %}
-	{% for hint in hints  %}
-		<p class="question-hint hint-general">
-			{{ hint|safe }}
-		</p>
-	{% endfor %}
-{% endif %}
-<p class="question-feedback">
-	{% if field.answer_correct %}
-		<i class="quiz1-icon-correct"  aria-hidden="true"></i>
-		<span class="feedback-text">{% trans "Correct!" %}</span>
-	{% else %}
-		<i class="quiz1-icon-incorrect" aria-hidden="true"></i>
-		<span class="feedback-text">
-			{% if not field.correct %}
-				{% trans "Incorrect" %}
-			{% else %}
-			{# if "reveal-model after max-submissions" is set to true and user's answer is not correct, the model answer is shown #}
-				<span data-aplus-once="yes">
-					{% if field.type == "checkbox" or field.type == "radio" %}
-						{% trans "Incorrect. You can check the correct options above." %}
-						{% if field.neutral %}
-							{% trans "Neutral options which do not affect grading are marked with a question mark." %}
-						{% endif %}
-					{% else %}
-						{% trans "Incorrect. The correct answer is" %}: {{ field.correct }}
+{% if result.form.reveal_correct %}
+{# if "reveal-model-at-max-submissions" is set to true, the correct answers are revealed #}
+	<p data-aplus-once="yes" class="question-feedback">
+		{% if field.answer_correct %}
+			<i class="quiz1-icon-correct"  aria-hidden="true"></i>
+			<span class="feedback-text">{% trans "Correct!" %}</span>
+		{% else %}
+			<i class="quiz1-icon-incorrect" aria-hidden="true"></i>
+			<span>
+				{% if field.type == "checkbox" or field.type == "radio" %}
+					{% trans "Incorrect. You can check the correct options above." %}
+					{% if field.neutral %}
+						{% trans "Neutral options which do not affect grading are marked with a question mark." %}
 					{% endif %}
-				</span>
-			{% endif %}
-		</span>
+				{% else %}
+					{% trans "Incorrect. The correct answer is" %}: {{ field.correct }}
+				{% endif %}
+			</span>
+		{% endif %}
+	</p>
+{% else %}
+{# if "reveal-model-at-max-submissions" is not set, possible hints and default messages are shown instead #}
+	{% if hints and not field.answer_correct %}
+		{% for hint in hints  %}
+			<p class="question-hint hint-general">
+				{{ hint|safe }}
+			</p>
+		{% endfor %}
 	{% endif %}
-</p>
+	<p class="question-feedback">
+		{% if field.answer_correct %}
+			<i class="quiz1-icon-correct"  aria-hidden="true"></i>
+			<span class="feedback-text">{% trans "Correct!" %}</span>
+		{% else %}
+			<i class="quiz1-icon-incorrect" aria-hidden="true"></i>
+			<span class="feedback-text">{% trans "Incorrect" %}</span>
+		{% endif %}
+	</p>
+{% endif %}

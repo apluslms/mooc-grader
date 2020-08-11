@@ -34,8 +34,8 @@ class GradedForm(forms.Form):
         if "exercise" not in kwargs:
             raise ConfigError("Missing exercise configuration from form arguments.")
         self.exercise = kwargs.pop("exercise")
-        self.model_answer = kwargs.pop('model_answer') if 'model_answer' in kwargs else False
-        self.reveal_correct = kwargs.pop('reveal_correct') if 'reveal_correct' in kwargs else False
+        self.model_answer = kwargs.pop('model_answer', False)
+        self.reveal_correct = kwargs.pop('reveal_correct', False)
         if not self.exercise.get('reveal_model_at_max_submissions', False):
             self.reveal_correct = False
         self.request = kwargs.pop('request') if 'request' in kwargs else None
