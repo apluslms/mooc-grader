@@ -43,7 +43,7 @@ msgstr ""
 #: access/templates/access/accept_general_form.html:42
 #: access/templates/access/accept_git_form.html:16
 #: access/templates/access/accept_post_form.html:17
-#: access/templates/access/graded_form.html:197
+#: access/templates/access/graded_form.html:201
 msgid "Submit"
 msgstr "Lähetä"
 
@@ -286,7 +286,7 @@ msgstr ""
 "    "
 
 #: access/templates/access/graded_form.html:49
-#: access/templates/access/graded_form_feedback.html:20
+#: access/templates/access/graded_form_feedback.html:39
 msgid "Incorrect"
 msgstr "Vastauksesi on väärin."
 
@@ -311,21 +311,25 @@ msgstr[1] ""
 "\n"
 "%(points)s pistettä"
 
-#: access/templates/access/graded_form_feedback.html:15
+#: access/templates/access/graded_form.html:134
+msgid "neutral option which does not affect grading"
+msgstr "neutraali vaihtoehto, joka ei vaikuta kokonaispisteisiin"
+
+#: access/templates/access/graded_form_feedback.html:9
+#: access/templates/access/graded_form_feedback.html:36
 msgid "Correct!"
 msgstr "Oikein!"
 
-#: access/templates/access/graded_form_feedback.html:25
+#: access/templates/access/graded_form_feedback.html:14
 msgid "Incorrect. You can check the correct options above."
 msgstr "Vastauksesi on väärin. Yllä näet oikeat vastaukset."
 
-#: access/templates/access/graded_form_feedback.html:27
+#: access/templates/access/graded_form_feedback.html:16
 msgid ""
 "Neutral options which do not affect grading are marked with a question mark."
-msgstr ""
-"Kysymysmerkillä varustetut vaihtoehdot eivät vaikuta kokonaispisteisiin."
+msgstr "Kysymysmerkillä merkityt vaihtoehdot eivät vaikuta kokonaispisteisiin."
 
-#: access/templates/access/graded_form_feedback.html:30
+#: access/templates/access/graded_form_feedback.html:19
 msgid "Incorrect. The correct answer is"
 msgstr "Vastauksesi on väärin. Oikea vastaus on"
 
