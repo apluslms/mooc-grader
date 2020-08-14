@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-28 09:01+0000\n"
+"POT-Creation-Date: 2020-08-14 13:07+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Saara Satokangas <saara.satokangas@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -15,6 +15,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: access/templates/access/_error_summary.html:6
+#: access/templates/access/async_accepted.html:18
+msgid "Submission failed"
+msgstr "Palautuksen vastaanottaminen epäonnistui"
+
+#: access/templates/access/_error_summary.html:7
+msgid "Check your answers before trying again:"
+msgstr "Tarkista vastauksesi ja yritä uudelleen:"
 
 #: access/templates/access/accept_files_default.html:8
 msgid "Select your files for grading"
@@ -34,7 +43,7 @@ msgstr ""
 #: access/templates/access/accept_general_form.html:42
 #: access/templates/access/accept_git_form.html:16
 #: access/templates/access/accept_post_form.html:17
-#: access/templates/access/graded_form.html:192
+#: access/templates/access/graded_form.html:197
 msgid "Submit"
 msgstr "Lähetä"
 
@@ -119,10 +128,6 @@ msgstr ""
 "synkronisesti, mikä estää muita palveluja toimimasta samaan aikaan. EI "
 "VALMIS TUOTANTOKÄYTTÖÖN!"
 
-#: access/templates/access/async_accepted.html:18
-msgid "Submission failed"
-msgstr "Palautuksen vastaanottaminen epäonnistui"
-
 #: access/templates/access/async_accepted.html:20
 msgid ""
 "\n"
@@ -204,38 +209,12 @@ msgstr "Vaatii gitmanager-liitännäisen"
 msgid "Available exercises"
 msgstr "Saatavilla olevat tehtävät"
 
-#: access/templates/access/create_form_default.html:12
-#, python-format
+#: access/templates/access/create_form_default.html:16
 msgid ""
-"\n"
-"    You got %(points)s/%(max_points)s points from this questionnaire.\n"
-"    "
-msgstr ""
-"\n"
-"Sait %(points)s/%(max_points)s pistettä tästä tehtävästä."
-
-#: access/templates/access/create_form_default.html:19
-msgid ""
-"\n"
-"    Note that the whole section of questions is marked as being incorrect "
-"if\n"
-"    one of the questions in that section is incorrect.\n"
-"    "
-msgstr ""
-"\n"
-"Huomaa, että koko kysymysosio merkitään virheelliseksi, jos yksikin osion\n"
-"vastauksista on virheellinen."
-
-#: access/templates/access/create_form_default.html:25
-msgid ""
-"\n"
-"    You can change your answers and submit them for regrading.\n"
-"    However, notice the number of allowed submissions left!\n"
-"    "
-msgstr ""
-"\n"
-"Voit vaihtaa vastauksiasi ja lähettää ne uudelleen arvosteltavaksi.\n"
-"Huomaa kuitenkin jäljellä olevien palautuskertojen määrä!"
+"The whole section within the black line is marked as being incorrect, if one "
+"of the questions incorrect."
+msgstr "Kaikki kysymykset kysymysosion sisällä merkitään vääriksi vastauksiksi "
+"mikäli yksi kysymyksistä on väärin."
 
 #: access/templates/access/exercise_config_error.html:6
 msgid ""
@@ -306,16 +285,16 @@ msgstr ""
 "    </p>\n"
 "    "
 
-#: access/templates/access/graded_form.html:44
+#: access/templates/access/graded_form.html:49
 #: access/templates/access/graded_form_feedback.html:20
 msgid "Incorrect"
 msgstr "Vastauksesi on väärin."
 
-#: access/templates/access/graded_form.html:46
+#: access/templates/access/graded_form.html:51
 msgid "Correct"
 msgstr "Oikein"
 
-#: access/templates/access/graded_form.html:54
+#: access/templates/access/graded_form.html:59
 #, python-format
 msgid ""
 "\n"
@@ -414,14 +393,14 @@ msgstr ""
 "Pahoittelemme häiriötä.\n"
 "Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."
 
-#: access/types/forms.py:644
+#: access/types/forms.py:639
 msgid "Multiple choices are selectable"
 msgstr "Voit valita useita vaihtoehtoja"
 
-#: access/types/forms.py:830
+#: access/types/forms.py:825
 msgid "Multiple correct answers accepted."
 msgstr "Useita oikeita vastauksia."
 
-#: access/types/forms.py:834
+#: access/types/forms.py:829
 msgid "Correct parts in your answer: "
 msgstr "Oikeat osat vastauksessasi: "

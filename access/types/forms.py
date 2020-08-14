@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.utils import ErrorDict
 from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
+from django.utils.crypto import get_random_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 
@@ -39,11 +40,18 @@ class GradedForm(forms.Form):
             self.show_correct_once = False
         self.request = kwargs.pop('request') if 'request' in kwargs else None
         kwargs['label_suffix'] = ''
+
+        # Set form-field ids to be random strings
+        random_id = get_random_string(length=8)
+        kwargs.setdefault("auto_id", "exercise-{}-%s".format(random_id))
+
         super(forms.Form, self).__init__(*args, **kwargs)
 
         if "fieldgroups" not in self.exercise:
             raise ConfigError("Missing required \"fieldgroups\" in exercise configuration")
 
+        self.form_id = "exercise-{}-form".format(random_id)
+        self.form_nonce = random_id
         self.disabled = self.show_correct
         self.randomized = False
         self.rng = random.Random()
@@ -147,7 +155,7 @@ class GradedForm(forms.Form):
                     fi.group_errors = group_errors
 
                 if j == 0:
-                    f[0].open_set = self.group_name(g)
+                    f[0].open_set = "exercise-{}-set-{}".format(self.form_nonce, self.group_name(g))
                     if "title" in group:
                         f[0].set_title = group["title"]
                 if j >= l:
@@ -229,19 +237,6 @@ class GradedForm(forms.Form):
         }
         if self.disabled:
             args['widget'].attrs['disabled'] = 'disabled'
-
-        if args['required'] and (
-            widget_class is not forms.CheckboxSelectMultiple or len(choices) == 1
-        ):
-            # The required HTML attribute should not be set to a question with
-            # multiple checkboxes since the browser would require that the user
-            # selects every checkbox.
-            # Note: newer Django versions include the required HTML attribute
-            # automatically when the "required" parameter is given to the Field
-            # constructor (like is done here with the args variable).
-            # When Django is upgraded, we don't need to set the "required" attr
-            # to the widget here anymore.
-            args['widget'].attrs['required'] = True
 
         name = self.field_name(i, config)
         selected_choices = choices
