@@ -7,6 +7,18 @@
 	<div class="alert alert-default">
 		<p>{{ exercise.accepted_message|safe }}</p>
 	</div>
+{% elif result.accepted and result.form.group_errors %}
+	<div class="alert alert-default">
+		{% if exercise.accepted_message|safe %}
+			<p>{{ exercise.accepted_message|safe }}</p>
+		{% endif %}
+		<p>
+			{% blocktrans %}
+				The whole section within the black line is marked as being
+				incorrect, if one of the questions incorrect.
+			{% endblocktrans %}
+		</p>
+	</div>
 {% elif result.form.errors %}
 	{% include "access/_error_summary.html" %}
 {% endif %}

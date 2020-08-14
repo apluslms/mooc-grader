@@ -9,8 +9,8 @@
 	{% for field in result.form %}
 
 	{% if field.field.open_set %}
-	<!-- Beginning of all questions -->
-		<fieldset id="{{ field.field.open_set }}">
+		<!-- Beginning of all questions -->
+		<fieldset id="{{ field.field.open_set }}"{% if result.accepted and field.field.group_errors %} class="alert alert-default"{% endif %}>
 		{% if field.field.set_title %}<legend>{{ field.field.set_title }}</legend>{% endif %}
 	{% endif %}
 
