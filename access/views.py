@@ -165,8 +165,11 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
         path = find_name(exercise['template_files'], parameter)
 
     if path:
-        with open(os.path.join(course['dir'], path)) as f:
-            content = f.read()
+        try:
+            with open(os.path.join(course['dir'], path)) as f:
+                content = f.read()
+        except FileNotFoundError as error:
+            raise Http404("Template file missing") from error
         response = HttpResponse(content, content_type='text/plain')
     else:
         try:
