@@ -37,7 +37,7 @@
 			{% endif %}
 
 			{% if not field.field.group_errors %}
-			{% if result.accepted %}
+			{% if result.accepted and not result.form.enrollment_exercise %}
 			<!-- Points badge -->
 				{% if not exercise.feedback or field.field.points > 0 %}
 				<span class="badge badge-{% if field.field.grade_points > 0 and field.field.grade_points < field.field.max_points %}warning{% elif field.field.name in result.error_fields %}danger{% else %}success{% endif %}">
@@ -165,7 +165,7 @@
 			<!-- End of a text-field -->
 			{% endif %}
 
-		{% if result.accepted and not result.model_answer and not field.field.row_label or field.field.close_table %}
+		{% if result.accepted and not result.form.enrollment_exercise and not result.model_answer and not field.field.row_label or field.field.close_table %}
 			<!-- Question feedback -->
 			<div>
 				{% if field.field.type == "checkbox" %}
