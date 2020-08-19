@@ -5,14 +5,17 @@
 	<div class="error-summary__text">
 		<h4>{% trans "Submission failed" %}</h4>
 		<p>{% trans "Check your answers before trying again:" %}</p>
+		<ul>
 		{% for field in result.form %}
 			{% if field.errors %}
-				<p>{{ field.label }}:
-				{% for error in field.errors %}
-					{{ error }}
-				{% endfor %}
-				</p>
+				<li>
+					<strong>{{ field.label }}: </strong>
+					{% for error in field.errors %}
+						{{ error }}
+					{% endfor %}
+				</li>		
 			{% endif %}
 		{% endfor %}
+		</ul>
 	</div>
 </div>
