@@ -1,0 +1,71 @@
+# EditorConfig: https://EditorConfig.org
+# Some editors require a plugin. Check above site for details!
+# List of fully and partially supported properties:
+#  https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
+
+# NOTE: this file is shared among multiple projects. Please send updates
+# to the upstream too! https://github.com/apluslms/apluslms.github.io
+
+# You may copy this file and add local changes at the bottom.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[Makefile*]
+indent_style = tab
+indent_size = 8
+
+# data
+
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# markup
+
+[*.html]
+indent_style = tab
+
+[*.md]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = false
+
+[*.rst]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# styling
+
+[*.{css,scss,sass}]
+indent_style = tab
+
+# programming
+
+[*.js]
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_style = space
+indent_size = 4
+# Docstrings and comments use max_line_length = 79
+max_line_length = 119
+
+[*.sh]
+indent_style = space
+indent_size = 4
+
+# overrides
+
+[*.min.{js,css}]
+indent_style = unset
+insert_final_newline = unset
+trim_trailing_whitespace = false
+
+# Non-global changes for a particular project should be added below this line
