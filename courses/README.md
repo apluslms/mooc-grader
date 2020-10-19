@@ -184,7 +184,19 @@ course specific exercise view in a course specific Python module.
 		asynchronous submissions (normally occurs if queue is shorter than 3)
 	* `feedback_template` (default `access/task_success.html`):
 		name of a template used to format the feedback
-	* `actions`: list of asynchronous test actions
+	* `container`: A dictionary for configuring attributes of the grading container
+		* `image`: Container image to use
+		* `mount`: Directory to mount to the container
+		* `cmd`: Command to execute inside the grading container - typically along the lines of `/exercise/run.sh`
+
+	Additional fields can be defined in the `container` dictionary, and they're given to the **site-specific** container creation script. **Aalto's installation** currently accepts the following fields:
+
+	*   * `resources` (optional): A dictionary defining resource limits for the container, with the following keys:
+			* `cpu` (optional, default `2`): Number of CPU cores to allocate
+			* `memory` (optional, default `4Gi`): Amount of memory to allocate
+		* `enable_network` (optional, default `False`): Whether the container should have generic network access
+		* `require_constant_environment` (optional, default `False`): Generally used for timed exercises where the number of points received depends on code execution time. Setting this to `True` causes the containers to end up in an environment where only one submission is run at a time, and all the grading nodes have identical hardware, so the variance in execution times should be minimal.
+		* `privileged` (optional, default `False`): Setting this to `True` essentially grants root access to the grading node where the container is run. This can be needed e.g. in exercises requiring access to `/dev/kvm` or docker-in-docker exercises. Privileged submissions are run on a separate node entirely dedicated to them. This should generally be used as a **last resort**, and the exercise creator should make sure that student code cannot escape the container.
 
 2. ### access.types.stdasync.acceptPost
 	Accepts form text for asynchronous grading queue. Extended attributes:
