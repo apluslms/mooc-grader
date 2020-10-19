@@ -73,7 +73,7 @@ def post_data(submission_url, data):
         rsp = r.json()
         if not "success" in rsp or not rsp["success"]:
             LOGGER.error("Result POST to \"%s\" got unexpected response: %s",
-                submission_url, rsp.body)
+                submission_url, " ".join(rsp.get('errors', [])))
         else:
             return True
     except Exception:
