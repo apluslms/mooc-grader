@@ -157,6 +157,10 @@ Durations are given in (int)(unit), where units are y, m, d, h or w.
 	* `model_files`: It is a list of model answers that are available only after the deadline has passed.
 		The `model_files` take file paths as input. These paths are relative to the root of the course repository,
 		e.g., `exercises/hello_world/model.py`.
+	* `template_files`: List of template files for the student (e.g., base code or skeleton code that the student starts to modify).
+		A+ shows the templates in the exercise navigation bar.
+		Give a list of file paths as the value. The file paths start from the root of the course repository,
+		e.g., `exercises/hello_world/submission.py`.
 
 	Rest of the attributes are exercise type specific.
 
