@@ -40,6 +40,7 @@ Then, create virtual environment with grader requirements.
 
     python3 -m venv venv
     source venv/bin/activate
+    pip install wheel
     pip install -r mooc-grader/requirements.txt
 
 ### 3. Testing grader application
@@ -112,26 +113,26 @@ restarts using touch. Operate the workers using:
     source ~/venv/bin/activate
     pip install uwsgi
     cp ~/mooc-grader/doc/etc-uwsgi-grader.ini ~/grader-uwsgi.ini
-    sudo cp ~/mooc-grader/doc/etc-systemd-system-uwsgi.service /etc/systemd/system/grader-uwsgi.service
+    sudo cp ~grader/mooc-grader/doc/etc-systemd-system-uwsgi.service /etc/systemd/system/grader-uwsgi.service
     # EDIT ~/grader-uwsgi.ini
     # EDIT /etc/systemd/system/grader-uwsgi.service, set the correct uwsgi path to ExecStart
-    sudo touch /var/log/uwsgi/grader.log
-    sudo chown -R $USER:$(id --group --name) /var/log/uwsgi
 
 Operate the workers:
 
-    systemctl status uwsgi
-    sudo systemctl start uwsgi
-    sudo systemctl enable uwsgi  # start on boot
+    # as root
+    systemctl status grader-uwsgi
+    systemctl start grader-uwsgi
+    systemctl enable grader-uwsgi  # start on boot
     # Graceful application reload
     touch ~grader/grader-uwsgi.ini
 
 #### nginx
 
-    sudo apt-get install nginx
-    sed -e "s/__HOSTNAME__/$(hostname)/g" /srv/aplus/a-plus/doc/nginx/aplus-nginx.conf \
-         | sudo tee /etc/nginx/sites-available/$(hostname).conf > /dev/null
-    sudo ln -s ../sites-available/$(hostname).conf /etc/nginx/sites-enabled/$(hostname).conf
+    apt-get install nginx
+    sed -e "s/__HOSTNAME__/$(hostname)/g" \
+      ~grader/mooc-grader/doc/etc-nginx-sites-available-grader > \
+      /etc/nginx/sites-available/$(hostname).conf
+    ln -s ../sites-available/$(hostname).conf /etc/nginx/sites-enabled/$(hostname).conf
     # Edit /etc/nginx/sites-available/$(hostname).conf if necessary
     # Check nginx config validity
     nginx -t
@@ -139,8 +140,9 @@ Operate the workers:
 
 #### apache2
 
-    sudo apt-get install apache2 libapache2-mod-uwsgi
+    apt-get install apache2 libapache2-mod-uwsgi
     # Configure based on doc/etc-apache2-sites-available-grader
+    a2enmod headers
 
 ## 2. Django application settings for deployment
 
