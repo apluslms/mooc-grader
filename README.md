@@ -33,15 +33,12 @@ Install software
 
 ### 2. Python requirements (2.7 should work too)
 
-    sudo apt-get install python3 python3-dev python3-pip
+    sudo apt-get install python3 python3-dev python3-pip python3-venv
 
-Make sure pip and virtualenv are installed.
-
-    sudo pip3 install virtualenv
 
 Then, create virtual environment with grader requirements.
 
-    virtualenv -p python3 venv
+    python3 -m venv venv
     source venv/bin/activate
     pip install -r mooc-grader/requirements.txt
 
