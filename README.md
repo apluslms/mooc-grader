@@ -76,6 +76,13 @@ user account.
 
 ### 1. Web server configuration
 
+#### Create temporary directory for sockets
+
+    echo "d /run/grader 0750 grader www-data - -" | \
+      sudo tee /etc/tmpfiles.d/grader.conf > /dev/null
+    sudo systemd-tmpfiles --create
+
+
 Install uwsgi to run WSGI processes. The **mooc-grader directory
 and user must** be set in the configuration files.
 
