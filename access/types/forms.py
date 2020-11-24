@@ -354,6 +354,11 @@ class GradedForm(forms.Form):
         if hint and not hint in hints:
             hints.append(hint)
 
+    def append_hint_checkbox(self, hints, configuration):
+        hint = str(configuration.get('hint', ''))
+        if hint and not hint in hints:
+            hints['hint'] = hint
+
     def is_enrollment_exercise(self):
         return self.exercise.get('status', '') in ('enrollment', 'enrollment_ext')
 
@@ -660,7 +665,7 @@ class GradedForm(forms.Form):
         return { 'options': opt }
 
     def grade_checkbox(self, configuration, value, hints=None, name=''):
-        hints = hints or []
+        hints = hints or OrderedDict()
         correct_count = 0
         wrong_answers = 0
         non_neutral_count = 0
@@ -685,16 +690,16 @@ class GradedForm(forms.Form):
                     if name not in value:
                         wrong_answers += 1
                         correct = False
-                        self.append_hint(hints, opt)
+                        self.append_hint_checkbox(hints, opt)
                 elif correct_answer is False:
                     non_neutral_count += 1
                     if value is not None and name in value:
                         correct = False
                         wrong_answers += 1
-                        self.append_hint(hints, opt)
+                        self.append_hint_checkbox(hints, opt)
                 elif correct_answer == "neutral":
                     if value is not None and name in value:
-                        self.append_hint(hints, opt)
+                        self.append_hint_checkbox(hints, opt)
             i += 1
 
         # If partial_points are set, the variable 'correct' becomes a float
