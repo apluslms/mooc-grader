@@ -152,14 +152,6 @@ SUBMISSION_PATH = join(BASE_DIR, 'uploads')
 # Django process requires write access to this directory.
 PERSONALIZED_CONTENT_PATH = join(BASE_DIR, 'exercises-meta')
 
-# Enable personal directories for users, which can be used in personalized
-# exercises to permanently store personal files with the
-# grader.actions.store_user_files action. Personalized exercises can still be
-# used even if this setting is False if the grading only uses the pregenerated
-# exercise instance files. Enabling and using personal directories makes the
-# grader stateful, which at least increases the amount of disk space used.
-ENABLE_PERSONAL_DIRECTORIES = False
-
 # Logging
 # https://docs.djangoproject.com/en/1.7/topics/logging/
 ##########################################################################

@@ -31,8 +31,7 @@ from django.utils import translation
 from util.files import create_submission_dir, save_submitted_file, \
     clean_submission_dir, write_submission_file, write_submission_meta
 from util.http import not_modified_since, not_modified_response, cache_headers
-from util.personalized import select_generated_exercise_instance, \
-    user_personal_directory_path
+from util.personalized import select_generated_exercise_instance
 from util.shell import invoke
 from util.templates import render_configured_template, render_template, \
     template_to_str
