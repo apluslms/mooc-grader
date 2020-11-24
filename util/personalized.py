@@ -25,14 +25,6 @@ class ExerciseGenerationError(Exception):
     pass
 
 
-def user_personal_directory_path(course, exercise, userid):
-    '''
-    Return the path to the personal directory of the user.
-    '''
-    return os.path.join(settings.PERSONALIZED_CONTENT_PATH,
-        course["key"], "users", userid, exercise["key"])
-
-
 def pregenerated_exercises_directory_path(course, exercise):
     '''
     Return path to the directory of pregenerated exercise instances
@@ -40,19 +32,6 @@ def pregenerated_exercises_directory_path(course, exercise):
     '''
     return os.path.join(settings.PERSONALIZED_CONTENT_PATH,
         course["key"], "pregenerated", exercise["key"])
-
-
-def prepare_user_personal_directory(course, exercise, userid):
-    '''
-    Create the personal directory of the user (unless the directory already exists).
-    '''
-    personal_dir = user_personal_directory_path(course, exercise, userid)
-    # Create empty directory unless it already exists
-    if not os.path.exists(personal_dir):
-        try:
-            os.makedirs(personal_dir)
-        except OSError:
-            pass # someone else created the dir after executing the if condition
 
 
 def prepare_pregenerated_exercises_directory(course, exercise):
@@ -107,20 +86,17 @@ def select_generated_exercise_instance(course, exercise, userids_str, submission
     return os.path.join(pregenerated_dir, str(instance))
 
 
-def read_user_personal_file(course, exercise, userid, filename, generated=False, submission_number=1):
+def read_user_personal_file(course, exercise, userid, filename, submission_number=1):
     '''
     Return the contents of a personal file of the user(s).
+
+    It is one file from the generated exercise instance. The instance depends on
+    the user and submission number.
     '''
-    if generated:
-        # file from the generated exercise instance, the instance depends on
-        # the user and submission number
-        filepath = os.path.join(
-                        select_generated_exercise_instance(course, exercise, userid, submission_number),
-                        filename)
-    else:
-        # personal file stored for the user
-        filepath = os.path.join(user_personal_directory_path(course, exercise, userid),
-                                filename)
+    filepath = os.path.join(
+        select_generated_exercise_instance(course, exercise, userid, submission_number),
+        filename,
+    )
     try:
         with open(filepath) as f:
             return f.read()
@@ -211,8 +187,6 @@ def generate_one_exercise_instance(course, exercise, dir_path):
 def personalized_template_context(course, exercise, request):
     '''
     Return template context for the given personalized exercise and user(s).
-    Prepares the user personal directory if it does not yet exist (and if the
-    settings have enabled it).
     '''
     ctx = {}
     if not ("personalized" in exercise and exercise["personalized"]):
@@ -221,9 +195,6 @@ def personalized_template_context(course, exercise, request):
     userid = get_uid(request)
     if not userid:
         raise access.config.ConfigError('Exercise is personalized but HTTP GET request did not supply any "uid" parameter.')
-    # create the personal directory if enabled
-    if settings.ENABLE_PERSONAL_DIRECTORIES:
-        prepare_user_personal_directory(course, exercise, userid)
     
     if "generated_files" not in exercise:
         raise access.config.ConfigError('"generated_files" missing in the configuration of a personalized exercise')
@@ -250,7 +221,7 @@ def personalized_template_context(course, exercise, request):
         if "content_in_template" in gen_file_conf and gen_file_conf["content_in_template"]:
             # read contents of the exercise generated file to a variable
             file_ctx["content"] = read_user_personal_file(course, exercise,
-                    userid, gen_file_conf["file"], True, submission_number)
+                    userid, gen_file_conf["file"], submission_number)
         generated_files[gen_file_conf["key"]] = file_ctx
     
     ctx["generated_files"] = generated_files
