@@ -211,7 +211,7 @@ class GradedForm(forms.Form):
             if 'key' in row:
                 row_config['key'] = row['key']
             i, fi = self.add_field(i, row_config,
-                field_class, widget_class, initial, correct, choices, multiple, {})
+                field_class, widget_class, initial, correct, neutral, choices, multiple, {})
             fi[0].row_label = row.get('label', None)
             fields += fi
 
