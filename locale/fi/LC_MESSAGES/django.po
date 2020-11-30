@@ -213,7 +213,8 @@ msgstr "Saatavilla olevat tehtävät"
 msgid ""
 "The whole section within the black line is marked as being incorrect, if one "
 "of the questions incorrect."
-msgstr "Kaikki kysymykset kysymysosion sisällä merkitään vääriksi vastauksiksi "
+msgstr ""
+"Kaikki kysymykset kysymysosion sisällä merkitään vääriksi vastauksiksi "
 "mikäli yksi kysymyksistä on väärin."
 
 #: access/templates/access/exercise_config_error.html:6
