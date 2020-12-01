@@ -3,16 +3,16 @@ upstream django {
 }
 server {
     listen 80;
-    server_name grader.domain.none;
+    server_name __HOSTNAME__;
     return 301 https://$server_name$request_uri;
 }
 server {
     listen 443 ssl;
-    server_name grader.domain.none;
+    server_name __HOSTNAME__;
 
     ssl on;
-    ssl_certificate /etc/ssl/certs/grader.domain.none.pem;
-    ssl_certificate_key /etc/ssl/private/grader.domain.none.key;
+    ssl_certificate /etc/ssl/certs/__HOSTNAME__.pem;
+    ssl_certificate_key /etc/ssl/private/__HOSTNAME__.key;
 
     charset utf-8;
     client_max_body_size 50M;

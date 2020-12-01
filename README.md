@@ -131,7 +131,13 @@ Operate the workers:
 #### nginx
 
     sudo apt-get install nginx
-    # Configure based on doc/etc-nginx-sites-available-grader
+    sed -e "s/__HOSTNAME__/$(hostname)/g" /srv/aplus/a-plus/doc/nginx/aplus-nginx.conf \
+         | sudo tee /etc/nginx/sites-available/$(hostname).conf > /dev/null
+    sudo ln -s ../sites-available/$(hostname).conf /etc/nginx/sites-enabled/$(hostname).conf
+    # Edit /etc/nginx/sites-available/$(hostname).conf if necessary
+    # Check nginx config validity
+    nginx -t
+    systemctl reload nginx
 
 #### apache2
 
