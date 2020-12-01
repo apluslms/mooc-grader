@@ -1,5 +1,5 @@
 upstream django {
-    server 127.0.0.1:3031;
+    server unix:/run/grader/uwsgi.socket;
 }
 server {
     listen 80;

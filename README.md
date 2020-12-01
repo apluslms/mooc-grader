@@ -109,16 +109,14 @@ restarts using touch. Operate the workers using:
 
 #### uWSGI with systemd (Ubuntu >= 15.04)
 
-    source venv/bin/activate
+    source ~/venv/bin/activate
     pip install uwsgi
-    sudo mkdir -p /etc/uwsgi
-    sudo mkdir -p /var/log/uwsgi
-    sudo cp doc/etc-uwsgi-grader.ini /etc/uwsgi/grader.ini
-    sudo cp doc/etc-systemd-system-uwsgi.service /etc/systemd/system/uwsgi.service
-    # EDIT /etc/uwsgi/grader.ini
-    # EDIT /etc/systemd/system/uwsgi.service, set the correct uwsgi path to ExecStart
+    cp ~/mooc-grader/doc/etc-uwsgi-grader.ini ~/grader-uwsgi.ini
+    sudo cp ~/mooc-grader/doc/etc-systemd-system-uwsgi.service /etc/systemd/system/grader-uwsgi.service
+    # EDIT ~/grader-uwsgi.ini
+    # EDIT /etc/systemd/system/grader-uwsgi.service, set the correct uwsgi path to ExecStart
     sudo touch /var/log/uwsgi/grader.log
-    sudo chown -R [shell-username]:users /etc/uwsgi /var/log/uwsgi
+    sudo chown -R $USER:$(id --group --name) /var/log/uwsgi
 
 Operate the workers:
 
@@ -126,7 +124,7 @@ Operate the workers:
     sudo systemctl start uwsgi
     sudo systemctl enable uwsgi  # start on boot
     # Graceful application reload
-    touch /etc/uwsgi/grader.ini
+    touch ~grader/grader-uwsgi.ini
 
 #### nginx
 
