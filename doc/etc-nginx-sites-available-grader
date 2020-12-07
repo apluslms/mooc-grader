@@ -1,4 +1,4 @@
-upstream django {
+upstream django-grader {
     server unix:/run/grader/uwsgi.socket;
 }
 server {
@@ -25,12 +25,12 @@ server {
         alias /srv/grader/mooc-grader/static/robots.txt;
     }
     location /ajax {
-        uwsgi_pass django;
+        uwsgi_pass django-grader;
         include uwsgi_params;
     }
     location /generatedfile {
         # client web browsers may need to download generated files in personalized exercises
-        uwsgi_pass django;
+        uwsgi_pass django-grader;
         include uwsgi_params;
     }
     location / {
@@ -39,7 +39,7 @@ server {
         #allow 192.168.1.0/24;
         #deny all;
 
-        uwsgi_pass django;
+        uwsgi_pass django-grader;
         include uwsgi_params;
     }
 }

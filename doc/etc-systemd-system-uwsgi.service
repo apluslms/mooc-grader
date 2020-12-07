@@ -3,6 +3,7 @@ Description=uWSGI Emperor service
 
 [Service]
 ExecStart=/srv/grader/venv/bin/uwsgi --ini /srv/grader/grader-uwsgi.ini
+SyslogIdentifier=grader
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
@@ -11,4 +12,3 @@ ExecReload=/bin/sh -c "echo c > /run/grader/uwsgi.master"
 
 [Install]
 WantedBy=multi-user.target
-
