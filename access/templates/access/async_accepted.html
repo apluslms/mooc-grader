@@ -24,7 +24,7 @@
 </div>
 
 {% else %}
-<h1>{% trans "Submission accepted" %}</h1>
+<h1>{% trans "Submission received" %}</h1>
 
 {% if result.missing_url %}
 <div class="alert alert-danger">
@@ -41,13 +41,14 @@
 		{% if exercise.accepted_message %}
 		{{ exercise.accepted_message|safe }}
 		{% elif result.queue < 3 %}
-		{% blocktrans %}
+		{% blocktrans trimmed %}
 		Your submission is being graded. The result will be available on this page
-		when the grading process completes. Note that grading may take a while.
+		when the grading process completes. Note that the grading may take a while.
 		You might also need to update the page manually in order to see the results.
+		You may close this message.
 		{% endblocktrans %}
 		{% else %}
-		{% blocktrans with queue=result.queue %}
+		{% blocktrans with queue=result.queue trimmed %}
 		Your submission is in the grading queue. There are {{ queue }} other
 		submissions before. The result will be available on this page
 		when the grading process completes. The page must be updated manually to
