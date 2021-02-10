@@ -28,7 +28,7 @@ General requirements
 
 Install software
 
-    git clone https://github.com/Aalto-LeTech/mooc-grader.git
+    git clone https://github.com/apluslms/mooc-grader.git
     mkdir mooc-grader/uploads
 
 ### 2. Python requirements (2.7 should work too)
