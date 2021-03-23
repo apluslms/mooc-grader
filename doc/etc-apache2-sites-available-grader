@@ -18,7 +18,7 @@
 	<Location />
 		Options FollowSymLinks
 		SetHandler uwsgi-handler
-		uWSGISocket 127.0.0.1:3031
+		uWSGISocket /run/grader/uwsgi.socket
 		uWSGIMaxVars 256
 	</Location>
 	<Location /static/>
