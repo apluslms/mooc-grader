@@ -12,6 +12,13 @@ local_settings.py
 grader/local_settings.py
 grader/ajax_key.py
 grader/secret_key.py
+exercises-meta/
+
+static/*
+!static/robots.txt
+courses/*
+!courses/README.md
+!courses/__init__.py
 
 .idea
 .settings
