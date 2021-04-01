@@ -15,7 +15,6 @@ grader/secret_key.py
 exercises-meta/
 
 static/*
-!static/robots.txt
 courses/*
 !courses/README.md
 !courses/__init__.py
