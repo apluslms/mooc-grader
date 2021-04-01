@@ -10,7 +10,7 @@ of the exercise. The exercise instances are generated with a manage.py command
 "pregenerate_exercises".
 '''
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import os
 import shutil
 import logging

@@ -34,16 +34,15 @@ ADD_APPS = (
     #'gitmanager',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     # 'django.middleware.security.SecurityMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     # 'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
-)
+]
 
 TEMPLATES = [
     {
@@ -212,7 +211,7 @@ INSTALLED_APPS = INSTALLED_APPS + ADD_APPS
 
 # Drop x-frame policy when debugging
 if DEBUG:
-    MIDDLEWARE_CLASSES = [c for c in MIDDLEWARE_CLASSES if "XFrameOptionsMiddleware" not in c]
+    MIDDLEWARE = [c for c in MIDDLEWARE if "XFrameOptionsMiddleware" not in c]
 
 # update template loaders for production
 use_cache_template_loader_in_production(__name__)

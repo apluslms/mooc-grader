@@ -1,6 +1,6 @@
 from itertools import zip_longest
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 def url_to_exercise(request, course_key, exercise_key):

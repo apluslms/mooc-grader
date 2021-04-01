@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 from django.db import migrations, models
 
@@ -29,7 +28,7 @@ class Migration(migrations.Migration):
                 ('updated_time', models.DateTimeField(auto_now=True)),
                 ('updated', models.BooleanField(default=False)),
                 ('log', models.TextField(default='')),
-                ('course_repo', models.ForeignKey(to='gitmanager.CourseRepo', related_name='updates')),
+                ('course_repo', models.ForeignKey(to='gitmanager.CourseRepo', on_delete=models.CASCADE, related_name='updates')),
             ],
         ),
     ]

@@ -3,7 +3,7 @@ from django.http.response import HttpResponse, JsonResponse, Http404, HttpRespon
 from django.utils import timezone
 from django.utils import translation
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 import copy
 import os
