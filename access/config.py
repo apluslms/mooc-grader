@@ -47,7 +47,7 @@ class ConfigParser:
     '''
     FORMATS = {
         'json': json.load,
-        'yaml': yaml.load
+        'yaml': yaml.safe_load
     }
     PROCESSOR_TAG_REGEX = re.compile(r'^(.+)\|(\w+)$')
     TAG_PROCESSOR_DICT = {

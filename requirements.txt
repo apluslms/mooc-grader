@@ -1,6 +1,6 @@
 Django~=2.2.19
 raphendyr-django-essentials==1.3.0
-requests==2.10.0
-PyYAML==3.11
-docutils==0.12
-python-magic==0.4.11
+requests~=2.25.1
+PyYAML~=5.4.1
+docutils==0.17
+python-magic~=0.4.22
