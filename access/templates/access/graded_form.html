@@ -32,7 +32,7 @@
 				{% if field.field.choice_list %}
 					<label class="control-label">{{ field.label }}</label>
 				{% else %}
-					<label class="control-label">{{ field.label_tag }}</label>
+					{{ field.label_tag }}
 				{% endif %}
 			{% endif %}
 
