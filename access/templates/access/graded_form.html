@@ -121,7 +121,7 @@
 			<!-- An input-field: Checkbox- or radio-field -->
 			{% for choice in field %}
 			<div class="{{ field.field.type }}">
-				<label for="{{ choice.id_for_label }}" class="{% if choice.choice_value in choice.value %}option-checked{% endif %}">
+				<label for="{{ choice.data.attrs.id }}" class="{% if choice.choice_value in choice.value %}option-checked{% endif %}">
 					{{ choice.tag }}
 					{{ choice.choice_label|safe }}
 				</label>
