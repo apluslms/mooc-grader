@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from access.views import config
 
 class Command(BaseCommand):
-    help = "List all used container images from course exercise configurations"
+    help = "List all used view types from course exercise configurations"
 
     def handle(self, *args, **options):
         view_types = {}
