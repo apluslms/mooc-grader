@@ -23,7 +23,7 @@
 	</p>
 {% else %}
 {# if "reveal-model-at-max-submissions" is not set, possible hints and default messages are shown instead #}
-	{% if hints and not field.answer_correct %}
+	{% if hints %}
 		{% for hint in hints  %}
 			<p class="question-hint hint-general">
 				{{ hint|safe }}
