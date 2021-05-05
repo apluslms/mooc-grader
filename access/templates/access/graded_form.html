@@ -123,7 +123,7 @@
 			<div class="{{ field.field.type }}">
 				<label for="{{ choice.data.attrs.id }}" class="{% if choice.choice_value in choice.value %}option-checked{% endif %}">
 					{{ choice.tag }}
-					{{ choice.choice_label|safe }}
+					<span>{{ choice.choice_label|safe }}</span>
 				</label>
 				{% if result.form.reveal_correct or result.model_answer %}
 					{# Indicating the correct and neutral options and hiding hints, if the form is a model answer #}
