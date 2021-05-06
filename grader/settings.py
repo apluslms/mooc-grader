@@ -200,8 +200,13 @@ update_settings_with_file(__name__,
                           environ.get('GRADER_LOCAL_SETTINGS', 'local_settings'),
                           quiet='GRADER_LOCAL_SETTINGS' in environ)
 update_settings_from_module(__name__, 'settings_local', quiet=True) # Compatibility with older releases
-update_settings_from_environment(__name__, 'DJANGO_') # FIXME: deprecated
-update_settings_from_environment(__name__, 'GRADER_')
+
+# If 'DISABLE_LOAD_ENVIRONMENT_SETTINGS' is found in env vars, don't load DJANGO_ and GRADER_ prefixed settings
+load_environment_settings = not 'DISABLE_LOAD_ENVIRONMENT_SETTINGS' in environ
+if load_environment_settings:
+    update_settings_from_environment(__name__, 'DJANGO_') # FIXME: deprecated
+    update_settings_from_environment(__name__, 'GRADER_')
+
 update_secret_from_file(__name__, environ.get('GRADER_SECRET_KEY_FILE', 'secret_key'))
 update_secret_from_file(__name__, environ.get('GRADER_AJAX_KEY_FILE', 'ajax_key'), setting='AJAX_KEY')
 assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
