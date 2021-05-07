@@ -43,7 +43,7 @@ while read key; do
   # reset/start log
   echo "Updating '$key' (update_id=$update_id, request_time=$request_time)" > "$LOG"
 
-  sudo -u $USER -H gitmanager/cron_pull_build.sh "$TRY_PYTHON" "$key" "$url" "$branch" >> "$LOG" 2>&1 || continue
+  gitmanager/cron_pull_build.sh "$TRY_PYTHON" "$key" "$url" "$branch" >> "$LOG" 2>&1 || continue
 
   # Update database
   $SQL >/dev/null <<SQL

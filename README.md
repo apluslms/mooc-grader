@@ -163,6 +163,6 @@ Django must install the database schema for the `gitmanager` (Python virtual env
 
     python manage.py migrate
 
-The `gitmanager` requires a crontab for the root account:
+The `gitmanager` requires a crontab for the grader account:
 
-    sudo crontab -u root doc/gitmanager-root-crontab
+    sudo crontab -u grader doc/gitmanager-crontab
