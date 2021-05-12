@@ -121,15 +121,15 @@
 			<!-- An input-field: Checkbox- or radio-field -->
 			{% for choice in field %}
 			<div class="{{ field.field.type }}">
-				<label for="{{ choice.data.attrs.id }}" class="{% if choice.choice_value in choice.value %}option-checked{% endif %}">
+				<label for="{{ choice.data.attrs.id }}" class="{% if choice.data.value in field.value %}option-checked{% endif %}">
 					{{ choice.tag }}
 					<span>{{ choice.choice_label|safe }}</span>
 				</label>
 				{% if result.form.reveal_correct or result.model_answer %}
 					{# Indicating the correct and neutral options and hiding hints, if the form is a model answer #}
-					{% if choice.choice_value in field.field.correct and not field.field.answer_correct %}
+					{% if choice.data.value in field.field.correct and not field.field.answer_correct %}
 						<i data-aplus-once="yes" class="quiz1-icon-correct" aria-hidden="true"></i>
-					{% elif choice.choice_value in field.field.neutral %}
+					{% elif choice.data.value in field.field.neutral %}
 						{% if result.model_answer %}
 							<span><em>**{% trans "neutral option which does not affect grading"%}**</em></span>
 						{% elif result.form.reveal_correct and not field.field.answer_correct %}
@@ -138,9 +138,9 @@
 					{% endif %}
 					{# end of correct answer #}
 				{% else %}
-					{% if field.field.type == "checkbox" and choice.choice_value in choice.value and field.field.hints %}
+					{% if field.field.type == "checkbox" and choice.data.value in field.value and field.field.hints %}
 						<div>
-							{% with hint=field.field.hints|find_checkbox_hints:choice.choice_value %}
+							{% with hint=field.field.hints|find_checkbox_hints:choice.data.value %}
 								{% if hint %}
 									<p class="question-hint hint-checkbox">
 										{{ hint|safe }}
