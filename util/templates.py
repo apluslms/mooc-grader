@@ -4,6 +4,7 @@ Utility functions for exercise templates.
 '''
 from django.template import loader, Context
 from django.shortcuts import render
+from django.utils.crypto import get_random_string
 from access.config import ConfigError
 from .personalized import personalized_template_context
 
@@ -93,6 +94,7 @@ def _exercise_context(course, exercise, post_url, result=None, request=None):
         "post_url": post_url or "",
         "static_url": course['static_url'],
         "result": result,
+        "unique_id": get_random_string(length=8),
     }
     if 'instructions_file' in exercise and exercise['instructions_file'].startswith('./'):
         exercise['instructions_file'] = course['key'] + exercise['instructions_file'][1:]

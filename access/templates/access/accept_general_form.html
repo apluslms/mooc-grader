@@ -5,13 +5,18 @@
 	{% if exercise.fields %}
 	{% for entry in exercise.fields %}
 	<div class="form-group{% if entry.missing %} has-error{% endif %}">
-		<label for="{{ entry.name }}_id" class="control-label">
+		<label for="exercise-{{ unique_id }}-{{ entry.name }}" class="control-label">
 			{{ entry.title|safe }}
 		</label>
 		{% if entry.more %}
 		{{ entry.more|safe }}
 		{% endif %}
-		<textarea id="{{ entry.name }}_id" name="{{ entry.name }}" class="form-control" rows="{% if entry.rows %}{{ entry.rows }}{% else %}6{% endif %}"></textarea>
+		<textarea
+			id="exercise-{{ unique_id }}-{{ entry.name }}"
+			name="{{ entry.name }}"
+			class="form-control"
+			rows="{% if entry.rows %}{{ entry.rows }}{% else %}6{% endif %}"
+		></textarea>
 	</div>
 	{% endfor %}
 	{% endif %}
@@ -28,11 +33,16 @@
 
 		{% for entry in exercise.files %}
 		<div class="form-group">
-			<label for="{{ entry.field }}_id">
+			<label for="exercise-{{ unique_id }}-{{ entry.field }}">
 				<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
 				{{ entry.name }}
 			</label>
-			<input type="file" id="{{ entry.field }}_id" name="{{ entry.field }}" class="form-control" />
+			<input
+				type="file"
+				id="exercise-{{ unique_id }}-{{ entry.field }}"
+				name="{{ entry.field }}"
+				class="form-control"
+			/>
 		</div>
 		{% endfor %}	
 	{% endif %}
