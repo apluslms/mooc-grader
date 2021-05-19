@@ -138,6 +138,10 @@ def createForm(request, course, exercise, post_url):
 
         result = { "form": form, "accepted": True, "points": points,
             "error_groups": error_groups, "error_fields": error_fields }
+    else:
+        # Don't reveal the correct answers if the form was rejected, and a
+        # submission was not consumed.
+        form.reveal_correct = False
 
     return cache_headers(
         render_configured_template(
