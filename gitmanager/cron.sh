@@ -12,13 +12,11 @@ else
   CDIR=courses
 fi
 CDIR=$(realpath $CDIR)
-USER=$(stat -c '%U' $CDIR/)
 
 if [ -e $FLAG ]; then
   exit 0
 fi
 touch $FLAG
-chown $USER $FLAG
 
 if [ -f $TRY_PYTHON ]; then
   source $TRY_PYTHON
