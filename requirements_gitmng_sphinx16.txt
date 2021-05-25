@@ -4,3 +4,4 @@
 # installed if courses have not been upgraded for the new version.
 Sphinx~=1.6.7
 PyYAML~=5.4.1
+recommonmark~=0.7.1
