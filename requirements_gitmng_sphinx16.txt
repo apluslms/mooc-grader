@@ -1,0 +1,6 @@
+# For building course materials in the MOOC-Grader gitmanager.
+# This file uses the old Sphinx version 1.6 that has been used
+# for a long time in many courses. The old version can be
+# installed if courses have not been upgraded for the new version.
+Sphinx~=1.6.7
+PyYAML~=5.4.1

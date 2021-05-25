@@ -5,10 +5,22 @@ class CourseRepo(models.Model):
     '''
     A course repository served out for learning environments.
     '''
+    SPHINX_VERSION_OLD = 'old'
+    SPHINX_VERSION_NEW = 'new'
+    SPHINX_VERSION_CHOICES = [
+        (SPHINX_VERSION_OLD, 'old'),
+        (SPHINX_VERSION_NEW, 'new'),
+    ]
+
     key = models.SlugField(unique=True)
     git_origin = models.CharField(max_length=255)
     git_branch = models.CharField(max_length=40)
     update_hook = models.URLField(blank=True)
+    sphinx_version = models.CharField(
+        max_length=3,
+        choices=SPHINX_VERSION_CHOICES,
+        default=SPHINX_VERSION_OLD,
+    )
 
     class META:
         ordering = ['key']

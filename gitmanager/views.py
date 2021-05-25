@@ -12,6 +12,7 @@ from .models import CourseRepo
 
 logger = logging.getLogger("grader.gitmanager")
 clean_flag = os.path.join(tempfile.gettempdir(), "mooc-grader-manager-clean")
+clean_flag_new = os.path.join(tempfile.gettempdir(), "mooc-grader-manager-clean-new-sphinx")
 
 
 def repos(request):
@@ -97,8 +98,11 @@ def hook(request, key):
             )
 
         # Remove clean flag for the cronjob.
-        if os.path.exists(clean_flag):
-            os.remove(clean_flag)
+        flag_file = clean_flag
+        if repo.sphinx_version == CourseRepo.SPHINX_VERSION_NEW:
+            flag_file = clean_flag_new
+        if os.path.exists(flag_file):
+            os.remove(flag_file)
 
     if request.META.get('HTTP_REFERER'):
         return redirect('manager-updates', repo.key)

@@ -4,6 +4,13 @@ TRY_PYTHON=$1
 key=$2
 url=$3
 branch=$4
+
+if [ -f $TRY_PYTHON ]; then
+  source $TRY_PYTHON
+else
+  TRY_PYTHON=$(which python3)
+fi
+
 echo "Processing key=$key url=$url branch=$branch python=$TRY_PYTHON"
 
 if [ -z "$key" -o -z "$url" -o -z "$branch" ]; then
@@ -15,10 +22,6 @@ if [ -d exercises ]; then
   CDIR=exercises
 else
   CDIR=courses
-fi
-
-if [ -f $TRY_PYTHON ]; then
-  source $TRY_PYTHON
 fi
 
 # Update from git origin and move to dir.

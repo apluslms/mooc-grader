@@ -12,4 +12,5 @@ class CourseRepoForm(forms.ModelForm):
             'git_origin',
             'git_branch',
             'update_hook',
+            'sphinx_version',
         ]
