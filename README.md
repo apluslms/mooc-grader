@@ -1,14 +1,16 @@
 # mooc-grader
 
-This grading service accepts anonymous submissions for grading via HTTP. The
-grading can be done synchronously or asynchronously using a submission queue.
+This grading service accepts anonymous submissions for grading via HTTP.
+The submissions are graded either synchronously in the web application or
+asynchronously in containers (usually in Kubernetes, though it is possible
+to run Docker containers in the web server for a small number of submissions).
 The results are delivered to the calling system and the grader does not keep
 any record other than service logs. The grader is designed to serve exercises
-for the A+ learning system. A farm of individual grading servers can be setup
-to handle large amount of submissions.
+for the A+ learning system. If the number of submissions is large, we recommend
+setting up a Kubernetes cluster for the grader.
 
-The grader is implemented on Django 1.9 (`grader/settings.py`). The application
-is tested on both Python 2.7 and 3.4.
+The grader is implemented on Django 2.2 (`grader/settings.py`). The application
+is tested on Python 3.7 and newer versions, but Python 3.5+ should also work.
 
 The grader can be run stand alone without the full stack to test graders in
 the local system environment. The grader is designed to be extended for
@@ -17,7 +19,13 @@ different courses and exercise types. Course and exercise configuration is in
 
 ## Installing for development
 
-> 6/2014 - Ubuntu 12.04.4
+You may run the app with Docker without installing the whole software stack locally.
+It is easy to get started with the aplus-manual course:
+[apluslms/aplus-manual](https://github.com/apluslms/aplus-manual).
+The Docker image is intended for local development and testing, not production:
+[apluslms/run-mooc-grader](https://github.com/apluslms/run-mooc-grader).
+
+> Ubuntu 20.04
 
 ### 1. Clone the software
 
@@ -31,7 +39,7 @@ Install software
     git clone https://github.com/apluslms/mooc-grader.git
     mkdir mooc-grader/uploads
 
-### 2. Python requirements (2.7 should work too)
+### 2. Python requirements
 
     sudo apt-get install python3 python3-dev python3-pip python3-venv
 
@@ -43,13 +51,24 @@ Then, create virtual environment with grader requirements.
     pip install wheel
     pip install -r mooc-grader/requirements.txt
 
+If you enable the gitmanager app in the MOOC-Grader (see the section
+"Django application settings for deployment"), you need to install its
+requirements in the (virtual) environment that it uses. It may use a different
+environment than the Django application.
+
+    pip install -r mooc-grader/requirements_gitmanager.txt
+    # If you need to use the old Sphinx version 1.6, then install this one instead:
+    pip install -r mooc-grader/requirements_gitmng_sphinx16.txt
+
 ### 3. Testing grader application
+
+Run the Django app locally:
 
     cd mooc-grader
     python manage.py runserver
 
-In addition, the exercise configuration and grading of individual
-exercises can be tested from command line.
+The exercise configuration and grading of individual
+exercises can be tested from the command line.
 
     python manage.py exercises
     python manage.py grade
@@ -60,7 +79,7 @@ exercises can be tested from command line.
 
 ## Installing the full stack
 
-> 6/2014 - Ubuntu 12.04.4
+> Ubuntu 20.04
 
 ### 0. User account
 
@@ -86,27 +105,6 @@ user account.
 
 Install uwsgi to run WSGI processes. The **mooc-grader directory
 and user must** be set in the configuration files.
-
-#### uWSGI with Upstart (Ubuntu < 15.04) (deprecated)
-
-    source venv/bin/activate
-    pip install uwsgi
-    sudo mkdir -p /etc/uwsgi
-    sudo mkdir -p /var/log/uwsgi
-    sudo cp doc/etc-uwsgi-grader.ini /etc/uwsgi/grader.ini
-    sudo cp doc/etc-init-uwsgi.conf /etc/init/uwsgi.conf
-    # EDIT /etc/uwsgi/grader.ini
-    # EDIT /etc/init/uwsgi.conf
-    sudo touch /var/log/uwsgi/grader.log
-    sudo chown -R [shell-username]:users /etc/uwsgi /var/log/uwsgi
-
-NOTE that the ownership of the log file is required for graceful
-restarts using touch. Operate the workers using:
-
-    sudo status uwsgi
-    sudo start uwsgi
-    # Graceful application reload
-    touch /etc/uwsgi/grader.ini
 
 #### uWSGI with systemd (Ubuntu >= 15.04)
 
@@ -162,6 +160,9 @@ If `gitmanager` is used to update course content via Git operations, enable it i
 Django must install the database schema for the `gitmanager` (Python virtual environment must be activated):
 
     python manage.py migrate
+
+Note that if the file path of the Sqlite database is changed in `local_settings.py`,
+the same path must also be hardcoded in the code `gitmanager/cron.sh`.
 
 The `gitmanager` requires a crontab for the grader account:
 
