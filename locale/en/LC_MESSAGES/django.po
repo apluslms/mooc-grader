@@ -144,14 +144,6 @@ msgid "A+_CONFIGURATION_JSON"
 msgstr "A+ configuration JSON"
 
 #: access/templates/access/course.html
-msgid "BUILD/MAKE_OUTPUT_RETRIEVAL"
-msgstr "Build/make output retrieval"
-
-#: access/templates/access/course.html
-msgid "REQUIRES_GITMANAGER_PLUG-IN"
-msgstr "Requires the gitmanager plugin"
-
-#: access/templates/access/course.html
 msgid "AVAILABLE_EXERCISES"
 msgstr "Available assignments"
 

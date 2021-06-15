@@ -23,18 +23,6 @@
       </a>
     </td>
   </tr>
-  <tr>
-    <td>{% trans "BUILD/MAKE_OUTPUT_RETRIEVAL" %}</td>
-    <td>
-    {% if build_log_url %}
-      <a href="{{ build_log_url }}">
-        {{ build_log_url }}
-      </a>
-    {% else %}
-    <p>{% trans "REQUIRES_GITMANAGER_PLUG-IN" %}</p>
-    {% endif %}
-    </td>
-  </tr>
 </table>
 <h3>{% trans "AVAILABLE_EXERCISES" %}</h3>
 <div class="list-group">

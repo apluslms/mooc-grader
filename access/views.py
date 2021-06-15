@@ -39,7 +39,6 @@ def index(request):
         })
     return render(request, 'access/ready.html', {
         "courses": courses,
-        "manager": 'gitmanager' in settings.INSTALLED_APPS,
     })
 
 
@@ -76,8 +75,6 @@ def course(request, course_key):
             'aplus-json', args=[course_key])),
         'error': error,
     }
-    if "gitmanager" in settings.INSTALLED_APPS:
-        render_context["build_log_url"] = request.build_absolute_uri(reverse("build-log-json", args=(course_key, )))
     return render(request, 'access/course.html', render_context)
 
 
@@ -276,8 +273,6 @@ def aplus_json(request, course_key):
     if errors:
         data["errors"] = errors
 
-    if "gitmanager" in settings.INSTALLED_APPS:
-        data["build_log_url"] = request.build_absolute_uri(reverse("build-log-json", args=(course_key, )))
     return JsonResponse(data)
 
 

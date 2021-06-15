@@ -5,13 +5,6 @@
 <div class="page-header">
 	<h1>{% trans "GRADER_READY" %}</h1>
 </div>
-<p>
-	{% if manager %}
-	<a href="{% url 'manager-repos' %}" class="btn btn-default btn-sm">
-		{% trans "GIT_MANAGER" %}
-	</a>
-	{% endif %}
-</p>
 <h3>{% trans "AVAILABLE_COURSES" %}</h3>
 <div class="list-group">
 	{% for course in courses %}

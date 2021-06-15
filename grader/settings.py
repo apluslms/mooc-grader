@@ -30,9 +30,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'access',
 )
-ADD_APPS = (
-    #'gitmanager',
-)
 
 MIDDLEWARE = [
     # 'django.middleware.security.SecurityMiddleware',
@@ -208,9 +205,6 @@ update_settings_from_environment(__name__, ENV_SETTINGS_PREFIX)
 update_secret_from_file(__name__, environ.get('GRADER_SECRET_KEY_FILE', 'secret_key'))
 update_secret_from_file(__name__, environ.get('GRADER_AJAX_KEY_FILE', 'ajax_key'), setting='AJAX_KEY')
 assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
-
-# update INSTALLED_APPS
-INSTALLED_APPS = INSTALLED_APPS + ADD_APPS
 
 # Drop x-frame policy when debugging
 if DEBUG:

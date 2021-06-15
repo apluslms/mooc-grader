@@ -1,7 +1,0 @@
-# crontab for mooc-grader gitmanager
-# Required for automatic course content updates via git
-# Should be run as the user owning the course directories, typically 'grader'
-# Install: $ sudo crontab -u grader this_file
-
-* * * * * /srv/grader/mooc-grader/gitmanager/cron.sh
-
