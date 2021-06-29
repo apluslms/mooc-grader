@@ -4,7 +4,7 @@ Utility functions for exercise files.
 '''
 from django.conf import settings
 import datetime, random, string, os, shutil, json
-
+from pathlib import Path
 
 META_PATH = os.path.join(settings.SUBMISSION_PATH, "meta")
 if not os.path.exists(META_PATH):
@@ -18,28 +18,74 @@ def random_ascii(length, rng=None):
         rng = random
     return ''.join([rng.choice(string.ascii_letters) for _ in range(length)])
 
-def create_submission_dir(course, exercise):
-    '''
-    Creates a directory for a submission.
+class SubmissionDir:
+    def __init__(self, course, exercise):
+        '''
+        Creates a directory for a submission.
 
-    @type course: C{dict}
-    @param course: a course configuration
-    @type exercise: C{dict}
-    @param exercise: an exercise configuration
-    @rtype: C{str}
-    @return: directory path
-    '''
+        @type course: C{dict}
+        @param course: a course configuration
+        @type exercise: C{dict}
+        @param exercise: an exercise configuration
+        @rtype: C{str}
+        @return: directory path
+        '''
+        # Create a unique directory name for the submission.
+        self.sid = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f") + random_ascii(5)
+        self.subdir = Path(course["key"], exercise["key"], self.sid)
 
-    # Create a unique directory name for the submission.
-    d = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f") + random_ascii(5)
-    submission_dir = os.path.join(settings.SUBMISSION_PATH,
-        course["key"], exercise["key"], d)
+        # Create empty directory.
+        self.dir().mkdir(parents=True, exist_ok=True)
 
-    # Create empty directory.
-    if not os.path.exists(submission_dir):
-        os.makedirs(submission_dir)
+    def dir(self, base_path=settings.SUBMISSION_PATH) -> Path:
+        return Path(base_path, self.subdir)
 
-    return submission_dir
+    def save_file(self, file_name, post_file):
+        '''
+        Saves a submitted file to a submission directory.
+
+        @type file_name: C{str}
+        @param file_name: a file name to write
+        @type post_file: C{django.core.files.uploadedfile.UploadedFile}
+        @param post_file: an uploaded file to save
+        '''
+        file_path = self.file_path(file_name)
+        with open(file_path, "wb+") as f:
+            for chunk in post_file.chunks():
+                f.write(chunk)
+
+    def write_file(self, file_name, content):
+        '''
+        Writes a submission file to a submission directory.
+
+        @type file_name: C{str}
+        @param file_name: a file name to write
+        @type content: C{str}
+        @param content: content to write
+        '''
+        file_path = self.file_path(file_name)
+        with open(file_path, "w+") as f:
+            f.write(content)
+
+    def read_file(self, file_name):
+        file_path = self.file_path(file_name)
+        with open(file_path, "r") as f:
+            return f.read()
+
+    def file_path(self, file_name):
+        '''
+        Creates a submission file path.
+
+        @type file_name: C{str}
+        @param file_name: a file name to write
+        @rtype: C{str}
+        @return: a submission file path
+        '''
+        if not is_safe_file_name(file_name):
+            raise ValueError("Unsafe file name detected")
+        file_path = self.dir() / 'user' / file_name
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        return file_path
 
 
 def clean_submission_dir(submission_dir):
@@ -51,64 +97,6 @@ def clean_submission_dir(submission_dir):
     '''
     if submission_dir.startswith(settings.SUBMISSION_PATH):
         shutil.rmtree(submission_dir)
-
-
-def save_submitted_file(submission_dir, file_name, post_file):
-    '''
-    Saves a submitted file to a submission directory.
-
-    @type submission_dir: C{str}
-    @param submission_dir: directory path
-    @type file_name: C{str}
-    @param file_name: a file name to write
-    @type post_file: C{django.core.files.uploadedfile.UploadedFile}
-    @param post_file: an uploaded file to save
-    '''
-    file_path = submission_file_path(submission_dir, file_name)
-    with open(file_path, "wb+") as f:
-        for chunk in post_file.chunks():
-            f.write(chunk)
-
-
-def write_submission_file(submission_dir, file_name, content):
-    '''
-    Writes a submission file to a submission directory.
-
-    @type submission_dir: C{str}
-    @param submission_dir: directory path
-    @type file_name: C{str}
-    @param file_name: a file name to write
-    @type content: C{str}
-    @param content: content to write
-    '''
-    file_path = submission_file_path(submission_dir, file_name)
-    with open(file_path, "w+") as f:
-        f.write(content)
-
-def read_submission_file(submission_dir, file_name):
-    file_path = submission_file_path(submission_dir, file_name)
-    with open(file_path, "r") as f:
-        return f.read()
-
-
-def submission_file_path(submission_dir, file_name):
-    '''
-    Creates a submission file path.
-
-    @type submission_dir: C{str}
-    @param submission_dir: directory path
-    @type file_name: C{str}
-    @param file_name: a file name to write
-    @rtype: C{str}
-    @return: a submission file path
-    '''
-    if not is_safe_file_name(file_name):
-        raise ValueError("Unsafe file name detected")
-    file_path = os.path.join(submission_dir, 'user', file_name)
-    dir_path = os.path.dirname(file_path)
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    return file_path
 
 
 def is_safe_file_name(file_name):
