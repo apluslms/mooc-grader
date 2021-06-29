@@ -296,7 +296,7 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
         surl_missing = False
     else:
         LOGGER.warning("submission_url missing from a request")
-        surl = request.build_absolute_uri(reverse('test-result'))
+        surl = f'http://{request.META["HOSTNAME"]}:{request.META["SERVER_PORT"]}{reverse("test-result")}'
         surl_missing = True
 
     # Order container for grading.
