@@ -25,12 +25,6 @@ from util.static import symbolic_link
 META = "apps.meta"
 INDEX = "index"
 DEFAULT_LANG = "en"
-#DIR = settings.COURSES_PATH # FIXME: not yet possible. Check settings.py for a comment
-DIR = os.path.join(settings.BASE_DIR, "courses")
-OLD_DIR = os.path.join(settings.BASE_DIR, "exercises")
-if os.path.isdir(OLD_DIR):
-    DIR = OLD_DIR
-DIR = os.path.realpath(DIR) # resolve symlinks
 
 LOGGER = logging.getLogger('main')
 
@@ -80,12 +74,12 @@ class ConfigParser:
         '''
 
         # Find all courses if exercises directory is modified.
-        t = os.path.getmtime(DIR)
+        t = os.path.getmtime(settings.COURSES_PATH)
         if self._dir_mtime < t:
             self._courses.clear()
             self._dir_mtime = t
             LOGGER.debug('Recreating course list.')
-            for item in os.listdir(DIR):
+            for item in os.listdir(settings.COURSES_PATH):
                 try:
                     self._course_root(item)
                 except ConfigError:
@@ -195,9 +189,9 @@ class ConfigParser:
                 pass
 
         LOGGER.debug('Loading course "%s"' % (course_key))
-        meta = read_meta(os.path.join(DIR, course_key, META))
+        meta = read_meta(os.path.join(settings.COURSES_PATH, course_key, META))
         try:
-            f = self._get_config(os.path.join(self._conf_dir(DIR, course_key, meta), INDEX))
+            f = self._get_config(os.path.join(self._conf_dir(settings.COURSES_PATH, course_key, meta), INDEX))
         except ConfigError:
             return None
 
@@ -211,7 +205,7 @@ class ConfigParser:
         self._check_fields(f, data, ["name"])
         data["key"] = course_key
         data["mtime"] = t
-        data["dir"] = self._conf_dir(DIR, course_key, {})
+        data["dir"] = self._conf_dir(settings.COURSES_PATH, course_key, {})
 
         if "static_url" not in data:
             data["static_url"] = "{}{}{}/".format(
@@ -259,7 +253,7 @@ class ConfigParser:
             "exercise_loader": exercise_loader,
             "exercises": {}
         }
-        symbolic_link(DIR, data)
+        symbolic_link(settings.COURSES_PATH, data)
         return course_root
 
 
@@ -288,7 +282,7 @@ class ConfigParser:
         # Try cached version.
         if exercise_key in course_root["exercises"]:
             exercise_root = course_root["exercises"][exercise_key]
-            course_dir = self._conf_dir(DIR, course_root["data"]["key"], course_root["meta"])
+            course_dir = self._conf_dir(settings.COURSES_PATH, course_root["data"]["key"], course_root["meta"])
             include_ok, include_file_timestamp = self._check_include_file_timestamps(
                 exercise_root,
                 course_dir,
@@ -308,13 +302,13 @@ class ConfigParser:
             f, t, data = course_root["exercise_loader"](
                 course_root,
                 file_name[1:],
-                self._conf_dir(DIR, course_root["data"]["key"], {})
+                self._conf_dir(settings.COURSES_PATH, course_root["data"]["key"], {})
             )
         else:
             f, t, data = course_root["exercise_loader"](
                 course_root,
                 file_name,
-                self._conf_dir(DIR, course_root["data"]["key"], course_root["meta"])
+                self._conf_dir(settings.COURSES_PATH, course_root["data"]["key"], course_root["meta"])
             )
         if not data:
             return None
@@ -486,7 +480,7 @@ class ConfigParser:
                     # Load new data from rendered include file string
                     render_context = include_data["template_context"]
                     template_name = os.path.join(course_dir, include_file)
-                    template_name = template_name[len(DIR)+1:] # FIXME: XXX: NOTE: TODO: Fix this hack
+                    template_name = template_name[len(settings.COURSES_PATH)+1:] # FIXME: XXX: NOTE: TODO: Fix this hack
                     rendered = django_template_loader.render_to_string(
                                 template_name,
                                 render_context
@@ -594,6 +588,6 @@ class ConfigParser:
 config = ConfigParser()
 
 # We are probably developing a course if only single course is detected. Pre-read configuration in the case.
-if len(next(os.walk(DIR))[1]) == 1:
+if len(next(os.walk(settings.COURSES_PATH))[1]) == 1:
     LOGGER.info('Only single course detected. Pre-reading course configuration.')
     config.courses()

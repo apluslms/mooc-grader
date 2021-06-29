@@ -36,7 +36,7 @@ from util.shell import invoke
 from util.templates import render_configured_template, render_template, \
     template_to_str
 from .auth import make_hash, get_uid
-from ..config import ConfigError, DIR
+from ..config import ConfigError
 
 
 LOGGER = logging.getLogger('main')
@@ -328,7 +328,7 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
         sid,
         request.scheme + "://" + request.get_host(),
         c["image"],
-        os.path.join(DIR, course["key"], c["mount"]),
+        os.path.join(settings.COURSES_PATH, course["key"], c["mount"]),
         sdir,
         c["cmd"],
         json.dumps(course_extra),

@@ -24,7 +24,7 @@ class ConfigTestCase(TestCase):
 
     def setUp(self):
         import access
-        access.config.DIR = os.path.join(os.path.dirname(__file__), 'test_data')
+        settings.COURSES_PATH = os.path.join(os.path.dirname(__file__), 'test_data')
         self.config = ConfigParser()
 
     def get_course_key(self):
