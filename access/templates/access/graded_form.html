@@ -138,7 +138,7 @@
 					{% endif %}
 					{# end of correct answer #}
 				{% else %}
-					{% if field.field.type == "checkbox" and choice.data.value in field.value and field.field.hints %}
+					{% if field.field.type == "checkbox" and field.field.checkbox_feedback and choice.data.value in field.value and field.field.hints %}
 						<div>
 							{% with hint=field.field.hints|find_checkbox_hints:choice.data.value %}
 								{% if hint %}
@@ -168,7 +168,7 @@
 		{% if result.accepted and not result.form.enrollment_exercise and not result.model_answer and not field.field.row_label or field.field.close_table %}
 			<!-- Question feedback -->
 			<div>
-				{% if field.field.type == "checkbox" %}
+				{% if field.field.type == "checkbox" and field.field.checkbox_feedback %}
 					{% include "access/graded_form_feedback.html" with field=field.field hints=field.field.hints|find_common_hints:field.value %}
 				{% else %}
 					{% include "access/graded_form_feedback.html" with field=field.field hints=field.field.hints %}

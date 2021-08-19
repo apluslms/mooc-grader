@@ -280,6 +280,8 @@ class GradedForm(forms.Form):
         field.points = config.get('points', 0)
         field.choice_list = choices is not None and widget_class != forms.Select
         field.neutral = neutral
+        if field.type == 'checkbox' and config.get('checkbox_feedback', False):
+            field.checkbox_feedback = True
 
         if correct:
             field.correct = correct
@@ -349,15 +351,25 @@ class GradedForm(forms.Form):
         return config.get("value", "option_{:d}".format(i))
 
     def append_hint(self, hints, configuration):
-        # The old definition of hint per option.
+        # Deprecated: hint defined under the option.
         hint = str(configuration.get('hint', ''))
         if hint and not hint in hints:
             hints.append(hint)
 
-    def append_hint_checkbox(self, hints, configuration):
+    def append_hint_checkbox(self, hints, configuration, checkbox_feedback=False, selected=True):
+        # Deprecated: hint defined under the option.
         hint = str(configuration.get('hint', ''))
-        if hint and not hint in hints:
-            hints['hint'] = hint
+        if hint:
+            if checkbox_feedback:
+                if selected:
+                    if hint not in hints.values():
+                        hints[configuration.get('value', '')] = hint
+                else:
+                    hints['not'] = hints.get('not') or OrderedDict()
+                    if hint not in hints['not'].values():
+                        hints['not'][configuration.get('value', '')] = hint
+            elif hint not in hints:
+                hints.append(hint)
 
     def is_enrollment_exercise(self):
         return self.exercise.get('status', '') in ('enrollment', 'enrollment_ext')
@@ -557,13 +569,10 @@ class GradedForm(forms.Form):
 
         name = self.field_name(i, configuration)
         value = self.cleaned_data.get(name, None)
+        checkbox_feedback = configuration.get('checkbox_feedback', False)
 
         if t == "checkbox":
             ok, correct_count, hints, method = self.grade_checkbox(configuration, value, name=name)
-            if not hints:
-                # checkbox-hints are in an OrderedDict to enable linking
-                # the hints efficiently to the related option
-                hints = OrderedDict()
         elif t == "radio" or t == "dropdown" or t == "select":
             ok, hints, method = self.grade_radio(configuration, value)
         elif t == "text" or t == "textarea":
@@ -620,14 +629,19 @@ class GradedForm(forms.Form):
                 add = not r if fb.get('not', False) else r
 
             # Checkbox-hints should be linkable with their options:
-            if t == "checkbox" and add:
+            if t == "checkbox" and checkbox_feedback and add:
                 if fb.get('not'):
                     hints['not'] = hints.get('not') or OrderedDict()
                     hints['not'][fb.get('value', '')] = new_hint
                 else:
                     hints[fb.get('value', '')] = new_hint
 
-            if t != "checkbox" and add:
+            elif add:
+                # If a student would be shown two feedback items,
+                # one of which is a prefix of the other, only the longer feedback
+                # shall be shown. And as a special case of that rule, if
+                # two or more feedback messages (for different checkboxes
+                # in the same question) are identical, only one copy is shown.
                 for j in range(len(hints)):
                     if new_hint.startswith(hints[j]):
                         hints[j] = new_hint
@@ -636,12 +650,18 @@ class GradedForm(forms.Form):
                     elif hints[j].startswith(new_hint):
                         add = False
                         break
+                if add:
+                    hints.append(new_hint)
 
-            if t != "checkbox" and add:
-                hints.append(new_hint)
 
-        if t == "checkbox" and correct_count > 1:
-            hints['multiple'] = _('Multiple choices are selectable')
+        if t == "checkbox" and not ok and correct_count > 1 and len(value) == 1:
+            # Show this hint in checkbox questions when the answer is not
+            # completely correct, contains only one selected option and
+            # the correct answer contains multiple options.
+            if checkbox_feedback:
+                hints['multiple'] = _('Multiple choices are selectable')
+            else:
+                hints.append(_('Multiple choices are selectable'))
 
         if name in self.fields:
             self.fields[name].grade_points = earned_points
@@ -665,7 +685,16 @@ class GradedForm(forms.Form):
         return { 'options': opt }
 
     def grade_checkbox(self, configuration, value, hints=None, name=''):
-        hints = hints or OrderedDict()
+        checkbox_feedback = configuration.get('checkbox_feedback', False)
+        if not hints:
+            if checkbox_feedback:
+                # checkbox-hints are in an OrderedDict to enable linking
+                # the hints efficiently to the related option
+                hints = OrderedDict()
+            else:
+                # hints are shown in a list under all checkboxes
+                hints = []
+
         correct_count = 0
         wrong_answers = 0
         non_neutral_count = 0
@@ -690,16 +719,16 @@ class GradedForm(forms.Form):
                     if name not in value:
                         wrong_answers += 1
                         correct = False
-                        self.append_hint_checkbox(hints, opt)
+                        self.append_hint_checkbox(hints, opt, checkbox_feedback, False)
                 elif correct_answer is False:
                     non_neutral_count += 1
                     if value is not None and name in value:
                         correct = False
                         wrong_answers += 1
-                        self.append_hint_checkbox(hints, opt)
+                        self.append_hint_checkbox(hints, opt, checkbox_feedback, True)
                 elif correct_answer == "neutral":
                     if value is not None and name in value:
-                        self.append_hint_checkbox(hints, opt)
+                        self.append_hint_checkbox(hints, opt, checkbox_feedback, True)
             i += 1
 
         # If partial_points are set, the variable 'correct' becomes a float
