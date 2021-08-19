@@ -599,9 +599,6 @@ class GradedForm(forms.Form):
         else:
             earned_points = 0
 
-        # Check if the field is fully correct
-        answer_correct = (earned_points==points)
-
         # Apply new feedback definitions.
         methods = method.split("-")
         mods = methods[1:]
@@ -667,7 +664,7 @@ class GradedForm(forms.Form):
             self.fields[name].grade_points = earned_points
             self.fields[name].max_points = points
             self.fields[name].hints = hints
-            self.fields[name].answer_correct = answer_correct
+            self.fields[name].answer_correct = ok
 
         return i + 1, ok, earned_points
 
