@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-01 11:44+0000\n"
+"POT-Creation-Date: 2021-08-20 15:17+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Markku Riekkinen <markku.riekkinen@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -313,8 +313,12 @@ msgid "Correct!"
 msgstr "Oikein!"
 
 #: access/templates/access/graded_form_feedback.html
-msgid "Incorrect. You can check the correct options above."
-msgstr "Vastauksesi on väärin. Yllä näet oikeat vastaukset."
+msgid "Incorrect."
+msgstr "Vastauksesi on väärin."
+
+#: access/templates/access/graded_form_feedback.html
+msgid "You can check the correct options above."
+msgstr "Yllä näet oikeat vastaukset."
 
 #: access/templates/access/graded_form_feedback.html
 msgid ""
@@ -322,8 +326,9 @@ msgid ""
 msgstr "Kysymysmerkillä merkityt vaihtoehdot eivät vaikuta kokonaispisteisiin."
 
 #: access/templates/access/graded_form_feedback.html
-msgid "Incorrect. The correct answer is"
-msgstr "Vastauksesi on väärin. Oikea vastaus on"
+#, python-format
+msgid "The correct answer is: %(correct)s"
+msgstr "Oikea vastaus on: %(correct)s"
 
 #: access/templates/access/personalized_content_default.html
 msgid "Download"
