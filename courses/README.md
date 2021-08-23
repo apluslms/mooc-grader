@@ -290,6 +290,15 @@ course specific exercise view in a course specific Python module.
 				resampled or preserved after a submission attempt in a `randomized`
 				question? `true` by default, which means that the choices are resampled
 				after attempts.
+			* `checkbox_feedback` (optional): boolean. If true, feedback (hints) for
+				a selected checkbox is rendered right under the checkbox so that
+				it is obvious which checkbox triggered the feedback/hint.
+				The inverse feedback (when the option is not selected, `not: true`
+				under the `feedback` field) is still rendered under the question
+				after all checkboxes. This option may only be used when
+				`type: checkbox` is set.
+				`False` by default, which means all feedback is rendered after
+				all checkboxes.
 	* `template` (default `access/create_form_default.html`): name of a template to present
 	* `accepted_message` (optional): overrides the default message displayed when
 		submission is accepted
