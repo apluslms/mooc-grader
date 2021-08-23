@@ -165,7 +165,7 @@
 			<!-- End of a text-field -->
 			{% endif %}
 
-		{% if result.accepted and not result.form.enrollment_exercise and not result.model_answer and not field.field.row_label or field.field.close_table %}
+		{% if result.accepted and not result.form.enrollment_exercise and not exercise.feedback and not result.model_answer and not field.field.row_label or field.field.close_table %}
 			<!-- Question feedback -->
 			<div>
 				{% if field.field.type == "checkbox" and field.field.checkbox_feedback %}
