@@ -1,4 +1,4 @@
 # For building course materials in the MOOC-Grader gitmanager
-Sphinx~=4.0.1
+Sphinx~=4.1.2
 PyYAML~=5.4.1
 recommonmark~=0.7.1
