@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-23 13:54+0000\n"
+"POT-Creation-Date: 2021-08-25 13:30+0000\n"
 "PO-Revision-Date: 2021-08-23 13:54+0000\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: English <>\n"
@@ -19,155 +19,106 @@ msgstr ""
 
 #: access/templates/access/_error_summary.html
 #: access/templates/access/async_accepted.html
-msgid "Submission failed"
+msgid "SUBMISSION_FAILED"
 msgstr "Submission failed"
 
 #: access/templates/access/_error_summary.html
-msgid "Check your answers before trying again:"
+msgid "CHECK_ANSWERS_BEFORE_TRYING_AGAIN"
 msgstr "Check your answers before trying again:"
 
 #: access/templates/access/accept_files_default.html
-msgid "Select your files for grading"
+msgid "SELECT_FILES_FOR_GRADING"
 msgstr "Select your files for grading"
 
 #: access/templates/access/accept_files_form.html
+#: access/templates/access/accept_general_form.html
 #, python-format
-msgid ""
-"\n"
-"\t\t\tSubmit only %(num_files)s of the following files.\n"
-"\t\t"
-msgstr ""
-"\n"
-"\t\t\tSubmit only %(num_files)s of the following files.\n"
-"\t\t"
+msgid "SUBMIT_ONLY_NUM_FILES_OF_FOLLOWING -- %(num_files)s"
+msgstr "Submit only %(num_files)s of the following files."
 
 #: access/templates/access/accept_files_form.html
 #: access/templates/access/accept_general_form.html
 #: access/templates/access/accept_git_form.html
 #: access/templates/access/accept_post_form.html
 #: access/templates/access/graded_form.html
-msgid "Submit"
+msgid "SUBMIT"
 msgstr "Submit"
 
 #: access/templates/access/accept_general_default.html
 #: access/templates/access/accept_post_default.html
-msgid "Enter your submission"
+msgid "ENTER_SUBMISSION"
 msgstr "Enter your submission"
 
-#: access/templates/access/accept_general_form.html
-#, python-format
-msgid ""
-"\n"
-"\t\t\t\tSubmit only %(num_files)s of the following files.\n"
-"\t\t\t"
-msgstr ""
-"\n"
-"\t\t\t\tSubmit only %(num_files)s of the following files.\n"
-"\t\t\t"
-
 #: access/templates/access/accept_git_form.html
-msgid "Enter your Git repository address for grading"
+msgid "GIT_ENTER_REPOSITORY_ADDRESS"
 msgstr "Enter your Git repository address for grading"
 
 #: access/templates/access/accept_git_form.html
 #: access/templates/access/accept_git_user.html
-msgid "Did you remember git add - git commit - git push?"
+msgid "GIT_WORKFLOW_REMINDER"
 msgstr "Did you remember git add - git commit - git push?"
 
 #: access/templates/access/accept_git_user.html
-msgid "Enter your user id for grading"
+msgid "GIT_ENTER_USER_ID"
 msgstr "Enter your user id for grading"
 
 #: access/templates/access/accept_git_user.html
-msgid "Request grading of my repository"
+msgid "GIT_REQUEST_GRADING_OF_REPO"
 msgstr "Request grading of my repository"
 
 #: access/templates/access/active_element_default.html
 #: access/templates/access/exercise_frame.html
-msgid "Invalid address entered."
+msgid "ERROR_INVALID_ADDRESS"
 msgstr "Invalid address entered."
 
 #: access/templates/access/active_element_default.html
-msgid ""
-"The same form can obly be submitted once. Start again from exercise "
-"description."
+msgid "ERROR_FORM_CAN_BE_SUBMITTED_ONLY_ONCE"
 msgstr ""
 "The same form can obly be submitted once. Start again from exercise "
 "description."
 
 #: access/templates/access/active_element_default.html
 #: access/templates/access/exercise_frame.html
-msgid "Missing required fields."
+msgid "ERROR_MISSING_REQUIRED_FIELDS"
 msgstr "Missing required fields."
 
 #: access/templates/access/active_element_feedback.html
 #: access/templates/access/task_success.html
 #, python-format
-msgid ""
-"\n"
-"\t\tPoints %(points)s/%(max_points)s\n"
-"\t\t"
-msgstr ""
-"\n"
-"\t\tPoints %(points)s/%(max_points)s\n"
-"\t\t"
+msgid "POINTS -- %(points)s, %(max_points)s"
+msgstr "Points %(points)s/%(max_points)s"
 
 #: access/templates/access/ajax.html
 #, python-format
-msgid ""
-"\n"
-"You got %(points)s/%(max_points)s for your answer.\n"
-msgstr ""
-"\n"
-"You got %(points)s/%(max_points)s for your answer.\n"
+msgid "POINTS_YOU_GOT -- %(points)s, %(max_points)s"
+msgstr "You got %(points)s/%(max_points)s for your answer."
 
 #: access/templates/access/async_accepted.html
-msgid ""
-"\n"
-"\tThe grading queue is not configured. This submission was graded\n"
-"\tsynchronously while blocking other services. NOT READY FOR PRODUCTION!\n"
-"\t"
+msgid "WARNING_GRADING_WAS_SYNCHRONOUS"
 msgstr ""
-"\n"
-"\tThe grading queue is not configured. This submission was graded\n"
-"\tsynchronously while blocking other services. NOT READY FOR PRODUCTION!\n"
-"\t"
+"The grading queue is not configured. This submission was graded "
+"synchronously while blocking other services. NOT READY FOR PRODUCTION!"
 
 #: access/templates/access/async_accepted.html
-msgid ""
-"\n"
-"\t\tError occurred while handling the submission. Please, contact course "
-"staff.\n"
-"\t\t"
+msgid "ERROR_OCCURED_CONTACT_STAFF"
 msgstr ""
-"\n"
-"\t\tError occurred while handling the submission. Please, contact course "
-"staff.\n"
-"\t\t"
+"Error occurred while handling the submission. Please, contact course staff."
 
 #: access/templates/access/async_accepted.html
-msgid "Submission received"
+msgid "SUBMISSION_RECEIVED"
 msgstr "Submission received"
 
 #: access/templates/access/async_accepted.html
 #, python-format
 msgid ""
-"\n"
-"\tMissing the <code>%(key)s</code> for result delivery!\n"
-"  The result can be temporarily seen at <a href=\"%(url)s\">%(url)s</a>.\n"
-"\t"
+"WARNING_MISSING_CODE_FOR_RESULT_DELIVERY_TEMPORARY_AVAILABLE -- %(key)s, "
+"%(url)s"
 msgstr ""
-"\n"
-"\tMissing the <code>%(key)s</code> for result delivery!\n"
-"  The result can be temporarily seen at <a href=\"%(url)s\">%(url)s</a>.\n"
-"\t"
+"Missing the <code>%(key)s</code> for result delivery! The result can be "
+"temporarily seen at <a href=\"%(url)s\">%(url)s</a>."
 
 #: access/templates/access/async_accepted.html
-msgid ""
-"Your submission is being graded. The result will be available on this page "
-"when the grading process completes. Note that the grading may take a while. "
-"You might also need to update the page manually in order to see the results. "
-"You may close this message."
+msgid "SUBMISSION_IN_GRADING_NOW"
 msgstr ""
 "Your submission is being graded. The result will be available on this page "
 "when the grading process completes. Note that the grading may take a while. "
@@ -176,11 +127,7 @@ msgstr ""
 
 #: access/templates/access/async_accepted.html
 #, python-format
-msgid ""
-"Your submission is in the grading queue. There are %(queue)s other "
-"submissions before. The result will be available on this page when the "
-"grading process completes. The page must be updated manually to see the "
-"results."
+msgid "SUBMISSION_IN_GRADING_QUEUE -- %(queue)s"
 msgstr ""
 "Your submission is in the grading queue. There are %(queue)s other "
 "submissions before. The result will be available on this page when the "
@@ -188,235 +135,163 @@ msgstr ""
 "results."
 
 #: access/templates/access/course.html
-msgid "Service URLs for A+"
+msgid "SERVICE_URLS_FOR_A+"
 msgstr "Service URLs for A+"
 
 #: access/templates/access/course.html
-msgid "A+ configuration JSON"
+msgid "A+_CONFIGURATION_JSON"
 msgstr "A+ configuration JSON"
 
 #: access/templates/access/course.html
-msgid "Build/make output retrieval"
+msgid "BUILD/MAKE_OUTPUT_RETRIEVAL"
 msgstr "Build/make output retrieval"
 
 #: access/templates/access/course.html
-msgid "Requires the gitmanager plugin"
+msgid "REQUIRES_GITMANAGER_PLUG-IN"
 msgstr "Requires the gitmanager plugin"
 
 #: access/templates/access/course.html
-msgid "Available exercises"
+msgid "AVAILABLE_EXERCISES"
 msgstr "Available exercises"
 
 #: access/templates/access/create_form_default.html
-msgid ""
-"The whole section within the black line is marked as being incorrect, if one "
-"of the questions incorrect."
+msgid "WHOLE_SECTION_WITHIN_LINE_MARKED_AS_INCORRECT"
 msgstr ""
 "The whole section within the black line is marked as being incorrect, if one "
 "of the questions incorrect."
 
 #: access/templates/access/exercise_config_error.html
-msgid ""
-"The exercise configuration has an error. Please, notify the course staff and "
-"provide the following message:"
+msgid "EXERCISE_CONFIGURATION_ERROR_NOTIFY_COURSE_STAFF_WITH_MESSAGE"
 msgstr ""
 "The exercise configuration has an error. Please, notify the course staff and "
 "provide the following message:"
 
 #: access/templates/access/exercise_frame.html
 #, python-format
-msgid ""
-"\n"
-"\t\t\tYou must submit %(num_files)s file.\n"
-"\t\t\t"
-msgid_plural ""
-"\n"
-"\t\t\tYou must submit %(num_files)s files.\n"
-"\t\t\t"
-msgstr[0] ""
-"\n"
-"\t\t\tYou must submit %(num_files)s file.\n"
-"\t\t\t"
-msgstr[1] ""
-"\n"
-"\t\t\tYou must submit %(num_files)s files.\n"
-"\t\t\t"
+msgid "ERROR_SUBMIT_NUM_FILES_SINGULAR -- %(num_files)s"
+msgid_plural "ERROR_SUBMIT_NUM_FILES_PLURAL -- %(num_files)s"
+msgstr[0] "You must submit %(num_files)s file."
+msgstr[1] "You must submit %(num_files)s files."
 
 #: access/templates/access/exercise_frame.html
-msgid "Every file is required for a submission."
+msgid "ERROR_EVERY_FILE_REQUIRED"
 msgstr "Every file is required for a submission."
 
 #: access/templates/access/exercise_frame.html
-msgid "Missing or invalid checksum. Do not tamper with the hidden form fields!"
+msgid "ERROR_INVALID_CHECKSUM"
 msgstr ""
 "Missing or invalid checksum. Do not tamper with the hidden form fields!"
 
 #: access/templates/access/feedback_template_did_not_use_result_alert.html
-msgid ""
-"\n"
-"    <p>\n"
-"        The feedback template did not access the <code>result</code> dict. "
-"This\n"
-"        means that the feedback shown below is likely inadequate or "
-"missing.\n"
-"        The template should access at least one of <code>points</code>,\n"
-"        <code>max_points</code>, <code>error</code> or <code>out</code>. "
-"Please\n"
-"        check the <code>feedback_template</code> specified in the exercise "
-"YAML.\n"
-"    </p><p>\n"
-"        If you are a student, please tell course staff what you were doing\n"
-"        before you got this message, and the content of this message.\n"
-"    </p>\n"
-"    "
+msgid "WARNING_FEEDBACK_DID_NOT_ACCESS_RESULT"
 msgstr ""
-"\n"
-"    <p>\n"
-"        The feedback template did not access the <code>result</code> dict. "
-"This\n"
-"        means that the feedback shown below is likely inadequate or "
-"missing.\n"
-"        The template should access at least one of <code>points</code>,\n"
-"        <code>max_points</code>, <code>error</code> or <code>out</code>. "
-"Please\n"
-"        check the <code>feedback_template</code> specified in the exercise "
-"YAML.\n"
-"    </p><p>\n"
-"        If you are a student, please tell course staff what you were doing\n"
-"        before you got this message, and the content of this message.\n"
-"    </p>\n"
-"    "
+"<p>\n"
+"The feedback template did not access the <code>result</code> dict. This "
+"means that the feedback shown below is likely inadequate or missing. The "
+"template should access at least one of <code>points</code>, "
+"<code>max_points</code>, <code>error</code> or <code>out</code>. Please "
+"check the <code>feedback_template</code> specified in the exercise YAML.\n"
+"</p>\n"
+"<p>\n"
+"If you are a student, please tell course staff what you were doing before "
+"you got this message, and the content of this message.\n"
+"</p> "
 
 #: access/templates/access/graded_form.html
 #: access/templates/access/graded_form_feedback.html
-msgid "Incorrect"
+msgid "INCORRECT"
 msgstr "Incorrect"
 
 #: access/templates/access/graded_form.html
-msgid "Correct"
+msgid "CORRECT"
 msgstr "Correct"
 
 #: access/templates/access/graded_form.html
 #, python-format
-msgid ""
-"\n"
-"\t\t\t\t%(points)s point\n"
-"\t\t\t\t"
-msgid_plural ""
-"\n"
-"\t\t\t\t%(points)s points\n"
-"\t\t\t\t"
-msgstr[0] ""
-"\n"
-"\t\t\t\t%(points)s point\n"
-"\t\t\t\t"
-msgstr[1] ""
-"\n"
-"\t\t\t\t%(points)s points\n"
-"\t\t\t\t"
+msgid "POINTS_SINGULAR -- %(points)s"
+msgid_plural "POINTS_PLURAL -- %(points)s"
+msgstr[0] "%(points)s point"
+msgstr[1] "%(points)s points"
 
 #: access/templates/access/graded_form.html
-msgid "neutral option which does not affect grading"
+msgid "NEUTRAL_OPTION_DESCRIPTION"
 msgstr "neutral option which does not affect grading"
 
 #: access/templates/access/graded_form_feedback.html
-msgid "Correct!"
+msgid "FEEDBACK_CORRECT_WITH_PUNCTUATION"
 msgstr "Correct!"
 
 #: access/templates/access/graded_form_feedback.html
-msgid "Incorrect."
+msgid "FEEDBACK_INCORRECT_WITH_PUNCTUATION"
 msgstr "Incorrect."
 
 #: access/templates/access/graded_form_feedback.html
-msgid "You can check the correct options above."
+msgid "YOU_CAN_CHECK_CORRECT_ANSWERS_ABOVE"
 msgstr "You can check the correct options above."
 
 #: access/templates/access/graded_form_feedback.html
-msgid ""
-"Neutral options which do not affect grading are marked with a question mark."
+msgid "NEUTRAL_ANSWERS_MARKED_WITH_QUESTION_MARK"
 msgstr ""
 "Neutral options which do not affect grading are marked with a question mark."
 
 #: access/templates/access/graded_form_feedback.html
 #, python-format
-msgid "The correct answer is: %(correct)s"
+msgid "CORRECT_ANSWER_IS -- %(correct)s"
 msgstr "The correct answer is: %(correct)s"
 
 #: access/templates/access/personalized_content_default.html
-msgid "Download"
+msgid "DOWNLOAD"
 msgstr "Download"
 
 #: access/templates/access/ready.html
-msgid "Grader ready"
+msgid "GRADER_READY"
 msgstr "Grader ready"
 
 #: access/templates/access/ready.html
-msgid "Git manager"
+msgid "GIT_MANAGER"
 msgstr "Git manager"
 
 #: access/templates/access/ready.html
-msgid "Available courses"
+msgid "AVAILABLE_COURSES"
 msgstr "Available courses"
 
 #: access/templates/access/task_success.html
 #, python-format
-msgid ""
-"\n"
-"\t\tTotal points %(points)s/%(max_points)s\n"
-"\t\t"
-msgstr ""
-"\n"
-"\t\tTotal points %(points)s/%(max_points)s\n"
-"\t\t"
+msgid "TOTAL_POINTS -- %(points)s, %(max_points)s"
+msgstr "Total points %(points)s/%(max_points)s"
 
 #: access/templates/access/task_success.html
-msgid "Appendixes"
+msgid "APPENDIXES"
 msgstr "Appendixes"
 
 #: access/templates/access/task_system_error.html
-msgid "Internal server error"
+msgid "INTERNAL_SERVER_ERROR"
 msgstr "Internal server error"
 
 #: access/templates/access/task_system_error.html
-msgid ""
-"\n"
-"        Ooops, there seems to be problems in the system!\n"
-"        Sorry for your inconvenience.\n"
-"        Please try again later or contact course support.\n"
-"        "
+msgid "INTERNAL_SERVER_ERROR_DESCRIPTION"
 msgstr ""
-"\n"
-"        Ooops, there seems to be problems in the system!\n"
-"        Sorry for your inconvenience.\n"
-"        Please try again later or contact course support.\n"
-"        "
+"Ooops, there seems to be problems in the system! Sorry for your "
+"inconvenience. Please try again later or contact course support. "
 
 #: access/templates/access/task_timeout.html
-msgid "Time out while grading"
+msgid "TIMEOUT_WHILE_GRADING"
 msgstr "Time out while grading"
 
 #: access/templates/access/task_timeout.html
-msgid ""
-"\n"
-"        Ooops, the grading of your submission timed out!\n"
-"        Sorry for your inconvenience.\n"
-"        Please try again later or contact course support.\n"
-"        "
+msgid "TIMEOUT_WHILE_GRADING_DESCRIPTION"
 msgstr ""
-"\n"
-"        Ooops, the grading of your submission timed out!\n"
-"        Sorry for your inconvenience.\n"
-"        Please try again later or contact course support.\n"
-"        "
+"Ooops, the grading of your submission timed out! Sorry for your "
+"inconvenience. Please try again later or contact course support. "
 
 #: access/types/forms.py
-msgid "Multiple choices are selectable"
+msgid "HINT_MULTIPLE_CHOICES_SELECTABLE"
 msgstr "Multiple choices are selectable"
 
 #: access/types/forms.py
-msgid "Multiple correct answers accepted."
+msgid "HINT_MULTIPLE_CORRECT_ANSWERS_ACCEPTED"
 msgstr "Multiple correct answers accepted."
 
 #: access/types/forms.py
-msgid "Correct parts in your answer: "
+msgid "HINT_CORRECT_PARTS_IN_YOUR_ANSWER"
 msgstr "Correct parts in your answer: "

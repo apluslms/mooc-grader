@@ -656,9 +656,9 @@ class GradedForm(forms.Form):
             # completely correct, contains only one selected option and
             # the correct answer contains multiple options.
             if checkbox_feedback:
-                hints['multiple'] = _('Multiple choices are selectable')
+                hints['multiple'] = _('HINT_MULTIPLE_CHOICES_SELECTABLE')
             else:
-                hints.append(_('Multiple choices are selectable'))
+                hints.append(_('HINT_MULTIPLE_CHOICES_SELECTABLE'))
 
         if name in self.fields:
             self.fields[name].grade_points = earned_points
@@ -853,11 +853,11 @@ class GradedForm(forms.Form):
 def get_subdiff_hints(value, all_solutions):
     solutions = all_solutions.split('|')
     if len(solutions) > 1:
-        matching_parts = [_("Multiple correct answers accepted.")]
+        matching_parts = [_('HINT_MULTIPLE_CORRECT_ANSWERS_ACCEPTED')]
     else:
         matching_parts = []
     for solution in solutions:
-        parts = _("Correct parts in your answer: ")
+        parts = _('HINT_CORRECT_PARTS_IN_YOUR_ANSWER')
         matches = difflib.SequenceMatcher(None, value, solution).get_matching_blocks()
         i = 0
         for match in matches:

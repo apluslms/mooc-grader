@@ -7,8 +7,8 @@
 		{% endif %}
 
 		{% if entry.points > 0 and entry.max_points > 0 %}
-		{% blocktrans with points=entry.points max_points=entry.max_points %}
-		Points {{ points }}/{{ max_points }}
+		{% blocktrans trimmed with points=entry.points max_points=entry.max_points %}
+			POINTS -- {{ points }}, {{ max_points }}
 		{% endblocktrans %}
 		{% endif %}
 

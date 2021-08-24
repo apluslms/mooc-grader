@@ -17,32 +17,32 @@
 		{% if result.missing_files %}
 		<div class="alert alert-danger">
 		{% if exercise.required_number_of_files %}
-			{% blocktrans count num_files=exercise.required_number_of_files %}
-			You must submit {{ num_files }} file.
+			{% blocktrans trimmed count num_files=exercise.required_number_of_files %}
+				ERROR_SUBMIT_NUM_FILES_SINGULAR -- {{ num_files }}
 			{% plural %}
-			You must submit {{ num_files }} files.
+				ERROR_SUBMIT_NUM_FILES_PLURAL -- {{ num_files }}
 			{% endblocktrans %}
 		{% else %}
-			{% trans "Every file is required for a submission." %}
+			{% trans "ERROR_EVERY_FILE_REQUIRED" %}
 		{% endif %}
 		</div>
 		{% endif %}
 
 		{% if result.invalid_address %}
 		<div class="alert alert-danger">
-		{% trans "Invalid address entered." %}
+		{% trans "ERROR_INVALID_ADDRESS" %}
 		</div>
 		{% endif %}
 
 		{% if result.fields %}
 		<div class="alert alert-danger">
-		{% trans "Missing required fields." %}
+		{% trans "ERROR_MISSING_REQUIRED_FIELDS" %}
 		</div>
 		{% endif %}
 
 		{% if result.invalid_checksum %}
 		<div class="alert alert-danger">
-		{% trans "Missing or invalid checksum. Do not tamper with the hidden form fields!" %}
+		{% trans "ERROR_INVALID_CHECKSUM" %}
 		</div>
 		{% endif %}
 

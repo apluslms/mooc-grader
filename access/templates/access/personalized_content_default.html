@@ -3,7 +3,7 @@
 {% if exercise.personalized %}
 	{% for key, entry in generated_files.items %}
 		{% if entry.url_in_template and entry.allow_download %}
-			<p>{% trans "Download" %} <a href="{{ entry.url }}">{{ entry.file }}</a>.</p>
+			<p>{% trans "DOWNLOAD" %} <a href="{{ entry.url }}">{{ entry.file }}</a>.</p>
 		{% endif %}
 		{% if entry.content_in_template %}
 			<p>

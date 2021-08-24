@@ -46,9 +46,9 @@
 					{% if field.field.max_points == 0 %}
 					<span class="sr-only">
 					{% if field.field.name in result.error_fields %}
-						{% trans "Incorrect" %}
+						{% trans "INCORRECT" %}
 					{% else %}
-						{% trans "Correct" %}
+						{% trans "CORRECT" %}
 					{% endif %}
 					</span>
 					{% endif %}
@@ -56,10 +56,10 @@
 			{% else %}
 				{% if exercise.max_points > 0 and not exercise.feedback or field.field.points > 0 %}
 				<span class="badge">
-				{% blocktrans count points=field.field.points %}
-				{{ points }} point
+				{% blocktrans trimmed count points=field.field.points %}
+					POINTS_SINGULAR -- {{ points }}
 				{% plural %}
-				{{ points }} points
+					POINTS_PLURAL -- {{ points }}
 				{% endblocktrans %}
 				</span>
 				{% endif %}
@@ -131,7 +131,7 @@
 						<i data-aplus-once="yes" class="quiz1-icon-correct" aria-hidden="true"></i>
 					{% elif choice.data.value in field.field.neutral %}
 						{% if result.model_answer %}
-							<span><em>**{% trans "neutral option which does not affect grading"%}**</em></span>
+							<span><em>**{% trans "NEUTRAL_OPTION_DESCRIPTION"%}**</em></span>
 						{% elif result.form.reveal_correct and not field.field.answer_correct %}
 							<i data-aplus-once="yes" class="quiz1-icon-neutral" aria-hidden="true"></i>
 						{% endif %}
@@ -198,7 +198,7 @@
 		<input type="hidden" name="_checksum" value="{{ result.form.checksum }}" />
 		{% endif %}
 		{% if not result.form.disabled %}
-		<input type="submit" value="{% trans 'Submit' %}" class="btn btn-primary aplus-submit" />
+		<input type="submit" value="{% trans 'SUBMIT' %}" class="btn btn-primary aplus-submit" />
 		{% endif %}
 	</div>
 	{% endif %}

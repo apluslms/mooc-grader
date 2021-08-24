@@ -1,8 +1,8 @@
 {% load i18n %}
 <div id="feedback">
 	<h1>
-		{% blocktrans with points=result.points max_points=result.max_points %}
-		Total points {{ points }}/{{ max_points }}
+		{% blocktrans trimmed with points=result.points max_points=result.max_points %}
+			TOTAL_POINTS -- {{ points }}, {{ max_points }}
 		{% endblocktrans %}
 	</h1>
 	{% for entry in result.tests %}
@@ -13,8 +13,8 @@
 		{% endif %}
 
 		{% if entry.points > 0 and entry.max_points > 0 %}
-		{% blocktrans with points=entry.points max_points=entry.max_points %}
-		Points {{ points }}/{{ max_points }}
+		{% blocktrans trimmed with points=entry.points max_points=entry.max_points %}
+			POINTS -- {{ points }}, {{ max_points }}
 		{% endblocktrans %}
 		{% endif %}
 
@@ -35,7 +35,7 @@
 
 	{% if result.has_appendixes %}
 	<div id="appendixes" class="accordion">
-		<h2>{% trans "Appendixes" %}</h2>
+		<h2>{% trans "APPENDIXES" %}</h2>
 		<div>
 			{% for entry in result.tests %}
 			{% if entry.appendix %}

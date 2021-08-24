@@ -11,27 +11,27 @@
 	<p class="question-feedback">
 		{% if field.answer_correct %}
 			<i class="quiz1-icon-correct" aria-hidden="true"></i>
-			<span class="feedback-text">{% trans "Correct!" %}</span>
+			<span class="feedback-text">{% trans "FEEDBACK_CORRECT_WITH_PUNCTUATION" %}</span>
 		{% else %}
 			<i class="quiz1-icon-incorrect" aria-hidden="true"></i>
 			<span class="feedback-text">
 				{% if not result.form.reveal_correct %}
-					{% trans "Incorrect" %}
+					{% trans "INCORRECT" %}
 				{% else %}
 					{# if "reveal-model-at-max-submissions" is set to true, the correct answers are revealed #}
 					{% if field.type == "checkbox" or field.type == "radio" %}
-						{% trans "Incorrect." %}
+						{% trans "FEEDBACK_INCORRECT_WITH_PUNCTUATION" %}
 						<span data-aplus-once="yes">
-							{% trans "You can check the correct options above." %}
+							{% trans "YOU_CAN_CHECK_CORRECT_ANSWERS_ABOVE" %}
 							{% if field.neutral %}
-								{% trans "Neutral options which do not affect grading are marked with a question mark." %}
+								{% trans "NEUTRAL_ANSWERS_MARKED_WITH_QUESTION_MARK" %}
 							{% endif %}
 						</span>
 					{% else %}
-						{% trans "Incorrect." %}
+						{% trans "FEEDBACK_INCORRECT_WITH_PUNCTUATION" %}
 						<span data-aplus-once="yes">
-							{% blocktrans with correct=field.correct trimmed %}
-								The correct answer is: {{ correct }}
+							{% blocktrans trimmed with correct=field.correct %}
+								CORRECT_ANSWER_IS -- {{ correct }}
 							{% endblocktrans %}
 						</span>
 					{% endif %}
