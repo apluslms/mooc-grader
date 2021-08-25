@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-25 13:30+0000\n"
+"POT-Creation-Date: 2021-08-25 14:03+0000\n"
 "PO-Revision-Date: 2021-08-23 13:54+0000\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: English <>\n"
@@ -74,7 +74,7 @@ msgstr "Invalid address entered."
 #: access/templates/access/active_element_default.html
 msgid "ERROR_FORM_CAN_BE_SUBMITTED_ONLY_ONCE"
 msgstr ""
-"The same form can obly be submitted once. Start again from exercise "
+"The same form can only be submitted once. Start again from the assignment "
 "description."
 
 #: access/templates/access/active_element_default.html
@@ -102,7 +102,8 @@ msgstr ""
 #: access/templates/access/async_accepted.html
 msgid "ERROR_OCCURED_CONTACT_STAFF"
 msgstr ""
-"Error occurred while handling the submission. Please, contact course staff."
+"An error occurred while handling the submission. Please, contact course "
+"staff."
 
 #: access/templates/access/async_accepted.html
 msgid "SUBMISSION_RECEIVED"
@@ -152,7 +153,7 @@ msgstr "Requires the gitmanager plugin"
 
 #: access/templates/access/course.html
 msgid "AVAILABLE_EXERCISES"
-msgstr "Available exercises"
+msgstr "Available assignments"
 
 #: access/templates/access/create_form_default.html
 msgid "WHOLE_SECTION_WITHIN_LINE_MARKED_AS_INCORRECT"
@@ -163,8 +164,8 @@ msgstr ""
 #: access/templates/access/exercise_config_error.html
 msgid "EXERCISE_CONFIGURATION_ERROR_NOTIFY_COURSE_STAFF_WITH_MESSAGE"
 msgstr ""
-"The exercise configuration has an error. Please, notify the course staff and "
-"provide the following message:"
+"The assignment configuration has an error. Please, notify the course staff "
+"and provide the following message:"
 
 #: access/templates/access/exercise_frame.html
 #, python-format
@@ -190,7 +191,7 @@ msgstr ""
 "means that the feedback shown below is likely inadequate or missing. The "
 "template should access at least one of <code>points</code>, "
 "<code>max_points</code>, <code>error</code> or <code>out</code>. Please "
-"check the <code>feedback_template</code> specified in the exercise YAML.\n"
+"check the <code>feedback_template</code> specified in the assignment YAML.\n"
 "</p>\n"
 "<p>\n"
 "If you are a student, please tell course staff what you were doing before "
@@ -276,12 +277,12 @@ msgstr ""
 
 #: access/templates/access/task_timeout.html
 msgid "TIMEOUT_WHILE_GRADING"
-msgstr "Time out while grading"
+msgstr "Timeout while grading"
 
 #: access/templates/access/task_timeout.html
 msgid "TIMEOUT_WHILE_GRADING_DESCRIPTION"
 msgstr ""
-"Ooops, the grading of your submission timed out! Sorry for your "
+"Ooops, the grading of your submission timed out! Sorry for the "
 "inconvenience. Please try again later or contact course support. "
 
 #: access/types/forms.py
@@ -290,7 +291,7 @@ msgstr "Multiple choices are selectable"
 
 #: access/types/forms.py
 msgid "HINT_MULTIPLE_CORRECT_ANSWERS_ACCEPTED"
-msgstr "Multiple correct answers accepted."
+msgstr "Multiple correct answers are accepted."
 
 #: access/types/forms.py
 msgid "HINT_CORRECT_PARTS_IN_YOUR_ANSWER"
