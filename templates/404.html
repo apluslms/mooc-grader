@@ -1,10 +1,9 @@
 {% extends 'grader_frame.html' %}
+{% load i18n %}
 
 {% block body %}
-	<h1>404 Not found</h1>
+	<h1>404 {% trans "NOT_FOUND" %}</h1>
 	<p>
-		Ooops, we might have entered a typo!
-		Sorry for your inconvenience.
-		Please try again later or contact course support.
+		{% trans "NOT_FOUND_DESCRIPTION" %}
 	</p>
 {% endblock %}

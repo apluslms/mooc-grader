@@ -263,11 +263,11 @@ msgstr "Kokonaispisteet %(points)s/%(max_points)s"
 msgid "APPENDIXES"
 msgstr "Liitteet"
 
-#: access/templates/access/task_system_error.html
+#: access/templates/access/task_system_error.html templates/500.html
 msgid "INTERNAL_SERVER_ERROR"
 msgstr "Järjestelmävirhe"
 
-#: access/templates/access/task_system_error.html
+#: access/templates/access/task_system_error.html templates/500.html
 msgid "INTERNAL_SERVER_ERROR_DESCRIPTION"
 msgstr ""
 "Hups, järjestelmässä näyttää olevan ongelmia! Pahoittelemme häiriötä. Yritä "
@@ -294,3 +294,13 @@ msgstr "Useita oikeita vastauksia."
 #: access/types/forms.py
 msgid "HINT_CORRECT_PARTS_IN_YOUR_ANSWER"
 msgstr "Oikeat osat vastauksessasi: "
+
+#: templates/404.html
+msgid "NOT_FOUND"
+msgstr "Sivua ei löytynyt"
+
+#: templates/404.html
+msgid "NOT_FOUND_DESCRIPTION"
+msgstr ""
+"Hups, olemme saattaneet kirjoittaa jotain väärin! Pahoittelemme häiriötä. "
+"Yritä myöhemmin uudelleen tai ota yhteyttä kurssihenkilökuntaan."

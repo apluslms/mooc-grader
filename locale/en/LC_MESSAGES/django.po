@@ -265,11 +265,11 @@ msgstr "Total points %(points)s/%(max_points)s"
 msgid "APPENDIXES"
 msgstr "Appendixes"
 
-#: access/templates/access/task_system_error.html
+#: access/templates/access/task_system_error.html templates/500.html
 msgid "INTERNAL_SERVER_ERROR"
 msgstr "Internal server error"
 
-#: access/templates/access/task_system_error.html
+#: access/templates/access/task_system_error.html templates/500.html
 msgid "INTERNAL_SERVER_ERROR_DESCRIPTION"
 msgstr ""
 "Ooops, there seems to be problems in the system! Sorry for your "
@@ -296,3 +296,13 @@ msgstr "Multiple correct answers are accepted."
 #: access/types/forms.py
 msgid "HINT_CORRECT_PARTS_IN_YOUR_ANSWER"
 msgstr "Correct parts in your answer: "
+
+#: templates/404.html
+msgid "NOT_FOUND"
+msgstr "Not found"
+
+#: templates/404.html
+msgid "NOT_FOUND_DESCRIPTION"
+msgstr ""
+"Ooops, we might have entered a typo! Sorry for the inconvenience. Please try "
+"again later or contact course support."
