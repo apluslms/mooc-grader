@@ -1,11 +1,11 @@
 # English texts for the MOOC-Grader
 # Copyright (C) 2021 Ella Anttila
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the MOOC-grader package.
 # Ella Anttila <ella.anttila@aalto.fi>, 2021.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-08-25 14:03+0000\n"
 "PO-Revision-Date: 2021-08-23 13:54+0000\n"
