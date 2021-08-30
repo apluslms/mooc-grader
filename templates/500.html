@@ -1,4 +1,5 @@
 {% extends 'grader_frame.html' %}
+{% load i18n %}
 
 {% block head %}
 {{ block.super }}
@@ -6,10 +7,8 @@
 {% endblock %}
 
 {% block body %}
-	<h1>500 Internal server error</h1>
+	<h1>500 {% trans "INTERNAL_SERVER_ERROR" %}</h1>
 	<p>
-		Ooops, there seems to be problems in the system!
-		Sorry for your inconvenience.
-		Please try again later or contact course support.
+		{% trans "INTERNAL_SERVER_ERROR_DESCRIPTION" %}
 	</p>
 {% endblock %}

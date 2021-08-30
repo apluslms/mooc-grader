@@ -4,9 +4,8 @@
 {% block exercise %}
 {% if result.synchronous %}
 <div class="alert alert-danger">
-	{% blocktrans %}
-	The grading queue is not configured. This submission was graded
-	synchronously while blocking other services. NOT READY FOR PRODUCTION!
+	{% blocktrans trimmed %}
+		WARNING_GRADING_WAS_SYNCHRONOUS
 	{% endblocktrans %}
 </div>
 <div id="feedback">
@@ -15,23 +14,22 @@
 
 {% elif result.error %}
 <div class="alert alert-danger">
-	<h1>{% trans "Submission failed" %}</h1>
+	<h1>{% trans "SUBMISSION_FAILED" %}</h1>
 	<p>
-		{% blocktrans %}
-		Error occurred while handling the submission. Please, contact course staff.
+		{% blocktrans trimmed %}
+			ERROR_OCCURED_CONTACT_STAFF
 		{% endblocktrans %}
 	</p>
 </div>
 
 {% else %}
-<h1>{% trans "Submission received" %}</h1>
+<h1>{% trans "SUBMISSION_RECEIVED" %}</h1>
 
 {% if result.missing_url %}
 <div class="alert alert-danger">
   {% url 'test-result' as surl %}
-	{% blocktrans with key="submission_url" url=surl %}
-	Missing the <code>{{ key }}</code> for result delivery!
-  The result can be temporarily seen at <a href="{{ url }}">{{ url }}</a>.
+	{% blocktrans trimmed with key="submission_url" url=surl %}
+		WARNING_MISSING_CODE_FOR_RESULT_DELIVERY_TEMPORARY_AVAILABLE -- {{ key }}, {{ url }}
 	{% endblocktrans %}
 </div>
 {% endif %}
@@ -39,21 +37,15 @@
 <div id="feedback">
 	<p>
 		{% if exercise.accepted_message %}
-		{{ exercise.accepted_message|safe }}
+			{{ exercise.accepted_message|safe }}
 		{% elif result.queue < 3 %}
-		{% blocktrans trimmed %}
-		Your submission is being graded. The result will be available on this page
-		when the grading process completes. Note that the grading may take a while.
-		You might also need to update the page manually in order to see the results.
-		You may close this message.
-		{% endblocktrans %}
+			{% blocktrans trimmed %}
+				SUBMISSION_IN_GRADING_NOW
+			{% endblocktrans %}
 		{% else %}
-		{% blocktrans with queue=result.queue trimmed %}
-		Your submission is in the grading queue. There are {{ queue }} other
-		submissions before. The result will be available on this page
-		when the grading process completes. The page must be updated manually to
-		see the results.
-		{% endblocktrans %}
+			{% blocktrans trimmed with queue=result.queue %}
+				SUBMISSION_IN_GRADING_QUEUE -- {{ queue }}
+			{% endblocktrans %}
 		{% endif %}
 	</p>
 </div>

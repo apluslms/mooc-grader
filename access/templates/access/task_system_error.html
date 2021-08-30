@@ -1,11 +1,9 @@
 {% load i18n %}
 <div id="feedback">
-    <h1>{% trans "Internal server error" %}</h1>
+    <h1>{% trans "INTERNAL_SERVER_ERROR" %}</h1>
     <p>
-        {% blocktrans %}
-        Ooops, there seems to be problems in the system!
-        Sorry for your inconvenience.
-        Please try again later or contact course support.
+        {% blocktrans trimmed %}
+            INTERNAL_SERVER_ERROR_DESCRIPTION
         {% endblocktrans %}
     </p>
 </div>

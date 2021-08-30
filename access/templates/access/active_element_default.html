@@ -14,15 +14,15 @@
 	<div class="alert alert-danger">
 
 		{% if result.invalid_address %}
-		<p>{% trans "Invalid address entered." %}</p>
+		<p>{% trans "ERROR_INVALID_ADDRESS" %}</p>
 		{% endif %}
 
 		{% if result.nonce_used %}
-		<p>{% trans "The same form can obly be submitted once. Start again from exercise description." %}</p>
+		<p>{% trans "ERROR_FORM_CAN_BE_SUBMITTED_ONLY_ONCE" %}</p>
 		{% endif %}
 
 		{% if result.fields %}
-		<p>{% trans "Missing required fields." %}</p>
+		<p>{% trans "ERROR_MISSING_REQUIRED_FIELDS" %}</p>
 		{% endif %}
 
 	</div>

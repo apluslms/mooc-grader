@@ -3,8 +3,8 @@
 
 <div class="error-summary">
 	<div class="error-summary__text">
-		<h4>{% trans "Submission failed" %}</h4>
-		<p>{% trans "Check your answers before trying again:" %}</p>
+		<h4>{% trans "SUBMISSION_FAILED" %}</h4>
+		<p>{% trans "CHECK_ANSWERS_BEFORE_TRYING_AGAIN" %}</p>
 		<ul>
 		{% for field in result.form %}
 			{% if field.errors %}

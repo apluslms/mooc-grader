@@ -3,8 +3,8 @@
 <form method="post" action="{{ post_url }}" enctype="multipart/form-data">
 	{% if exercise.required_number_of_files %}
 		<p>
-		{% blocktrans with num_files=exercise.required_number_of_files %}
-			Submit only {{ num_files }} of the following files.
+		{% blocktrans trimmed with num_files=exercise.required_number_of_files %}
+			SUBMIT_ONLY_NUM_FILES_OF_FOLLOWING -- {{ num_files }}
 		{% endblocktrans %}
 		</p>
 	{% endif %}
@@ -26,7 +26,7 @@
 	{% endfor %}
 	{% if post_url or not result.accepted %}
 	<div class="form-group">
-		<input type="submit" value="{% trans 'Submit' %}" class="btn btn-primary aplus-submit" />
+		<input type="submit" value="{% trans 'SUBMIT' %}" class="btn btn-primary aplus-submit" />
 	</div>
 	{% endif %}
 </form>
