@@ -291,7 +291,8 @@ def generated_exercise_file(request, course_key, exercise_key, exercise_instance
 
 def _get_course_exercise_lang(course_key, exercise_key, lang_code):
     # Keep only "en" from "en-gb" if the long language format is used.
-    lang_code = lang_code[:2]
+    if lang_code:
+        lang_code = lang_code[:2]
     (course, exercise) = config.exercise_entry(course_key, exercise_key, lang=lang_code)
     if course is None or exercise is None:
         raise Http404()
