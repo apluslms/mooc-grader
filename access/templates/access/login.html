@@ -1,0 +1,38 @@
+{% extends 'grader_frame.html' %}
+{% load i18n %}
+
+{% block body %}
+<div class="page-header">
+	<h1>Login</h1>
+</div>
+<form id="login-form">
+    Access token: <input type="text" name="token"></input>
+    <input type="submit" value="Login"></input>
+</form>
+<div id="error"></div>
+<script>
+    document.getElementById("login-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const data = new FormData(e.target);
+
+        const xml = new XMLHttpRequest();
+        xml.open("POST", "/login");
+        xml.setRequestHeader("Authorization", "Bearer " + data.get("token"))
+        xml.onload = () => {
+            console.log(xml);
+            if(xml.status == 200) {
+                window.location.href = new URLSearchParams(window.location.search).get("referer") ?? "/";
+            } else if(xml.status == 501) {
+                document.getElementById("error").textContent = xml.responseText;
+            } else {
+                document.getElementById("error").textContent = xml.statusText;
+            }
+        };
+        xml.onerror = () => document.getElementById("error").textContent = xml.statusText;
+        xml.send();
+
+        return false;
+    });
+</script>
+{% endblock %}

@@ -52,6 +52,7 @@ MIDDLEWARE = [
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
     # 'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'aplus_auth.auth.django.AuthenticationMiddleware',
 ]
 
 TEMPLATES = [

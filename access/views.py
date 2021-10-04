@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils import translation
 from django.urls import reverse
 from django.conf import settings
+from django.views import View
 
 from access.config import DEFAULT_LANG, ConfigError, config
 from util import export
@@ -19,6 +20,7 @@ from util.files import (
 )
 from util.http import post_data
 from util.importer import import_named
+from util.login_required import login_required
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util.templates import template_to_str
@@ -42,6 +44,7 @@ def index(request):
     })
 
 
+@login_required
 def course(request, course_key):
     '''
     Signals that the course is ready to be graded and lists available exercises.
@@ -78,6 +81,7 @@ def course(request, course_key):
     return render(request, 'access/course.html', render_context)
 
 
+@login_required
 def exercise(request, course_key, exercise_key):
     '''
     Presents the exercise and accepts answers to it.
@@ -126,6 +130,7 @@ def exercise_ajax(request, course_key, exercise_key):
     return response
 
 
+@login_required
 def exercise_model(request, course_key, exercise_key, parameter=None):
     '''
     Presents a model answer for an exercise.
@@ -166,6 +171,7 @@ def exercise_model(request, course_key, exercise_key, parameter=None):
         raise Http404()
 
 
+@login_required
 def exercise_template(request, course_key, exercise_key, parameter=None):
     '''
     Presents the exercise template.
@@ -206,6 +212,7 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
         raise Http404()
 
 
+@login_required
 def aplus_json(request, course_key):
     '''
     Delivers the configuration as JSON for A+.
@@ -274,6 +281,21 @@ def aplus_json(request, course_key):
         data["errors"] = errors
 
     return JsonResponse(data)
+
+
+class LoginView(View):
+    def get(self, request):
+        response = render(request, 'access/login.html')
+        response.delete_cookie("AuthToken")
+        return response
+
+    def post(self, request):
+        if not hasattr(request, "user") or not request.user.is_authenticated:
+            return HttpResponse("Invalid token", status=401)
+        else:
+            response = HttpResponse()
+            response.set_cookie("AuthToken", str(request.auth))
+            return response
 
 
 def test_result(request):
