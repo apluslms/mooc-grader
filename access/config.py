@@ -4,6 +4,7 @@ Each directory inside courses/ holding an index.json/yaml is a course.
 '''
 import io
 import json
+from json.decoder import JSONDecodeError
 import os
 import re
 import time
@@ -27,6 +28,41 @@ INDEX = "index"
 DEFAULT_LANG = "en"
 
 LOGGER = logging.getLogger('main')
+
+
+def _ext_exercise_loader(course_root, exercise_key, course_dir):
+    '''
+    Loader for exercises that were received from /configure.
+
+    @type course_root: C{dict}
+    @param course_root: a course root dictionary
+    @type exercise_key: C{str}
+    @param exercise_key: an exercise key
+    @type course_dir: C{str}
+    @param course_dir: a path to the course root directory
+    @rtype: C{str}, C{dict}
+    @return: exercise config file path, modified time and data dict
+    '''
+    config_file = os.path.join(course_dir, exercise_key) + ".json"
+    try:
+        with open(config_file) as f:
+            data = json.load(f)
+    except (OSError, JSONDecodeError) as e:
+        raise ConfigError(f"Failed to load json: {e}")
+
+    ndata = {}
+    for lang, d in data.items():
+        if "container" in d:
+            if "mount" in d["container"]:
+                d["container"]["mount"] = os.path.join("files", d["container"]["mount"])
+
+        for key, value in d.items():
+            key = key+"|i18n"
+            if key not in ndata:
+                ndata[key] = {}
+            ndata[key][lang] = value
+
+    return config_file, os.path.getmtime(config_file), ndata
 
 
 class ConfigError(Exception):

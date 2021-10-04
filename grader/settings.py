@@ -25,6 +25,13 @@ APLUS_AUTH_LOCAL = {
     "REMOTE_AUTHENTICATOR_KEY": None,
     "REMOTE_AUTHENTICATOR_URL": None,
 }
+
+# modify this if there are very large courses to be configured through /configure
+# it is the maximum number of bytes allowed in a request body (doesn't count files)
+# https://docs.djangoproject.com/en/3.2/ref/settings/#data-upload-max-memory-size
+# Other applications in the pipeline, like NGINX and kubernetes, may have their
+# own limits that need to be modified separately
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10*1024*1024 # 10MB
 ##########################################################################
 
 # Messaging library

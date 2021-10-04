@@ -1,9 +1,14 @@
 import copy
 import json
+from json.decoder import JSONDecodeError
 import logging
 import os
+from pathlib import Path
+from shutil import rmtree
 from typing import List
+from zipfile import ZipFile
 
+from aplus_auth.payload import Permission
 from django.shortcuts import render
 from django.http.response import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.utils import timezone
@@ -42,6 +47,68 @@ def index(request):
     return render(request, 'access/ready.html', {
         "courses": courses,
     })
+
+
+@login_required
+def configure(request):
+    '''
+    Configure a course.
+    '''
+    if request.method != "POST":
+        return HttpResponse(status=405)
+
+    if "exercises" not in request.POST or "course_id" not in request.POST:
+        return HttpResponse("Missing exercises or course_id", status=400)
+
+    course_id = request.POST["course_id"]
+    try:
+        exercises = json.loads(request.POST["exercises"])
+        course_id_int = int(course_id)
+    except (JSONDecodeError, ValueError) as e:
+        LOGGER.exception("Invalid exercises or course_id field")
+        return HttpResponse(f"Invalid exercises or course_id field: {e}", status=500)
+
+    if not request.auth.permissions.instances.has(Permission.WRITE, id=course_id_int):
+        return HttpResponse(status=401)
+
+    course_path = Path(settings.COURSES_PATH, course_id)
+    if course_path.exists():
+        try:
+            rmtree(course_path)
+        except OSError:
+            LOGGER.exception("Failed to remove old stored course files")
+            return HttpResponse("Failed to remove old stored course files", status=500)
+
+    course_path.mkdir(parents=True, exist_ok=True)
+
+    if "files" in request.FILES:
+        zip_file = request.FILES["files"].file
+        ziph = ZipFile(zip_file, "r")
+        ziph.extractall(course_path)
+
+    course_config = {
+        "name": course_id,
+        "exercises": [ex["key"] for ex in exercises],
+        "exercise_loader": "access.config._ext_exercise_loader",
+    }
+
+    with open(course_path / "index.json", "w") as f:
+        json.dump(course_config, f)
+
+    for info in exercises:
+        with open(course_path / (info["key"] + ".json"), "w") as f:
+            json.dump(info["config"], f)
+
+    defaults = {}
+    for info in exercises:
+        of = info["spec"]
+        if info.get("config"):
+            of["config"] = info["key"] + ".json"
+            course, exercise = config.exercise_entry(course_id, info["key"], "_root")
+            of = export.exercise(request, course, exercise, of)
+        defaults[of["key"]] = of
+
+    return JsonResponse(defaults)
 
 
 @login_required
