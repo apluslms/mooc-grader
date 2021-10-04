@@ -4,6 +4,7 @@
 # You can copy local_settings.example.py and start from there.
 ##
 from os.path import abspath, dirname, join
+from typing import Dict, Optional
 BASE_DIR = dirname(dirname(abspath(__file__)))
 
 
@@ -17,8 +18,19 @@ ADMINS = (
 )
 #SERVER_EMAIL = 'root@'
 ALLOWED_HOSTS = ["*"]
+# Local nessaging library settings
+APLUS_AUTH_LOCAL = {
+    "PRIVATE_KEY": None,
+    "PUBLIC_KEY": None,
+    "REMOTE_AUTHENTICATOR_KEY": None,
+    "REMOTE_AUTHENTICATOR_URL": None,
+}
 ##########################################################################
 
+# Messaging library
+APLUS_AUTH: Dict[str, Optional[str]] = {
+    "AUTH_CLASS": "access.auth.Authentication",
+}
 
 INSTALLED_APPS = (
     # 'django.contrib.admin',
@@ -29,6 +41,7 @@ INSTALLED_APPS = (
     'staticfileserver', # override for runserver command, thus this needs to be before django contrib one
     'django.contrib.staticfiles',
     'access',
+    'aplus_auth',
 )
 
 MIDDLEWARE = [
@@ -201,6 +214,8 @@ update_settings_from_environment(__name__, ENV_SETTINGS_PREFIX)
 update_secret_from_file(__name__, environ.get('GRADER_SECRET_KEY_FILE', 'secret_key'))
 update_secret_from_file(__name__, environ.get('GRADER_AJAX_KEY_FILE', 'ajax_key'), setting='AJAX_KEY')
 assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
+
+APLUS_AUTH.update(APLUS_AUTH_LOCAL)
 
 # Drop x-frame policy when debugging
 if DEBUG:
