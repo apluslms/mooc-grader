@@ -98,9 +98,10 @@ def hook(request, key):
             )
 
         # Remove clean flag for the cronjob.
-        flag_file = clean_flag
-        if repo.sphinx_version == CourseRepo.SPHINX_VERSION_NEW:
-            flag_file = clean_flag_new
+        flag_file = clean_flag_new
+        # only support the new Sphinx version in this server
+        #if repo.sphinx_version == CourseRepo.SPHINX_VERSION_NEW:
+        #    flag_file = clean_flag_new
         if os.path.exists(flag_file):
             os.remove(flag_file)
 

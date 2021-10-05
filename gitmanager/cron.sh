@@ -9,18 +9,10 @@ logfile="$LOG"
 SQL="sqlite3 -batch -noheader db.sqlite3"
 TRY_PYTHON="/srv/grader/venv/bin/activate"
 
-installed_sphinx_version=$(sphinx-build --version)
-# Parse the version number from the output: sphinx-build 4.0.1, sphinx-build 3.5.3, Sphinx (sphinx-build) 1.6.7
-installed_sphinx_version=${installed_sphinx_version##* }
-if [ "$installed_sphinx_version" == "1.6.7" ]; then
-  installed_sphinx_version='old'
-  flagfile="$FLAG"
-  logfile="$LOG"
-else
-  installed_sphinx_version='new'
-  flagfile="$FLAG_NEW"
-  logfile="$LOG_NEW"
-fi
+# Only support the new Sphinx version in this server. It is installed in the venv.
+installed_sphinx_version='new'
+flagfile="$FLAG_NEW"
+logfile="$LOG_NEW"
 
 if [ -e "$flagfile" ]; then
   exit 0
@@ -44,7 +36,7 @@ fi
 # in this container that is running now.
 $SQL "SELECT DISTINCT r.key
       FROM gitmanager_courseupdate AS u LEFT JOIN gitmanager_courserepo AS r ON u.course_repo_id=r.id
-      WHERE u.updated=0 AND r.sphinx_version='$installed_sphinx_version'
+      WHERE u.updated=0
       ORDER BY u.request_time DESC;" | \
 while read key; do
   IFS=$'\n' read -d '' -r repo_id url branch < <($SQL -separator $'\n' "
