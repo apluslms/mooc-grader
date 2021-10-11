@@ -256,7 +256,7 @@ class GradedForm(forms.Form):
 
         if self.model_answer:
             # Checks the correct fields in a model answer
-            if neutral_choices and correct_choices:
+            if neutral_choices and correct_choices and multiple:
                 combined = correct_choices + neutral_choices
                 args['initial'] = combined
             elif correct_choices:
