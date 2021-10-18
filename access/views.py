@@ -29,6 +29,7 @@ from util.login_required import login_required
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util.templates import template_to_str
+from util.zip import extract_all
 
 
 LOGGER = logging.getLogger('main')
@@ -84,7 +85,7 @@ def configure(request):
     if "files" in request.FILES:
         zip_file = request.FILES["files"].file
         ziph = ZipFile(zip_file, "r")
-        ziph.extractall(course_path)
+        extract_all(ziph, course_path)
 
     course_config = {
         "name": course_id,
