@@ -145,14 +145,6 @@ STATIC_ROOT = join(BASE_DIR, 'static')
 #MEDIA_ROOT = join(BASE_DIR, 'media')
 
 
-# Task queue settings
-##########################################################################
-CONTAINER_SCRIPT = join(BASE_DIR, "scripts/docker-run.sh")
-
-# HTTP
-DEFAULT_EXPIRY_MINUTES = 15
-
-
 # Course configuration path:
 # Every directory under this directory is expected to be a course configuration
 COURSES_PATH = join(BASE_DIR, 'courses')
@@ -164,6 +156,33 @@ SUBMISSION_PATH = join(BASE_DIR, 'uploads')
 # Personalized exercises and user files are kept here.
 # Django process requires write access to this directory.
 PERSONALIZED_CONTENT_PATH = join(BASE_DIR, 'exercises-meta')
+
+
+# Task queue settings
+##########################################################################
+RUNNER_MODULE = join(BASE_DIR, "scripts/docker-run.py")
+# settings passed to the runner module. See the runner module file for more
+# information.
+HOST_BASE_DIR = BASE_DIR
+RUNNER_MODULE_SETTINGS = {
+  "network": "bridge",
+  "mounts": {
+    COURSES_PATH: COURSES_PATH.replace(BASE_DIR, HOST_BASE_DIR),
+    SUBMISSION_PATH: SUBMISSION_PATH.replace(BASE_DIR, HOST_BASE_DIR),
+    PERSONALIZED_CONTENT_PATH: PERSONALIZED_CONTENT_PATH.replace(BASE_DIR, HOST_BASE_DIR),
+  },
+}
+
+# If running in a docker container, set this to the docker network used by the container
+# e.g. the default for a docker-compose project is '<dir>_default', where <dir> is
+# the directory the docker-compose.yml file is in
+# 'bridge' is the default when running docker directly without compose
+CONTAINER_NETWORK = "bridge"
+
+
+# HTTP
+DEFAULT_EXPIRY_MINUTES = 15
+
 
 # Logging
 # https://docs.djangoproject.com/en/1.7/topics/logging/

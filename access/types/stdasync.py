@@ -22,7 +22,6 @@ Functions take arguments:
 import logging
 import copy
 import os
-import json
 from django.conf import settings
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
@@ -30,6 +29,7 @@ from django.utils import translation
 
 from util.files import SubmissionDir, write_submission_meta
 from util.http import not_modified_since, not_modified_response, cache_headers
+from util.importer import import_path
 from util.personalized import select_generated_exercise_instance
 from util.shell import invoke
 from util.templates import render_configured_template, render_template, \
@@ -39,6 +39,14 @@ from ..config import ConfigError
 
 
 LOGGER = logging.getLogger('main')
+
+
+runner_module = import_path(settings.RUNNER_MODULE)
+if not hasattr(runner_module, "run"):
+    raise AttributeError(f"settings.RUNNER_MODULE ({settings.RUNNER_MODULE}) does not have a run function")
+runner_func = runner_module.run
+if not callable(runner_func):
+    raise AttributeError(f"run attribute in settings.RUNNER_MODULE ({settings.RUNNER_MODULE}) is not callable")
 
 
 def acceptPost(request, course, exercise, post_url):
@@ -301,18 +309,9 @@ def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
     # Order container for grading.
     c = _requireContainer(exercise)
 
-    course_extra = {
-        "key": course["key"],
-        "name": course["name"],
-    }
-    exercise_extra = {
-        "key": exercise["key"],
-        "title": exercise.get("title", None),
-        "container_config": c
-    }
+    personalized_dir = None
     if exercise.get("personalized", False):
-        exercise_extra["personalized_exercise"] \
-            = select_generated_exercise_instance(course, exercise, uids, attempt)
+        personalized_dir = select_generated_exercise_instance(course, exercise, uids, attempt)
 
     write_submission_meta(sdir.sid, {
         "url": surl,
@@ -321,24 +320,25 @@ def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
         "exercise_key": exercise["key"],
         "lang": translation.get_language(),
     })
-    r = invoke([
-        settings.CONTAINER_SCRIPT,
-        sdir.sid,
-        request.scheme + "://" + request.get_host(),
-        c["image"],
-        os.path.join(settings.COURSES_PATH, course["key"], c["mount"]),
-        str(sdir.dir()),
-        c["cmd"],
-        json.dumps(course_extra),
-        json.dumps(exercise_extra),
-    ])
-    LOGGER.debug("Container order exit=%d out=%s err=%s",
-        r["code"], r["out"], r["err"])
+    return_code, out, err = runner_func(
+        course=course,
+        exercise=exercise,
+        container_config=c,
+        submission_id=sdir.sid,
+        host_url=request.scheme + "://" + request.get_host(),
+        exercise_dir=os.path.join(settings.COURSES_PATH, course["key"], c["mount"]),
+        submission_dir=str(sdir.dir()),
+        personalized_dir=personalized_dir,
+        image=c["image"],
+        cmd=c["cmd"],
+        settings=settings.RUNNER_MODULE_SETTINGS,
+    )
+    LOGGER.debug(f"Container order exit={return_code} out={out} err={err}")
     qlen = 1
 
     return render_template(request, course, exercise, post_url,
         "access/async_accepted.html", {
-            "error": r['code'] != 0,
+            "error": return_code != 0,
             "accepted": True,
             "wait": True,
             "missing_url": surl_missing,
