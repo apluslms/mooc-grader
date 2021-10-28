@@ -192,6 +192,10 @@ course specific exercise view in a course specific Python module.
 		* `image`: Container image to use
 		* `mount`: Directory to mount to the container
 		* `cmd`: Command to execute inside the grading container - typically along the lines of `/exercise/run.sh`
+		* `mounts` (optional): A mapping of course files/directories to container paths for mounting.
+		E.g. `java_library: /library` mounts the directory `java_library` to the path `/library` inside the container.
+		`/exercise`, `/submission` and `/personalized_exercise` are reserved mounts that cannot be used.
+        Works in addition to `mount` which mounts to `/exercise`.
 
 	Additional fields can be defined in the `container` dictionary, and they're given to the **site-specific** container creation script. **Aalto's installation** currently accepts the following fields:
 
@@ -323,7 +327,7 @@ course specific exercise view in a course specific Python module.
 8. ### access.types.stdsync.noGrading
 	Presents a template and does not grade anything. Extended attributes:
 	* `template`: name of a template to present
-	
+
 ## Templates
 
 Many type views can use a named template. The templates can be placed in

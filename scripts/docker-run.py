@@ -37,9 +37,8 @@ def host_path(mounts: Dict[str, str], path: str):
 def run(
         submission_id: str,
         host_url: str,
-        exercise_dir: str,
-        submission_dir: str,
-        personalized_dir: str,
+        readwrite_mounts: Dict[str, str],
+        readonly_mounts: Dict[str, str],
         image: str,
         cmd: str,
         settings: Dict[str, Any],
@@ -52,9 +51,15 @@ def run(
     network = settings.get("network")
     if "mounts" not in settings:
         settings["mounts"] = {"/": "/"}
-    host_exercise_dir = host_path(settings["mounts"], exercise_dir)
-    host_submission_dir = host_path(settings["mounts"], submission_dir)
-    host_personalized_dir = host_path(settings["mounts"], personalized_dir)
+
+    volumes = {
+        host_path(settings["mounts"], k): {"bind": v, "mode": "rw"}
+        for k,v in readwrite_mounts.items()
+    }
+    volumes.update({
+        host_path(settings["mounts"], k): {"bind": v, "mode": "ro"}
+        for k,v in readonly_mounts.items()
+    })
 
     try:
         docker_client.containers.run(
@@ -67,15 +72,7 @@ def run(
                 "SID": submission_id,
                 "REC": host_url,
             },
-            volumes = {
-                host_exercise_dir: {"bind": "/exercise", "mode": "ro"},
-                host_submission_dir: {"bind": "/submission"},
-                **(
-                    {host_personalized_dir: {"bind": "/personalized_exercise", "mode": "ro"}}
-                    if host_personalized_dir
-                    else {}
-                ),
-            }
+            volumes = volumes,
         )
 
         return 0, "", ""

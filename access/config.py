@@ -55,6 +55,9 @@ def _ext_exercise_loader(course_root, exercise_key, course_dir):
         if "container" in d:
             if "mount" in d["container"]:
                 d["container"]["mount"] = os.path.join("files", d["container"]["mount"])
+            if "mounts" in d["container"]:
+                for k,v in d["container"]["mounts"]:
+                    d["container"]["mounts"][k] = os.path.join("files", v)
 
         for key, value in d.items():
             key = key+"|i18n"

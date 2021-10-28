@@ -309,9 +309,30 @@ def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
     # Order container for grading.
     c = _requireContainer(exercise)
 
-    personalized_dir = None
+    ro_mounts = c.get("mounts", {}).copy()
+    if not isinstance(ro_mounts, dict):
+        raise ConfigError("'container'->'mounts' must be a <path on course>-<mount path> dictionary or omitted altogether")
+    for k,v in ro_mounts.items():
+        if not os.path.isabs(v):
+            raise ConfigError(f"Mount path must be absolute: {v}")
+        if any(v == p or v.startswith(p + "/") for p in ("/exercise", "/submission", "/personalized_exercise")):
+            raise ConfigError("/exercise, /submission and /personalized_exercise are reserved mounts, you cannot mount to them in 'mounts'")
+        if os.path.isabs(k) or os.path.normpath(k).startswith(".."):
+            raise ConfigError(f"Mounted path on course must be a relative subpath: {k}")
+
+    ro_mounts[c["mount"]] = "/exercise"
+
+    ro_mounts = {
+        os.path.join(settings.COURSES_PATH, course["key"], k): v
+        for k,v in ro_mounts.items()
+    }
+
+    if len(set(ro_mounts.values())) != len(ro_mounts):
+        raise ConfigError("Mount paths must be distinct")
+
     if exercise.get("personalized", False):
         personalized_dir = select_generated_exercise_instance(course, exercise, uids, attempt)
+        ro_mounts[personalized_dir] = "/personalized_exercise"
 
     write_submission_meta(sdir.sid, {
         "url": surl,
@@ -326,9 +347,8 @@ def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
         container_config=c,
         submission_id=sdir.sid,
         host_url=request.scheme + "://" + request.get_host(),
-        exercise_dir=os.path.join(settings.COURSES_PATH, course["key"], c["mount"]),
-        submission_dir=str(sdir.dir()),
-        personalized_dir=personalized_dir,
+        readwrite_mounts={str(sdir.dir()): "/submission"},
+        readonly_mounts=ro_mounts,
         image=c["image"],
         cmd=c["cmd"],
         settings=settings.RUNNER_MODULE_SETTINGS,
