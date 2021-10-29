@@ -30,6 +30,9 @@ DEFAULT_LANG = "en"
 LOGGER = logging.getLogger('main')
 
 
+EXTERNAL_FILES_DIR = "files"
+EXTERNAL_EXERCISES_DIR = "exercises"
+
 def _ext_exercise_loader(course_root, exercise_key, course_dir):
     '''
     Loader for exercises that were received from /configure.
@@ -43,7 +46,7 @@ def _ext_exercise_loader(course_root, exercise_key, course_dir):
     @rtype: C{str}, C{dict}
     @return: exercise config file path, modified time and data dict
     '''
-    config_file = os.path.join(course_dir, exercise_key) + ".json"
+    config_file = os.path.join(course_dir, EXTERNAL_EXERCISES_DIR, exercise_key) + ".json"
     try:
         with open(config_file) as f:
             data = json.load(f)
@@ -54,10 +57,10 @@ def _ext_exercise_loader(course_root, exercise_key, course_dir):
     for lang, d in data.items():
         if "container" in d:
             if "mount" in d["container"]:
-                d["container"]["mount"] = os.path.join("files", d["container"]["mount"])
+                d["container"]["mount"] = os.path.join(EXTERNAL_FILES_DIR, d["container"]["mount"])
             if "mounts" in d["container"]:
                 for k,v in d["container"]["mounts"]:
-                    d["container"]["mounts"][k] = os.path.join("files", v)
+                    d["container"]["mounts"][k] = os.path.join(EXTERNAL_FILES_DIR, v)
 
         for key, value in d.items():
             key = key+"|i18n"

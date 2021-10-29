@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.conf import settings
 from django.views import View
 
-from access.config import DEFAULT_LANG, ConfigError, config
+from access.config import DEFAULT_LANG, EXTERNAL_EXERCISES_DIR, EXTERNAL_FILES_DIR, ConfigError, config
 from util import export
 from util.files import (
     read_and_remove_submission_meta,
@@ -80,12 +80,15 @@ def configure(request):
             LOGGER.exception("Failed to remove old stored course files")
             return HttpResponse("Failed to remove old stored course files", status=500)
 
-    course_path.mkdir(parents=True, exist_ok=True)
+    course_files_path = course_path / EXTERNAL_FILES_DIR
+    course_exercises_path = course_path / EXTERNAL_EXERCISES_DIR
+    course_files_path.mkdir(parents=True, exist_ok=True)
+    course_exercises_path.mkdir(parents=True, exist_ok=True)
 
     if "files" in request.FILES:
         zip_file = request.FILES["files"].file
         ziph = ZipFile(zip_file, "r")
-        extract_all(ziph, course_path)
+        extract_all(ziph, course_files_path)
 
     course_config = {
         "name": course_id,
@@ -97,7 +100,7 @@ def configure(request):
         json.dump(course_config, f)
 
     for info in exercises:
-        with open(course_path / (info["key"] + ".json"), "w") as f:
+        with open(course_exercises_path / (info["key"] + ".json"), "w") as f:
             json.dump(info["config"], f)
 
     defaults = {}
