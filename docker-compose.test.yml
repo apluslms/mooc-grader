@@ -1,0 +1,14 @@
+version: '3'
+
+# Run tests:
+# docker-compose -f docker-compose.test.yml up grader_unit
+
+services:
+  grader_unit:
+    build:
+      context: .
+      dockerfile: .github/workflows/Dockerfile
+    volumes:
+      - .:/grader
+    working_dir: /grader
+    command: python3 manage.py test
