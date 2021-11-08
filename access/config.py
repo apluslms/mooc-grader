@@ -2,6 +2,8 @@
 The exercises and classes are configured in json/yaml.
 Each directory inside courses/ holding an index.json/yaml is a course.
 '''
+from typing import Any, Dict, Tuple
+
 from django.conf import settings
 from django.template import loader as django_template_loader
 import os, time, json, yaml, re
@@ -274,11 +276,18 @@ class ConfigParser:
         @return: exercise root or None
         '''
 
+        include_file_timestamp = 0
         # Try cached version.
         if exercise_key in course_root["exercises"]:
             exercise_root = course_root["exercises"][exercise_key]
+            course_dir = self._conf_dir(DIR, course_root["data"]["key"], course_root["meta"])
+            include_ok, include_file_timestamp = self._check_include_file_timestamps(
+                exercise_root,
+                course_dir,
+            )
             try:
-                if exercise_root["mtime"] >= os.path.getmtime(exercise_root["file"]):
+                if (exercise_root["mtime"] >= os.path.getmtime(exercise_root["file"])
+                        and include_ok):
                     return exercise_root
             except OSError:
                 pass
@@ -301,6 +310,10 @@ class ConfigParser:
             )
         if not data:
             return None
+
+        # Save the latest modification time of the exercise in the cache.
+        # If there is an included base template, its modification time may be later.
+        t = max(t, include_file_timestamp)
 
         # Process key modifiers and create language versions of the data.
         data = self._process_exercise_data(course_root, data)
@@ -406,6 +419,32 @@ class ConfigParser:
             except ValueError as e:
                 raise ConfigError("Configuration error in %s" % (path), e)
         return data
+
+
+    def _check_include_file_timestamps(self, exercise_root: Dict[str, Any], course_dir: str) -> Tuple[bool, int]:
+        """Check the exercise modification time against the modification timestamps
+        of the included configuration templates.
+
+        Included configuration templates are set in the data["include] field
+        (if they are used).
+
+        @param exercise_root: root dict of the exercise configuration
+        @param course_dir: file path to the course
+        @return: 2-tuple (boolean, int) True if the exercise is up-to-date
+            (not older than the latest modification in included files), and
+            the latest included file modification timestamp
+        """
+        max_include_timestamp = 0
+        for data in exercise_root["data"].values():
+            for include_data in data.get("include", []):
+                include_file = self._get_config(os.path.join(course_dir, include_data["file"]))
+                try:
+                    include_timestamp = os.path.getmtime(include_file)
+                    if include_timestamp > max_include_timestamp:
+                        max_include_timestamp = include_timestamp
+                except OSError:
+                    return False, 0
+        return exercise_root["mtime"] >= max_include_timestamp, max_include_timestamp
 
 
     def _include(self, data, target_file, course_dir):
