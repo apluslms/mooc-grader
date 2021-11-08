@@ -416,7 +416,7 @@ class ConfigParser:
         with open(path) as f:
             try:
                 data = loader(f)
-            except ValueError as e:
+            except (ValueError, yaml.YAMLError) as e:
                 raise ConfigError("Configuration error in %s" % (path), e)
         return data
 
