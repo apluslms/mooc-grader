@@ -10,7 +10,7 @@ import os, time, json, yaml, re
 import logging
 import copy
 
-from util.dict import iterate_kvp_with_dfs, get_rst_as_html
+from util.dict import get_rst_as_html
 from util.files import read_meta
 from util.importer import import_named
 from util.static import symbolic_link
