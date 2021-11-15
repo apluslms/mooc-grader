@@ -2,13 +2,17 @@
 The exercises and classes are configured in json/yaml.
 Each directory inside courses/ holding an index.json/yaml is a course.
 '''
+import json
+import os
+import re
+import time
+import logging
 from typing import Any, Dict, Tuple
+
+import yaml
 
 from django.conf import settings
 from django.template import loader as django_template_loader
-import os, time, json, yaml, re
-import logging
-import copy
 
 from util.dict import get_rst_as_html
 from util.files import read_meta

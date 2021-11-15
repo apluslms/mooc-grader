@@ -1,18 +1,17 @@
+import copy
+import json
+import os
+
 from django.shortcuts import render
 from django.http.response import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.utils import timezone
 from django.utils import translation
-from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 from django.conf import settings
-import copy
-import os
-import json
 
 from access.config import DEFAULT_LANG, ConfigError, config
 from util import export
 from util.files import (
-    clean_submission_dir,
     read_and_remove_submission_meta,
     write_submission_meta,
 )
