@@ -15,7 +15,7 @@
 	{% if result.error or result.rejected %}
 
 		{% if result.missing_files %}
-		<div class="alert alert-danger">
+		<div class="alert alert-danger" role="alert">
 		{% if exercise.required_number_of_files %}
 			{% blocktrans trimmed count num_files=exercise.required_number_of_files %}
 				ERROR_SUBMIT_NUM_FILES_SINGULAR -- {{ num_files }}
@@ -29,19 +29,19 @@
 		{% endif %}
 
 		{% if result.invalid_address %}
-		<div class="alert alert-danger">
+		<div class="alert alert-danger" role="alert">
 		{% trans "ERROR_INVALID_ADDRESS" %}
 		</div>
 		{% endif %}
 
 		{% if result.fields %}
-		<div class="alert alert-danger">
+		<div class="alert alert-danger" role="alert">
 		{% trans "ERROR_MISSING_REQUIRED_FIELDS" %}
 		</div>
 		{% endif %}
 
 		{% if result.invalid_checksum %}
-		<div class="alert alert-danger">
+		<div class="alert alert-danger" role="alert">
 		{% trans "ERROR_INVALID_CHECKSUM" %}
 		</div>
 		{% endif %}
