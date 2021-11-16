@@ -21,6 +21,7 @@ from access.config import DEFAULT_LANG, EXTERNAL_EXERCISES_DIR, EXTERNAL_FILES_D
 from util import export
 from util.files import (
     read_and_remove_submission_meta,
+    renames,
     write_submission_meta,
 )
 from util.http import post_data
@@ -49,13 +50,74 @@ def index(request):
     })
 
 
+def publish(request):
+    """
+    Move a course from store to the main folder
+    """
+    if request.method != "POST":
+        return HttpResponse(status=405)
+
+    if "course_id" not in request.POST:
+        return HttpResponse("Missing course_id", status=400)
+
+    course_id = request.POST["course_id"]
+
+    if not request.auth.permissions.instances.has(Permission.WRITE, id=int(course_id)):
+        return HttpResponse(status=401)
+
+    root_dir = Path(settings.COURSES_PATH)
+    store_root_dir = Path(settings.COURSE_STORE)
+    course_path = root_dir / course_id
+    store_course_path = store_root_dir / course_id
+    version_id_path = root_dir / (course_id + ".version")
+    store_version_id_path = store_root_dir / (course_id + ".version")
+
+    try:
+        with open(store_version_id_path) as f:
+            store_version_id = f.read()
+    except FileNotFoundError:
+        store_version_id = None
+    except OSError:
+        LOGGER.exception("Could not open version file")
+        return HttpResponse("Could not open version file", status=500)
+
+    if store_version_id == request.POST.get("version_id"):
+        try:
+            renames([
+                (store_version_id_path, version_id_path),
+                (store_course_path, course_path),
+            ])
+        except OSError as e:
+            LOGGER.exception("Failed to rename files on publish")
+            return HttpResponse(status=500)
+
+        return HttpResponse()
+
+    try:
+        with open(version_id_path) as f:
+            version_id = f.read()
+    except FileNotFoundError:
+        version_id = None
+    except OSError:
+        LOGGER.exception("Could not open version file")
+        return HttpResponse("Could not open version file", status=500)
+
+    if version_id == request.POST.get("version_id"):
+        return HttpResponse()
+    else:
+        return HttpResponse("Unknown version id", status=404)
+
+
 @login_required
 def configure(request):
     '''
-    Configure a course.
+    Configure a course according to the gitmanager protocol.
     '''
     if request.method != "POST":
         return HttpResponse(status=405)
+
+    if request.POST.get("publish"):
+        return publish(request)
 
     if "exercises" not in request.POST or "course_id" not in request.POST:
         return HttpResponse("Missing exercises or course_id", status=400)
@@ -71,7 +133,8 @@ def configure(request):
     if not request.auth.permissions.instances.has(Permission.WRITE, id=course_id_int):
         return HttpResponse(status=401)
 
-    course_path = Path(settings.COURSES_PATH, course_id)
+    root_dir = Path(settings.COURSE_STORE)
+    course_path = root_dir / course_id
     if course_path.exists():
         try:
             rmtree(course_path)
@@ -81,6 +144,7 @@ def configure(request):
 
     course_files_path = course_path / EXTERNAL_FILES_DIR
     course_exercises_path = course_path / EXTERNAL_EXERCISES_DIR
+    version_id_path = root_dir / (course_id + ".version")
     course_files_path.mkdir(parents=True, exist_ok=True)
     course_exercises_path.mkdir(parents=True, exist_ok=True)
 
@@ -102,12 +166,20 @@ def configure(request):
         with open(course_exercises_path / (info["key"] + ".json"), "w") as f:
             json.dump(info["config"], f)
 
+    if "version_id" in request.POST:
+        with open(version_id_path, "w") as f:
+            f.write(request.POST["version_id"])
+    elif version_id_path.exists():
+        version_id_path.unlink()
+
+    course_config = config._course_root_from_root_dir(course_id, root_dir)
+
     defaults = {}
     for info in exercises:
         of = info["spec"]
         if info.get("config"):
             of["config"] = info["key"] + ".json"
-            course, exercise = config.exercise_entry(course_id, info["key"], "_root")
+            course, exercise = config.exercise_entry(course_config, info["key"], "_root")
             of = export.exercise(request, course, exercise, of)
         defaults[of["key"]] = of
 

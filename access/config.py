@@ -211,29 +211,21 @@ class ConfigParser:
         return course_root["data"], list(exercise_root["data"].values())[0]
 
 
-    def _course_root(self, course_key):
+    def _course_root_from_root_dir(self, course_key, root_dir):
         '''
         Gets course dictionary root (meta and data).
 
         @type course_key: C{str}
         @param course_key: a course key
+        @type root_dir: C{str}
+        @param root_dir: directory where the course directory is
         @rtype: C{dict}
         @return: course root or None
         '''
-
-        # Try cached version.
-        if course_key in self._courses:
-            course_root = self._courses[course_key]
-            try:
-                if course_root["mtime"] >= os.path.getmtime(course_root["file"]):
-                    return course_root
-            except OSError:
-                pass
-
         LOGGER.debug('Loading course "%s"' % (course_key))
-        meta = read_meta(os.path.join(settings.COURSES_PATH, course_key, META))
+        meta = read_meta(os.path.join(root_dir, course_key, META))
         try:
-            f = self._get_config(os.path.join(self._conf_dir(settings.COURSES_PATH, course_key, meta), INDEX))
+            f = self._get_config(os.path.join(self._conf_dir(root_dir, course_key, meta=meta), INDEX))
         except ConfigError:
             return None
 
@@ -247,7 +239,7 @@ class ConfigParser:
         self._check_fields(f, data, ["name"])
         data["key"] = course_key
         data["mtime"] = t
-        data["dir"] = self._conf_dir(settings.COURSES_PATH, course_key, {})
+        data["dir"] = self._conf_dir(root_dir, course_key, meta={})
 
         if "static_url" not in data:
             data["static_url"] = "{}{}{}/".format(
@@ -285,7 +277,7 @@ class ConfigParser:
         if "exercise_loader" in data:
             exercise_loader = import_named(data, data["exercise_loader"])
 
-        self._courses[course_key] = course_root = {
+        return {
             "meta": meta,
             "file": f,
             "mtime": t,
@@ -295,7 +287,33 @@ class ConfigParser:
             "exercise_loader": exercise_loader,
             "exercises": {}
         }
-        symbolic_link(settings.COURSES_PATH, data)
+
+
+    def _course_root(self, course_key):
+        '''
+        Gets course dictionary root (meta and data).
+
+        @type course_key: C{str}
+        @param course_key: a course key
+        @rtype: C{dict}
+        @return: course root or None
+        '''
+
+        # Try cached version.
+        if course_key in self._courses:
+            course_root = self._courses[course_key]
+            try:
+                if course_root["mtime"] >= os.path.getmtime(course_root["file"]):
+                    return course_root
+            except OSError:
+                pass
+
+        course_root = self._course_root_from_root_dir(course_key, settings.COURSES_PATH)
+        if course_root is None:
+            return None
+
+        self._courses[course_key] = course_root
+        symbolic_link(settings.COURSES_PATH, course_root["data"])
         return course_root
 
 
@@ -324,7 +342,7 @@ class ConfigParser:
         # Try cached version.
         if exercise_key in course_root["exercises"]:
             exercise_root = course_root["exercises"][exercise_key]
-            course_dir = self._conf_dir(settings.COURSES_PATH, course_root["data"]["key"], course_root["meta"])
+            course_dir = self._conf_dir(course_root["data"]["dir"], meta=course_root["meta"])
             include_ok, include_file_timestamp = self._check_include_file_timestamps(
                 exercise_root,
                 course_dir,
@@ -344,13 +362,13 @@ class ConfigParser:
             f, t, data = course_root["exercise_loader"](
                 course_root,
                 file_name[1:],
-                self._conf_dir(settings.COURSES_PATH, course_root["data"]["key"], {})
+                self._conf_dir(course_root["data"]["dir"], meta={})
             )
         else:
             f, t, data = course_root["exercise_loader"](
                 course_root,
                 file_name,
-                self._conf_dir(settings.COURSES_PATH, course_root["data"]["key"], course_root["meta"])
+                self._conf_dir(course_root["data"]["dir"], meta=course_root["meta"])
             )
         if not data:
             return None
@@ -391,7 +409,7 @@ class ConfigParser:
                 raise ConfigError('Required field "%s" missing from "%s"' % (name, file_name))
 
 
-    def _conf_dir(self, directory, course_key, meta):
+    def _conf_dir(self, directory, course_key = "", *, meta):
         '''
         Gets configuration directory for the course.
 

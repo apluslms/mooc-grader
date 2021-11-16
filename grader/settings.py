@@ -148,6 +148,9 @@ STATIC_ROOT = join(BASE_DIR, 'static')
 # Course configuration path:
 # Every directory under this directory is expected to be a course configuration
 COURSES_PATH = join(BASE_DIR, 'courses')
+# This is required if external configuring is used and, in that case,
+# this must be on the same device as COURSES_PATH
+COURSE_STORE = join(BASE_DIR, 'course_store')
 
 # Exercise files submission path:
 # Django process requires write access to this directory.
@@ -225,6 +228,7 @@ LOGGING = {
 
 
 ###############################################################################
+from pathlib import Path
 from os import environ
 from r_django_essentials.conf import *
 
@@ -243,6 +247,8 @@ update_secret_from_file(__name__, environ.get('GRADER_AJAX_KEY_FILE', 'ajax_key'
 assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
 
 APLUS_AUTH.update(APLUS_AUTH_LOCAL)
+
+Path(COURSE_STORE).mkdir(parents=True, exist_ok=True)
 
 # Drop x-frame policy when debugging
 if DEBUG:
