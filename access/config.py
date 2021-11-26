@@ -205,6 +205,8 @@ class ConfigParser:
         data = self._parse(f)
         if data is None:
             raise ConfigError('Failed to parse configuration file "%s"' % (f))
+        elif not isinstance(data, dict):
+            raise ConfigError(f'The configuration data is invalid. It must be a dictionary. File "{f}"')
 
         self._check_fields(f, data, ["name"])
         data["key"] = course_key
