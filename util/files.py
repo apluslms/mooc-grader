@@ -149,14 +149,14 @@ def _meta_dir(sid):
 def write_submission_meta(sid, data):
     with open(_meta_dir(sid), "w") as f:
         f.write(json.dumps(data))
-        f.close()
 
 
 def read_and_remove_submission_meta(sid):
     p = _meta_dir(sid)
-    if not os.path.exists(p):
+    try:
+        with open(p, "r") as f:
+            data = json.loads(f.read())
+        os.unlink(p)
+    except (OSError, ValueError):
         return None
-    with open(p, "r") as f:
-        data = json.loads(f.read())
-    os.unlink(p)
     return data
