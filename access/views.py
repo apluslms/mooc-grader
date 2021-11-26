@@ -1,6 +1,8 @@
 import copy
 import json
+import logging
 import os
+from typing import List
 
 from django.shortcuts import render
 from django.http.response import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
@@ -20,6 +22,9 @@ from util.importer import import_named
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util.templates import template_to_str
+
+
+LOGGER = logging.getLogger('main')
 
 
 def index(request):
@@ -42,20 +47,34 @@ def course(request, course_key):
     '''
     Signals that the course is ready to be graded and lists available exercises.
     '''
-    (course, exercises) = config.exercises(course_key)
-    if course is None:
-        raise Http404()
+    error = None
+    try:
+        (course, exercises) = config.exercises(course_key)
+    except ConfigError as e:
+        course = exercises = None
+        error = str(e)
+    else:
+        if course is None:
+            raise Http404()
     if request.is_ajax():
-        return JsonResponse({
-            "ready": True,
-            "course_name": course["name"],
-            "exercises": _filter_fields(exercises, ["key", "title"]),
-        })
+        if error:
+            data = {
+                "ready": False,
+                "errors": [error],
+            }
+        else:
+            data = {
+                "ready": True,
+                "course_name": course["name"],
+                "exercises": _filter_fields(exercises, ["key", "title"]),
+            }
+        return JsonResponse(data)
     render_context = {
         'course': course,
         'exercises': exercises,
         'plus_config_url': request.build_absolute_uri(reverse(
-            'aplus-json', args=[course['key']])),
+            'aplus-json', args=[course_key])),
+        'error': error,
     }
     if "gitmanager" in settings.INSTALLED_APPS:
         render_context["build_log_url"] = request.build_absolute_uri(reverse("build-log-json", args=(course_key, )))
@@ -68,12 +87,13 @@ def exercise(request, course_key, exercise_key):
     '''
     post_url = request.GET.get('post_url', None)
     lang = request.POST.get('__grader_lang', None) or request.GET.get('lang', None)
-    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
+    course = exercise = None
 
-    # Try to call the configured view.
     try:
+        (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
+        # Try to call the configured view.
         return import_named(course, exercise['view_type'])(request, course, exercise, post_url)
-    except ConfigError as error:
+    except (ConfigError, ImportError) as error:
         return render(request, 'access/exercise_config_error.html', {
             'course': course,
             'exercise': exercise,
@@ -89,16 +109,20 @@ def exercise_ajax(request, course_key, exercise_key):
     Receives an AJAX request for an exercise.
     '''
     lang = request.GET.get('lang', None)
-    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
 
-    if course is None or exercise is None or 'ajax_type' not in exercise:
-        raise Http404()
+    try:
+        (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
 
-    # jQuery does not send "requested with" on cross domain requests
-    #if not request.is_ajax():
-    #    return HttpResponse('Method not allowed', status=405)
+        if course is None or exercise is None or 'ajax_type' not in exercise:
+            raise Http404()
 
-    response = import_named(course, exercise['ajax_type'])(request, course, exercise)
+        # jQuery does not send "requested with" on cross domain requests
+        #if not request.is_ajax():
+        #    return HttpResponse('Method not allowed', status=405)
+
+        response = import_named(course, exercise['ajax_type'])(request, course, exercise)
+    except (ConfigError, ImportError) as e:
+        return _error_response(exc=e)
 
     # No need to control domain as valid submission_url is required to submit.
     response['Access-Control-Allow-Origin'] = '*'
@@ -110,33 +134,34 @@ def exercise_model(request, course_key, exercise_key, parameter=None):
     Presents a model answer for an exercise.
     '''
     lang = request.GET.get('lang', None)
-    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
+    try:
+        (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
+    except ConfigError as e:
+        return HttpResponse(str(e), content_type='text/plain')
 
     response = None
     path = None
 
-    if 'model_files' in exercise:
-        def find_name(paths, name):
-            models = [(path,path.split('/')[-1]) for path in paths]
-            for path,name in models:
-                if name == parameter:
-                    return path
-            return None
-        path = find_name(exercise['model_files'], parameter)
+    if 'model_files' in exercise and parameter:
+        path = _find_file(exercise['model_files'], parameter)
 
     if path:
         try:
             with open(os.path.join(course['dir'], path)) as f:
                 content = f.read()
-        except FileNotFoundError:
-            pass
-        else:
-            response = HttpResponse(content, content_type='text/plain')
+        except FileNotFoundError as error:
+            raise Http404(f'Model file "{parameter}" missing') from error
+        except OSError as error:
+            LOGGER.error(f'Error in reading the exercise model file "{path}".', exc_info=error)
+            content = str(error)
+        response = HttpResponse(content, content_type='text/plain')
     else:
         try:
             response = import_named(course, exercise['view_type'] + "Model")(request, course, exercise, parameter)
         except ImportError:
             pass
+        except ConfigError as e:
+            response = HttpResponse(str(e), content_type='text/plain')
 
     if response:
         return response
@@ -149,32 +174,34 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
     Presents the exercise template.
     '''
     lang = request.GET.get('lang', None)
-    (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
+    try:
+        (course, exercise, lang) = _get_course_exercise_lang(course_key, exercise_key, lang)
+    except ConfigError as e:
+        return HttpResponse(str(e), content_type='text/plain')
 
     response = None
     path = None
 
-    if 'template_files' in exercise:
-        def find_name(paths, name):
-            templates = [(path,path.split('/')[-1]) for path in paths]
-            for path,name in templates:
-                if name == parameter:
-                    return path
-            return None
-        path = find_name(exercise['template_files'], parameter)
+    if 'template_files' in exercise and parameter:
+        path = _find_file(exercise['template_files'], parameter)
 
     if path:
         try:
             with open(os.path.join(course['dir'], path)) as f:
                 content = f.read()
         except FileNotFoundError as error:
-            raise Http404("Template file missing") from error
+            raise Http404(f'Template file "{parameter}" missing') from error
+        except OSError as error:
+            LOGGER.error(f'Error in reading the exercise template file "{path}".', exc_info=error)
+            content = str(error)
         response = HttpResponse(content, content_type='text/plain')
     else:
         try:
             response = import_named(course, exercise['view_type'] + "Template")(request, course, exercise, parameter)
         except ImportError:
             pass
+        except ConfigError as e:
+            response = HttpResponse(str(e), content_type='text/plain')
 
     if response:
         return response
@@ -186,7 +213,10 @@ def aplus_json(request, course_key):
     '''
     Delivers the configuration as JSON for A+.
     '''
-    course = config.course_entry(course_key)
+    try:
+        course = config.course_entry(course_key)
+    except ConfigError as e:
+        return _error_response(exc=e)
     if course is None:
         raise Http404()
     data = _copy_fields(course, [
@@ -215,6 +245,8 @@ def aplus_json(request, course_key):
     if "language" in course:
         data["lang"] = course["language"]
 
+    errors = []
+
     def children_recursion(parent):
         if not "children" in parent:
             return []
@@ -222,7 +254,11 @@ def aplus_json(request, course_key):
         for o in [o for o in parent["children"] if "key" in o]:
             of = _type_dict(o, course.get("exercise_types", {}))
             if "config" in of:
-                _, exercise = config.exercise_entry(course["key"], str(of["key"]), '_root')
+                try:
+                    _, exercise = config.exercise_entry(course["key"], str(of["key"]), '_root')
+                except ConfigError as e:
+                    errors.append(str(e))
+                    continue
                 of = export.exercise(request, course, exercise, of)
             elif "static_content" in of:
                 of = export.chapter(request, course, of)
@@ -237,6 +273,8 @@ def aplus_json(request, course_key):
             mf["children"] = children_recursion(m)
             modules.append(mf)
     data["modules"] = modules
+    if errors:
+        data["errors"] = errors
 
     if "gitmanager" in settings.INSTALLED_APPS:
         data["build_log_url"] = request.build_absolute_uri(reverse("build-log-json", args=(course_key, )))
@@ -252,14 +290,21 @@ def test_result(request):
     if request.method == 'POST':
         vals = request.POST.copy()
         vals['time'] = str(timezone.now())
-        with open(file_path, 'w') as f:
-            f.write(json.dumps(vals))
+        try:
+            with open(file_path, 'w') as f:
+                f.write(json.dumps(vals))
+        except OSError as e:
+            return _error_response(exc=e)
         return JsonResponse({ "success": True })
 
     result = None
-    if os.path.exists(file_path):
+    try:
         with open(file_path, 'r') as f:
             result = f.read()
+    except FileNotFoundError:
+        pass
+    except OSError as e:
+        return _error_response(exc=e)
     return HttpResponse(result or 'No test result received yet.')
 
 
@@ -268,7 +313,10 @@ def generated_exercise_file(request, course_key, exercise_key, exercise_instance
     Delivers a generated file of the exercise instance.
     '''
     # Fetch the corresponding exercise entry from the config.
-    (course, exercise) = config.exercise_entry(course_key, exercise_key)
+    try:
+        (course, exercise) = config.exercise_entry(course_key, exercise_key)
+    except ConfigError as e:
+        return HttpResponse(str(e), content_type='text/plain')
     if course is None or exercise is None:
         raise Http404()
     if "generated_files" in exercise:
@@ -299,6 +347,14 @@ def _get_course_exercise_lang(course_key, exercise_key, lang_code):
         lang_code = course.get('lang', DEFAULT_LANG)
     translation.activate(lang_code)
     return (course, exercise, lang_code)
+
+
+def _find_file(filepaths, name):
+    file_paths_and_names = [(path, path.split('/')[-1]) for path in filepaths]
+    for path, filename in file_paths_and_names:
+        if filename == name:
+            return path
+    return None
 
 
 def _filter_fields(dict_list, pick_fields):
@@ -356,6 +412,15 @@ def _type_dict(dict_item, dict_types):
     if "type" in base:
         del base["type"]
     return base
+
+
+def _error_response(errors: List[str] = None, exc: Exception = None):
+    if exc:
+        errors = [str(exc)]
+    return JsonResponse({
+        'success': False,
+        'errors': errors,
+    })
 
 
 def container_post(request):
