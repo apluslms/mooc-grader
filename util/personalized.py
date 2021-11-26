@@ -100,7 +100,7 @@ def read_user_personal_file(course, exercise, userid, filename, submission_numbe
     try:
         with open(filepath) as f:
             return f.read()
-    except IOError as e:
+    except OSError as e:
         LOGGER.error('User file %s could not be read. Error: %s', filepath, str(e))
         return ''
 
@@ -114,7 +114,7 @@ def read_generated_exercise_file(course, exercise, instance, filename):
     try:
         with open(path, 'rb') as f:
             return f.read()
-    except IOError as e:
+    except OSError as e:
         LOGGER.error('Generated exercise instance file %s could not be read. Error: %s', path, str(e))
         return ''
 
