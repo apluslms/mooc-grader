@@ -2,6 +2,7 @@
 The exercises and classes are configured in json/yaml.
 Each directory inside courses/ holding an index.json/yaml is a course.
 '''
+import io
 import json
 import os
 import re
@@ -13,6 +14,7 @@ import yaml
 
 from django.conf import settings
 from django.template import loader as django_template_loader
+from django.template.exceptions import TemplateDoesNotExist, TemplateSyntaxError
 
 from util.dict import get_rst_as_html
 from util.files import read_meta
@@ -465,28 +467,44 @@ class ConfigParser:
         @return: updated data
         '''
         return_data = data.copy()
+        include_data_list = data.get("include")
+        if not isinstance(include_data_list, list):
+            raise ConfigError(
+                f'The value of the "include" field in the file "{target_file}" should be a list of dictionaries.',
+            )
 
-        for include_data in data["include"]:
-            self._check_fields(target_file, include_data, ("file",))
+        for include_data in include_data_list:
+            try:
+                self._check_fields(target_file, include_data, ("file",))
 
-            include_file = self._get_config(os.path.join(course_dir, include_data["file"]))
-            loader = self.FORMATS[os.path.splitext(include_file)[1][1:]]
+                include_file = self._get_config(os.path.join(course_dir, include_data["file"]))
+                loader = self.FORMATS[os.path.splitext(include_file)[1][1:]]
 
-            if "template_context" in include_data:
-                # Load new data from rendered include file string
-                render_context = include_data["template_context"]
-                template_name = os.path.join(course_dir, include_file)
-                template_name = template_name[len(DIR)+1:] # FIXME: XXX: NOTE: TODO: Fix this hack
-                rendered = django_template_loader.render_to_string(
-                            template_name,
-                            render_context
-                           )
-                new_data = loader(rendered)
-            else:
-                # Load new data directly from the include file
-                new_data = loader(include_file)
+                if "template_context" in include_data:
+                    # Load new data from rendered include file string
+                    render_context = include_data["template_context"]
+                    template_name = os.path.join(course_dir, include_file)
+                    template_name = template_name[len(DIR)+1:] # FIXME: XXX: NOTE: TODO: Fix this hack
+                    rendered = django_template_loader.render_to_string(
+                                template_name,
+                                render_context
+                            )
+                    new_data = loader(io.StringIO(rendered))
+                else:
+                    # Load new data directly from the include file
+                    with open(include_file, 'r') as f:
+                        new_data = loader(f)
+            except (OSError, KeyError, ValueError, yaml.YAMLError, TemplateDoesNotExist, TemplateSyntaxError) as e:
+                raise ConfigError(
+                    f'Error in parsing the config file to be included into "{target_file}".', error=e,
+                ) from e
 
-            if "force" in include_data and include_data["force"]:
+            if not new_data:
+                raise ConfigError(f'Included config file is empty: "{target_file}"')
+            if not isinstance(new_data, dict):
+                raise ConfigError(f'Included config is not of type dict: "{target_file}"')
+
+            if include_data.get('force', False):
                 return_data.update(new_data)
             else:
                 for new_key, new_value in new_data.items():
