@@ -18,12 +18,16 @@ ADMINS = (
 )
 #SERVER_EMAIL = 'root@'
 ALLOWED_HOSTS = ["*"]
-# Local nessaging library settings
+# Local nessaging library settings, see [aplus-auth](https://pypi.org/project/aplus-auth/) for explanations
 APLUS_AUTH_LOCAL = {
     "PRIVATE_KEY": None,
     "PUBLIC_KEY": None,
     "REMOTE_AUTHENTICATOR_KEY": None,
-    "REMOTE_AUTHENTICATOR_URL": None,
+    "REMOTE_AUTHENTICATOR_URL": None, # probably "https://<A+ domain>/api/v2/get-token/"
+    #"TRUSTED_KEYS": [...],
+    #"TRUSTING_REMOTES": [...],
+    #"DISABLE_LOGIN_CHECKS": False,
+    #"DISABLE_JWT_SIGNING": False,
 }
 
 # modify this if there are very large courses to be configured through /configure

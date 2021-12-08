@@ -136,3 +136,19 @@ Operate the workers:
 ## 2. Django application settings for deployment
 
 When deploying, overwrite necessary configurations in `mooc-grader/grader/local_settings.py`.
+
+### Authentication system configuration
+
+Alternatively, the system can be disabled by settings `DISABLE_JWT_SIGNING` and
+`DISABLE_LOGIN_CHECKS` in the `APLUS_AUTH` dict in the settings to True.
+
+1. Create RSA keys for [JWT authentication](https://github.com/apluslms/a-plus/blob/master/doc/AUTH.md)
+
+    # generate private key
+    openssl genrsa -out private.pem 2048
+    # extract public key
+    openssl rsa -in private.pem -out public.pem -pubout
+
+2. Fill the `APLUS_AUTH` settings (in `local_settings.py`). Check the comments in `settings.py`.
+
+3. Add the RSA public key to A+ settings.
