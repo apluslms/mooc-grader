@@ -29,9 +29,13 @@ DEFAULT_LANG = "en"
 
 LOGGER = logging.getLogger('main')
 
-
-EXTERNAL_FILES_DIR = "files"
-EXTERNAL_EXERCISES_DIR = "exercises"
+# NEEDS WORK: a few options are dependent on the relative locations of the files
+# so we cannot add an intermediary directory yet. Would have to figure out
+# which options need to be modified and whether there are other consequences
+# for changing the file locations
+EXTERNAL_FILES_DIR = "" # "files"
+# lest hope _exercise_configs isn't in use by the course
+EXTERNAL_EXERCISES_DIR = "_exercise_configs" # "exercises"
 
 def _ext_exercise_loader(course_root, exercise_key, course_dir):
     '''
