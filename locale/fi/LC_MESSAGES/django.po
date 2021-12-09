@@ -142,14 +142,6 @@ msgid "A+_CONFIGURATION_JSON"
 msgstr "A+:n konfiguraatio-JSON"
 
 #: access/templates/access/course.html
-msgid "BUILD/MAKE_OUTPUT_RETRIEVAL"
-msgstr "Kurssin kääntämisen tulosteen haku"
-
-#: access/templates/access/course.html
-msgid "REQUIRES_GITMANAGER_PLUG-IN"
-msgstr "Vaatii gitmanager-liitännäisen"
-
-#: access/templates/access/course.html
 msgid "AVAILABLE_EXERCISES"
 msgstr "Saatavilla olevat tehtävät"
 

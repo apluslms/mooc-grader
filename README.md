@@ -51,15 +51,6 @@ Then, create virtual environment with grader requirements.
     pip install wheel
     pip install -r mooc-grader/requirements.txt
 
-If you enable the gitmanager app in the MOOC-Grader (see the section
-"Django application settings for deployment"), you need to install its
-requirements in the (virtual) environment that it uses. It may use a different
-environment than the Django application.
-
-    pip install -r mooc-grader/requirements_gitmanager.txt
-    # If you need to use the old Sphinx version 1.6, then install this one instead:
-    pip install -r mooc-grader/requirements_gitmng_sphinx16.txt
-
 ### 3. Testing grader application
 
 Run the Django app locally:
@@ -146,24 +137,18 @@ Operate the workers:
 
 When deploying, overwrite necessary configurations in `mooc-grader/grader/local_settings.py`.
 
-If `gitmanager` is used to update course content via Git operations, enable it in
-`local_settings.py`:
+### Authentication system configuration
 
-    ADD_APPS = (
-    'gitmanager',
-    )
+Alternatively, the system can be disabled by settings `DISABLE_JWT_SIGNING` and
+`DISABLE_LOGIN_CHECKS` in the `APLUS_AUTH` dict in the settings to True.
 
-`gitmanager` uses a database. If `sqlite3` is used (in `settings.py`), it must be installed:
+1. Create RSA keys for [JWT authentication](https://github.com/apluslms/a-plus/blob/master/doc/AUTH.md)
 
-    sudo apt-get install sqlite3 libsqlite3-dev
+    # generate private key
+    openssl genrsa -out private.pem 2048
+    # extract public key
+    openssl rsa -in private.pem -out public.pem -pubout
 
-Django must install the database schema for the `gitmanager` (Python virtual environment must be activated):
+2. Fill the `APLUS_AUTH` settings (in `local_settings.py`). Check the comments in `settings.py`.
 
-    python manage.py migrate
-
-Note that if the file path of the Sqlite database is changed in `local_settings.py`,
-the same path must also be hardcoded in the code `gitmanager/cron.sh`.
-
-The `gitmanager` requires a crontab for the grader account:
-
-    sudo crontab -u grader doc/gitmanager-crontab
+3. Add the RSA public key to A+ settings.

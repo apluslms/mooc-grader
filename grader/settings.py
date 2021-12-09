@@ -4,6 +4,7 @@
 # You can copy local_settings.example.py and start from there.
 ##
 from os.path import abspath, dirname, join
+from typing import Dict, Optional
 BASE_DIR = dirname(dirname(abspath(__file__)))
 
 
@@ -17,8 +18,30 @@ ADMINS = (
 )
 #SERVER_EMAIL = 'root@'
 ALLOWED_HOSTS = ["*"]
+# Local nessaging library settings, see [aplus-auth](https://pypi.org/project/aplus-auth/) for explanations
+APLUS_AUTH_LOCAL = {
+    "PRIVATE_KEY": None,
+    "PUBLIC_KEY": None,
+    "REMOTE_AUTHENTICATOR_KEY": None,
+    "REMOTE_AUTHENTICATOR_URL": None, # probably "https://<A+ domain>/api/v2/get-token/"
+    #"TRUSTED_KEYS": [...],
+    #"TRUSTING_REMOTES": [...],
+    #"DISABLE_LOGIN_CHECKS": False,
+    #"DISABLE_JWT_SIGNING": False,
+}
+
+# modify this if there are very large courses to be configured through /configure
+# it is the maximum number of bytes allowed in a request body (doesn't count files)
+# https://docs.djangoproject.com/en/3.2/ref/settings/#data-upload-max-memory-size
+# Other applications in the pipeline, like NGINX and kubernetes, may have their
+# own limits that need to be modified separately
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10*1024*1024 # 10MB
 ##########################################################################
 
+# Messaging library
+APLUS_AUTH: Dict[str, Optional[str]] = {
+    "AUTH_CLASS": "access.auth.Authentication",
+}
 
 INSTALLED_APPS = (
     # 'django.contrib.admin',
@@ -29,9 +52,7 @@ INSTALLED_APPS = (
     'staticfileserver', # override for runserver command, thus this needs to be before django contrib one
     'django.contrib.staticfiles',
     'access',
-)
-ADD_APPS = (
-    #'gitmanager',
+    'aplus_auth',
 )
 
 MIDDLEWARE = [
@@ -42,6 +63,7 @@ MIDDLEWARE = [
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
     # 'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'aplus_auth.auth.django.AuthenticationMiddleware',
 ]
 
 TEMPLATES = [
@@ -51,7 +73,6 @@ TEMPLATES = [
             join(BASE_DIR, 'local_templates'),
             join(BASE_DIR, 'templates'),
             join(BASE_DIR, 'courses'),
-            join(BASE_DIR, 'exercises'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -128,20 +149,12 @@ STATIC_ROOT = join(BASE_DIR, 'static')
 #MEDIA_ROOT = join(BASE_DIR, 'media')
 
 
-# Task queue settings
-##########################################################################
-CONTAINER_SCRIPT = join(BASE_DIR, "scripts/docker-run.sh")
-
-# HTTP
-DEFAULT_EXPIRY_MINUTES = 15
-
-
 # Course configuration path:
 # Every directory under this directory is expected to be a course configuration
-# FIXME: this option is currently just place holder and it's waiting for deprecation
-# of course specific view_types. ps. those are currently imported by util.importer.import_named
-# access/config.py contains hardcoded version of this value.
 COURSES_PATH = join(BASE_DIR, 'courses')
+# This is required if external configuring is used and, in that case,
+# this must be on the same device as COURSES_PATH
+COURSE_STORE = join(BASE_DIR, 'course_store')
 
 # Exercise files submission path:
 # Django process requires write access to this directory.
@@ -150,6 +163,33 @@ SUBMISSION_PATH = join(BASE_DIR, 'uploads')
 # Personalized exercises and user files are kept here.
 # Django process requires write access to this directory.
 PERSONALIZED_CONTENT_PATH = join(BASE_DIR, 'exercises-meta')
+
+
+# Task queue settings
+##########################################################################
+RUNNER_MODULE = join(BASE_DIR, "scripts/docker-run.py")
+# settings passed to the runner module. See the runner module file for more
+# information.
+HOST_BASE_DIR = BASE_DIR
+RUNNER_MODULE_SETTINGS = {
+  "network": "bridge",
+  "mounts": {
+    COURSES_PATH: COURSES_PATH.replace(BASE_DIR, HOST_BASE_DIR),
+    SUBMISSION_PATH: SUBMISSION_PATH.replace(BASE_DIR, HOST_BASE_DIR),
+    PERSONALIZED_CONTENT_PATH: PERSONALIZED_CONTENT_PATH.replace(BASE_DIR, HOST_BASE_DIR),
+  },
+}
+
+# If running in a docker container, set this to the docker network used by the container
+# e.g. the default for a docker-compose project is '<dir>_default', where <dir> is
+# the directory the docker-compose.yml file is in
+# 'bridge' is the default when running docker directly without compose
+CONTAINER_NETWORK = "bridge"
+
+
+# HTTP
+DEFAULT_EXPIRY_MINUTES = 15
+
 
 # Logging
 # https://docs.djangoproject.com/en/1.7/topics/logging/
@@ -192,6 +232,7 @@ LOGGING = {
 
 
 ###############################################################################
+from pathlib import Path
 from os import environ
 from r_django_essentials.conf import *
 
@@ -209,8 +250,9 @@ update_secret_from_file(__name__, environ.get('GRADER_SECRET_KEY_FILE', 'secret_
 update_secret_from_file(__name__, environ.get('GRADER_AJAX_KEY_FILE', 'ajax_key'), setting='AJAX_KEY')
 assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
 
-# update INSTALLED_APPS
-INSTALLED_APPS = INSTALLED_APPS + ADD_APPS
+APLUS_AUTH.update(APLUS_AUTH_LOCAL)
+
+Path(COURSE_STORE).mkdir(parents=True, exist_ok=True)
 
 # Drop x-frame policy when debugging
 if DEBUG:

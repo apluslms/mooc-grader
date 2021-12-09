@@ -4,6 +4,7 @@ from access import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
+    url(r'^configure$', views.configure, name='configure'),
     url(r'^test-result$', views.test_result, name='test-result'),
     url(r'^container-post$', views.container_post, name='container-post'),
     url(r'^ajax/([\w-]+)/([\w-]+)$', views.exercise_ajax, name='ajax'),
@@ -13,5 +14,6 @@ urlpatterns = [
         name='generated-file'),
     url(r'^([\w-]+)/$', views.course, name='course'),
     url(r'^([\w-]+)/aplus-json$', views.aplus_json, name='aplus-json'),
-    url(r'^([\w-]+)/([\w-]+)$', views.exercise, name='exercise'),
+    url(r'^([\d-]+|[\w-]+)/([\w-]+)$', views.exercise, name='exercise'),
+    url(r'^login$', views.LoginView.as_view(), name="login"),
 ]

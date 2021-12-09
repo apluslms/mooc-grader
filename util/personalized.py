@@ -53,7 +53,7 @@ def pregenerated_exercise_instances(course, exercise):
     pregenerated_dir = pregenerated_exercises_directory_path(course, exercise)
     try:
         # return a list of directory names (not full paths)
-        return [instance_dir for instance_dir in os.listdir(pregenerated_dir) 
+        return [instance_dir for instance_dir in os.listdir(pregenerated_dir)
                 if os.path.isdir(os.path.join(pregenerated_dir, instance_dir))]
     except OSError:
         return [] # pregenerated_dir does not exist
@@ -71,7 +71,7 @@ def select_generated_exercise_instance(course, exercise, userids_str, submission
     num_instances = len(instances)
     if num_instances == 0:
         raise access.config.ConfigError("Exercise is personalized but no exercise instances have been pregenerated")
-    
+
     if "max_submissions_before_regeneration" in exercise:
         # the generated exercise may be regenerated after submitting certain amount of times
         instance_numbers = list(range(num_instances))
@@ -149,7 +149,7 @@ def generate_exercise_instances(course, exercise, number_of_instances):
         except ValueError:
             pass
     index += 1
-    
+
     pregen_dir = pregenerated_exercises_directory_path(course, exercise)
     # this base directory should already exist
     for _ in range(number_of_instances):
@@ -174,7 +174,7 @@ def generate_one_exercise_instance(course, exercise, dir_path):
                 (course["key"], exercise["key"]))
 
     # default cwd is the course directory
-    cwd = os.path.join(access.config.DIR, course["key"])
+    cwd = os.path.join(settings.COURSES_PATH, course["key"])
     if "cwd" in exercise["generator"]:
         # if cwd is set, it should reside inside course directory
         cwd = os.path.join(cwd, exercise["generator"]["cwd"])
@@ -191,14 +191,14 @@ def personalized_template_context(course, exercise, request):
     ctx = {}
     if not ("personalized" in exercise and exercise["personalized"]):
         return ctx
-    
+
     userid = get_uid(request)
     if not userid:
         raise access.config.ConfigError('Exercise is personalized but HTTP GET request did not supply any "uid" parameter.')
-    
+
     if "generated_files" not in exercise:
         raise access.config.ConfigError('"generated_files" missing in the configuration of a personalized exercise')
-    
+
     # prepare template context (variables about the pregenerated exercise instance files)
     generated_files = {}
     for gen_file_conf in exercise["generated_files"]:
@@ -209,9 +209,9 @@ def personalized_template_context(course, exercise, request):
         file_ctx["url_in_template"] = gen_file_conf.get("url_in_template", False)
         file_ctx["content_in_template"] = gen_file_conf.get("content_in_template", False)
         file_ctx["allow_download"] = gen_file_conf.get("allow_download", False)
-        
+
         submission_number = int(request.GET.get("ordinal_number", 1))
-        
+
         if "url_in_template" in gen_file_conf and gen_file_conf["url_in_template"]:
             exercise_instance = os.path.basename(select_generated_exercise_instance(
                     course, exercise, userid, submission_number))
@@ -223,6 +223,6 @@ def personalized_template_context(course, exercise, request):
             file_ctx["content"] = read_user_personal_file(course, exercise,
                     userid, gen_file_conf["file"], submission_number)
         generated_files[gen_file_conf["key"]] = file_ctx
-    
+
     ctx["generated_files"] = generated_files
     return ctx

@@ -1,24 +1,32 @@
 import copy
 import json
+from json.decoder import JSONDecodeError
 import logging
 import os
+from pathlib import Path
+from shutil import rmtree
+from tarfile import TarFile
 from typing import List
 
+from aplus_auth.payload import Permission
 from django.shortcuts import render
 from django.http.response import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.utils import timezone
 from django.utils import translation
 from django.urls import reverse
 from django.conf import settings
+from django.views import View
 
-from access.config import DEFAULT_LANG, ConfigError, config
+from access.config import DEFAULT_LANG, EXTERNAL_EXERCISES_DIR, EXTERNAL_FILES_DIR, ConfigError, config
 from util import export
 from util.files import (
     read_and_remove_submission_meta,
+    renames,
     write_submission_meta,
 )
 from util.http import post_data
 from util.importer import import_named
+from util.login_required import login_required
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util.templates import template_to_str
@@ -39,10 +47,146 @@ def index(request):
         })
     return render(request, 'access/ready.html', {
         "courses": courses,
-        "manager": 'gitmanager' in settings.INSTALLED_APPS,
     })
 
 
+def publish(request):
+    """
+    Move a course from store to the main folder
+    """
+    if request.method != "POST":
+        return HttpResponse(status=405)
+
+    if "course_id" not in request.POST:
+        return HttpResponse("Missing course_id", status=400)
+
+    course_id = request.POST["course_id"]
+
+    if not request.auth.permissions.instances.has(Permission.WRITE, id=int(course_id)):
+        return HttpResponse(status=401)
+
+    root_dir = Path(settings.COURSES_PATH)
+    store_root_dir = Path(settings.COURSE_STORE)
+    course_path = root_dir / course_id
+    store_course_path = store_root_dir / course_id
+    version_id_path = root_dir / (course_id + ".version")
+    store_version_id_path = store_root_dir / (course_id + ".version")
+
+    try:
+        with open(store_version_id_path) as f:
+            store_version_id = f.read()
+    except FileNotFoundError:
+        store_version_id = None
+    except OSError:
+        LOGGER.exception("Could not open version file")
+        return HttpResponse("Could not open version file", status=500)
+
+    if store_version_id == request.POST.get("version_id"):
+        try:
+            renames([
+                (store_version_id_path, version_id_path),
+                (store_course_path, course_path),
+            ])
+        except OSError as e:
+            LOGGER.exception("Failed to rename files on publish")
+            return HttpResponse(status=500)
+
+        return HttpResponse()
+
+    try:
+        with open(version_id_path) as f:
+            version_id = f.read()
+    except FileNotFoundError:
+        version_id = None
+    except OSError:
+        LOGGER.exception("Could not open version file")
+        return HttpResponse("Could not open version file", status=500)
+
+    if version_id == request.POST.get("version_id"):
+        return HttpResponse()
+    else:
+        return HttpResponse("Unknown version id", status=404)
+
+
+@login_required
+def configure(request):
+    '''
+    Configure a course according to the gitmanager protocol.
+    '''
+    if request.method != "POST":
+        return HttpResponse(status=405)
+
+    if request.POST.get("publish"):
+        return publish(request)
+
+    if "exercises" not in request.POST or "course_id" not in request.POST:
+        return HttpResponse("Missing exercises or course_id", status=400)
+
+    course_id = request.POST["course_id"]
+    try:
+        exercises = json.loads(request.POST["exercises"])
+        course_id_int = int(course_id)
+    except (JSONDecodeError, ValueError) as e:
+        LOGGER.exception("Invalid exercises or course_id field")
+        return HttpResponse(f"Invalid exercises or course_id field: {e}", status=500)
+
+    if not request.auth.permissions.instances.has(Permission.WRITE, id=course_id_int):
+        return HttpResponse(status=401)
+
+    root_dir = Path(settings.COURSE_STORE)
+    course_path = root_dir / course_id
+    if course_path.exists():
+        try:
+            rmtree(course_path)
+        except OSError:
+            LOGGER.exception("Failed to remove old stored course files")
+            return HttpResponse("Failed to remove old stored course files", status=500)
+
+    course_files_path = course_path / EXTERNAL_FILES_DIR
+    course_exercises_path = course_path / EXTERNAL_EXERCISES_DIR
+    version_id_path = root_dir / (course_id + ".version")
+    course_files_path.mkdir(parents=True, exist_ok=True)
+    course_exercises_path.mkdir(parents=True, exist_ok=True)
+
+    if "files" in request.FILES:
+        tar_file = request.FILES["files"].file
+        tarh = TarFile(fileobj=tar_file)
+        tarh.extractall(course_files_path)
+
+    course_config = {
+        "name": course_id,
+        "exercises": [ex["key"] for ex in exercises],
+        "exercise_loader": "access.config._ext_exercise_loader",
+    }
+
+    with open(course_path / "index.json", "w") as f:
+        json.dump(course_config, f)
+
+    for info in exercises:
+        with open(course_exercises_path / (info["key"] + ".json"), "w") as f:
+            json.dump(info["config"], f)
+
+    if "version_id" in request.POST:
+        with open(version_id_path, "w") as f:
+            f.write(request.POST["version_id"])
+    elif version_id_path.exists():
+        version_id_path.unlink()
+
+    course_config = config._course_root_from_root_dir(course_id, root_dir)
+
+    defaults = {}
+    for info in exercises:
+        of = info["spec"]
+        if info.get("config"):
+            of["config"] = info["key"] + ".json"
+            course, exercise = config.exercise_entry(course_config, info["key"], "_root")
+            of = export.exercise(request, course, exercise, of)
+        defaults[of["key"]] = of
+
+    return JsonResponse(defaults)
+
+
+@login_required
 def course(request, course_key):
     '''
     Signals that the course is ready to be graded and lists available exercises.
@@ -76,11 +220,10 @@ def course(request, course_key):
             'aplus-json', args=[course_key])),
         'error': error,
     }
-    if "gitmanager" in settings.INSTALLED_APPS:
-        render_context["build_log_url"] = request.build_absolute_uri(reverse("build-log-json", args=(course_key, )))
     return render(request, 'access/course.html', render_context)
 
 
+@login_required
 def exercise(request, course_key, exercise_key):
     '''
     Presents the exercise and accepts answers to it.
@@ -129,6 +272,7 @@ def exercise_ajax(request, course_key, exercise_key):
     return response
 
 
+@login_required
 def exercise_model(request, course_key, exercise_key, parameter=None):
     '''
     Presents a model answer for an exercise.
@@ -169,6 +313,7 @@ def exercise_model(request, course_key, exercise_key, parameter=None):
         raise Http404()
 
 
+@login_required
 def exercise_template(request, course_key, exercise_key, parameter=None):
     '''
     Presents the exercise template.
@@ -209,6 +354,7 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
         raise Http404()
 
 
+@login_required
 def aplus_json(request, course_key):
     '''
     Delivers the configuration as JSON for A+.
@@ -276,9 +422,22 @@ def aplus_json(request, course_key):
     if errors:
         data["errors"] = errors
 
-    if "gitmanager" in settings.INSTALLED_APPS:
-        data["build_log_url"] = request.build_absolute_uri(reverse("build-log-json", args=(course_key, )))
     return JsonResponse(data)
+
+
+class LoginView(View):
+    def get(self, request):
+        response = render(request, 'access/login.html')
+        response.delete_cookie("AuthToken")
+        return response
+
+    def post(self, request):
+        if not hasattr(request, "user") or not request.user.is_authenticated:
+            return HttpResponse("Invalid token", status=401)
+        else:
+            response = HttpResponse()
+            response.set_cookie("AuthToken", str(request.auth))
+            return response
 
 
 def test_result(request):

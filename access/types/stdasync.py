@@ -22,24 +22,31 @@ Functions take arguments:
 import logging
 import copy
 import os
-import json
 from django.conf import settings
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 from django.utils import translation
 
-from util.files import create_submission_dir, save_submitted_file, \
-    clean_submission_dir, write_submission_file, write_submission_meta
+from util.files import SubmissionDir, write_submission_meta
 from util.http import not_modified_since, not_modified_response, cache_headers
+from util.importer import import_path
 from util.personalized import select_generated_exercise_instance
 from util.shell import invoke
 from util.templates import render_configured_template, render_template, \
     template_to_str
 from .auth import make_hash, get_uid
-from ..config import ConfigError, DIR
+from ..config import ConfigError
 
 
 LOGGER = logging.getLogger('main')
+
+
+runner_module = import_path(settings.RUNNER_MODULE)
+if not hasattr(runner_module, "run"):
+    raise AttributeError(f"settings.RUNNER_MODULE ({settings.RUNNER_MODULE}) does not have a run function")
+runner_func = runner_module.run
+if not callable(runner_func):
+    raise AttributeError(f"run attribute in settings.RUNNER_MODULE ({settings.RUNNER_MODULE}) is not callable")
 
 
 def acceptPost(request, course, exercise, post_url):
@@ -64,9 +71,9 @@ def acceptPost(request, course, exercise, post_url):
         else:
 
             # Store submitted values.
-            sdir = create_submission_dir(course, exercise)
+            sdir = SubmissionDir(course, exercise)
             for entry in fields:
-                write_submission_file(sdir, entry["name"], entry["value"])
+                sdir.write_file(entry["name"], entry["value"])
             return _acceptSubmission(request, course, exercise, post_url, sdir)
     else:
         result = { "fields": fields }
@@ -111,9 +118,9 @@ def acceptFiles(request, course, exercise, post_url):
                 result = { "rejected": True, "missing_files": True }
             else:
                 # Store submitted files.
-                sdir = create_submission_dir(course, exercise)
+                sdir = SubmissionDir(course, exercise)
                 for entry in files_submitted:
-                    save_submitted_file(sdir, entry["name"], request.FILES[entry["field"]])
+                    sdir.save_file(entry["name"], request.FILES[entry["field"]])
                 return _acceptSubmission(request, course, exercise, post_url, sdir)
 
     return cache_headers(
@@ -160,8 +167,8 @@ def acceptGitAddress(request, course, exercise, post_url):
             result = { "error": True, "invalid_address": True }
 
         if result is None:
-            sdir = create_submission_dir(course, exercise)
-            write_submission_file(sdir, "gitsource", source)
+            sdir = SubmissionDir(course, exercise)
+            sdir.write_file("gitsource", source)
             return _acceptSubmission(request, course, exercise, post_url, sdir)
 
     return cache_headers(
@@ -190,8 +197,8 @@ def acceptGitUser(request, course, exercise, post_url):
             if make_hash(auth_secret, user) != request.POST["hash"]:
                 raise PermissionDenied()
         source = exercise["git_address"].replace("$USER", user)
-        sdir = create_submission_dir(course, exercise)
-        write_submission_file(sdir, "gitsource", source)
+        sdir = SubmissionDir(course, exercise)
+        sdir.write_file("gitsource", source)
         return _acceptSubmission(request, course, exercise, post_url, sdir)
 
     return render_configured_template(request, course, exercise, post_url,
@@ -203,7 +210,7 @@ def acceptGitUser(request, course, exercise, post_url):
 
 def acceptGeneralForm(request, course, exercise, post_url):
     '''
-    Presents a template and accepts form containing any input types 
+    Presents a template and accepts form containing any input types
     (text, file, etc) for grading queue.
     '''
     if not_modified_since(request, exercise):
@@ -212,16 +219,16 @@ def acceptGeneralForm(request, course, exercise, post_url):
     fields = copy.deepcopy(exercise.get("fields", []))
     result = None
     miss = False
-    
+
     if request.method == "POST":
         # Parse submitted values.
-        for entry in fields:        
+        for entry in fields:
             entry["value"] = request.POST.get(entry["name"], "").strip()
             if "required" in entry and entry["required"] and not entry["value"]:
                 entry["missing"] = True
                 miss = True
-        
-        files_submitted = [] 
+
+        files_submitted = []
         if "files" in exercise:
             # Confirm that all required files were submitted.
             #files_submitted = [] # exercise["files"] entries for the files that were really submitted
@@ -234,15 +241,15 @@ def acceptGeneralForm(request, course, exercise, post_url):
                         break
                 else:
                     files_submitted.append(entry)
-                   
+
         if miss:
             result = { "fields": fields, "rejected": True }
         elif result is None:
             # Store submitted values.
-            sdir = create_submission_dir(course, exercise)
+            sdir = SubmissionDir(course, exercise)
             for entry in fields:
-                write_submission_file(sdir, entry["name"], entry["value"])
-                               
+                sdir.write_file(entry["name"], entry["value"])
+
             if "files" in exercise:
                 if "required_number_of_files" in exercise and \
                         exercise["required_number_of_files"] > len(files_submitted):
@@ -250,9 +257,9 @@ def acceptGeneralForm(request, course, exercise, post_url):
                 else:
                     # Store submitted files.
                     for entry in files_submitted:
-                        save_submitted_file(sdir, entry["name"], request.FILES[entry["field"]])             
+                        sdir.save_file(entry["name"], request.FILES[entry["field"]])
             return _acceptSubmission(request, course, exercise, post_url, sdir)
-    
+
     return cache_headers(
         render_configured_template(
             request, course, exercise, post_url,
@@ -260,31 +267,31 @@ def acceptGeneralForm(request, course, exercise, post_url):
         ),
         request,
         exercise
-    )    
+    )
 
 def _requireContainer(exercise):
     c = exercise.get("container", {})
     a = exercise.get("actions", {})
 
     if c and a:
-        LOGGER.warning("The `actions` parameter defined in your config.yaml is no longer used by the mooc-grader." 
+        LOGGER.warning("The `actions` parameter defined in your config.yaml is no longer used by the mooc-grader."
         "Therefore, you should remove it from your config.yaml and make use of the `container`.")
     if not c or not "image" in c or not "mount" in c or not "cmd" in c:
         raise ConfigError("Missing or invalid \"container\" in exercise configuration.")
-    
+
     return c
 
 
 def _saveForm(request, course, exercise, post_url, form):
     data,files = form.json_and_files(post_url)
-    sdir = create_submission_dir(course, exercise)
-    write_submission_file(sdir, "data.json", data)
+    sdir = SubmissionDir(course, exercise)
+    sdir.write_file("data.json", data)
     for name,uploaded in files.items():
-        save_submitted_file(sdir, name, uploaded)
+        sdir.save_file(name, uploaded)
     return _acceptSubmission(request, course, exercise, post_url, sdir)
 
 
-def _acceptSubmission(request, course, exercise, post_url, sdir):
+def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
     '''
     Queues the submission for grading.
     '''
@@ -296,51 +303,62 @@ def _acceptSubmission(request, course, exercise, post_url, sdir):
         surl_missing = False
     else:
         LOGGER.warning("submission_url missing from a request")
-        surl = request.build_absolute_uri(reverse('test-result'))
+        surl = f'http://{request.META["HOSTNAME"]}:{request.META["SERVER_PORT"]}{reverse("test-result")}'
         surl_missing = True
 
     # Order container for grading.
     c = _requireContainer(exercise)
 
-    course_extra = {
-        "key": course["key"],
-        "name": course["name"],
-    }
-    exercise_extra = {
-        "key": exercise["key"],
-        "title": exercise.get("title", None),
-        "container_config": c
-    }
-    if exercise.get("personalized", False):
-        exercise_extra["personalized_exercise"] \
-            = select_generated_exercise_instance(course, exercise, uids, attempt)
+    ro_mounts = c.get("mounts", {}).copy()
+    if not isinstance(ro_mounts, dict):
+        raise ConfigError("'container'->'mounts' must be a <path on course>-<mount path> dictionary or omitted altogether")
+    for k,v in ro_mounts.items():
+        if not os.path.isabs(v):
+            raise ConfigError(f"Mount path must be absolute: {v}")
+        if any(v == p or v.startswith(p + "/") for p in ("/exercise", "/submission", "/personalized_exercise")):
+            raise ConfigError("/exercise, /submission and /personalized_exercise are reserved mounts, you cannot mount to them in 'mounts'")
+        if os.path.isabs(k) or os.path.normpath(k).startswith(".."):
+            raise ConfigError(f"Mounted path on course must be a relative subpath: {k}")
 
-    sid = os.path.basename(sdir)
-    write_submission_meta(sid, {
+    ro_mounts[c["mount"]] = "/exercise"
+
+    ro_mounts = {
+        os.path.join(settings.COURSES_PATH, course["key"], k): v
+        for k,v in ro_mounts.items()
+    }
+
+    if len(set(ro_mounts.values())) != len(ro_mounts):
+        raise ConfigError("Mount paths must be distinct")
+
+    if exercise.get("personalized", False):
+        personalized_dir = select_generated_exercise_instance(course, exercise, uids, attempt)
+        ro_mounts[personalized_dir] = "/personalized_exercise"
+
+    write_submission_meta(sdir.sid, {
         "url": surl,
-        "dir": sdir,
+        "dir": str(sdir.dir()),
         "course_key": course["key"],
         "exercise_key": exercise["key"],
         "lang": translation.get_language(),
     })
-    r = invoke([
-        settings.CONTAINER_SCRIPT,
-        sid,
-        request.scheme + "://" + request.get_host(),
-        c["image"],
-        os.path.join(DIR, course["key"], c["mount"]),
-        sdir,
-        c["cmd"],
-        json.dumps(course_extra),
-        json.dumps(exercise_extra),
-    ])
-    LOGGER.debug("Container order exit=%d out=%s err=%s",
-        r["code"], r["out"], r["err"])
+    return_code, out, err = runner_func(
+        course=course,
+        exercise=exercise,
+        container_config=c,
+        submission_id=sdir.sid,
+        host_url=request.scheme + "://" + request.get_host(),
+        readwrite_mounts={str(sdir.dir()): "/submission"},
+        readonly_mounts=ro_mounts,
+        image=c["image"],
+        cmd=c["cmd"],
+        settings=settings.RUNNER_MODULE_SETTINGS,
+    )
+    LOGGER.debug(f"Container order exit={return_code} out={out} err={err}")
     qlen = 1
 
     return render_template(request, course, exercise, post_url,
         "access/async_accepted.html", {
-            "error": r['code'] != 0,
+            "error": return_code != 0,
             "accepted": True,
             "wait": True,
             "missing_url": surl_missing,

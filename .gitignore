@@ -16,6 +16,7 @@ exercises-meta/
 
 static/*
 courses/*
+course_store/*
 !courses/README.md
 !courses/__init__.py
 
@@ -31,7 +32,7 @@ courses/*
 venv
 
 #### Development Environment ####
- 
-# symbolic link exercises to /srv/courses 
+
+# symbolic link exercises to /srv/courses
 # Important!! This symbolic link should be created in order to debug the mooc grader
 exercises

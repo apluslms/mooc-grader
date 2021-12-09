@@ -4,6 +4,7 @@ Each directory inside courses/ holding an index.json/yaml is a course.
 '''
 import io
 import json
+from json.decoder import JSONDecodeError
 import os
 import re
 import time
@@ -25,14 +26,53 @@ from util.static import symbolic_link
 META = "apps.meta"
 INDEX = "index"
 DEFAULT_LANG = "en"
-#DIR = settings.COURSES_PATH # FIXME: not yet possible. Check settings.py for a comment
-DIR = os.path.join(settings.BASE_DIR, "courses")
-OLD_DIR = os.path.join(settings.BASE_DIR, "exercises")
-if os.path.isdir(OLD_DIR):
-    DIR = OLD_DIR
-DIR = os.path.realpath(DIR) # resolve symlinks
 
 LOGGER = logging.getLogger('main')
+
+# NEEDS WORK: a few options are dependent on the relative locations of the files
+# so we cannot add an intermediary directory yet. Would have to figure out
+# which options need to be modified and whether there are other consequences
+# for changing the file locations
+EXTERNAL_FILES_DIR = "" # "files"
+# lest hope _exercise_configs isn't in use by the course
+EXTERNAL_EXERCISES_DIR = "_exercise_configs" # "exercises"
+
+def _ext_exercise_loader(course_root, exercise_key, course_dir):
+    '''
+    Loader for exercises that were received from /configure.
+
+    @type course_root: C{dict}
+    @param course_root: a course root dictionary
+    @type exercise_key: C{str}
+    @param exercise_key: an exercise key
+    @type course_dir: C{str}
+    @param course_dir: a path to the course root directory
+    @rtype: C{str}, C{dict}
+    @return: exercise config file path, modified time and data dict
+    '''
+    config_file = os.path.join(course_dir, EXTERNAL_EXERCISES_DIR, exercise_key) + ".json"
+    try:
+        with open(config_file) as f:
+            data = json.load(f)
+    except (OSError, JSONDecodeError) as e:
+        raise ConfigError(f"Failed to load json: {e}")
+
+    ndata = {}
+    for lang, d in data.items():
+        if "container" in d:
+            if "mount" in d["container"]:
+                d["container"]["mount"] = os.path.join(EXTERNAL_FILES_DIR, d["container"]["mount"])
+            if "mounts" in d["container"]:
+                for k,v in d["container"]["mounts"]:
+                    d["container"]["mounts"][k] = os.path.join(EXTERNAL_FILES_DIR, v)
+
+        for key, value in d.items():
+            key = key+"|i18n"
+            if key not in ndata:
+                ndata[key] = {}
+            ndata[key][lang] = value
+
+    return config_file, os.path.getmtime(config_file), ndata
 
 
 class ConfigError(Exception):
@@ -80,12 +120,12 @@ class ConfigParser:
         '''
 
         # Find all courses if exercises directory is modified.
-        t = os.path.getmtime(DIR)
+        t = os.path.getmtime(settings.COURSES_PATH)
         if self._dir_mtime < t:
             self._courses.clear()
             self._dir_mtime = t
             LOGGER.debug('Recreating course list.')
-            for item in os.listdir(DIR):
+            for item in os.listdir(settings.COURSES_PATH):
                 try:
                     self._course_root(item)
                 except ConfigError:
@@ -175,29 +215,21 @@ class ConfigParser:
         return course_root["data"], list(exercise_root["data"].values())[0]
 
 
-    def _course_root(self, course_key):
+    def _course_root_from_root_dir(self, course_key, root_dir):
         '''
         Gets course dictionary root (meta and data).
 
         @type course_key: C{str}
         @param course_key: a course key
+        @type root_dir: C{str}
+        @param root_dir: directory where the course directory is
         @rtype: C{dict}
         @return: course root or None
         '''
-
-        # Try cached version.
-        if course_key in self._courses:
-            course_root = self._courses[course_key]
-            try:
-                if course_root["mtime"] >= os.path.getmtime(course_root["file"]):
-                    return course_root
-            except OSError:
-                pass
-
         LOGGER.debug('Loading course "%s"' % (course_key))
-        meta = read_meta(os.path.join(DIR, course_key, META))
+        meta = read_meta(os.path.join(root_dir, course_key, META))
         try:
-            f = self._get_config(os.path.join(self._conf_dir(DIR, course_key, meta), INDEX))
+            f = self._get_config(os.path.join(self._conf_dir(root_dir, course_key, meta=meta), INDEX))
         except ConfigError:
             return None
 
@@ -211,7 +243,7 @@ class ConfigParser:
         self._check_fields(f, data, ["name"])
         data["key"] = course_key
         data["mtime"] = t
-        data["dir"] = self._conf_dir(DIR, course_key, {})
+        data["dir"] = self._conf_dir(root_dir, course_key, meta={})
 
         if "static_url" not in data:
             data["static_url"] = "{}{}{}/".format(
@@ -249,7 +281,7 @@ class ConfigParser:
         if "exercise_loader" in data:
             exercise_loader = import_named(data, data["exercise_loader"])
 
-        self._courses[course_key] = course_root = {
+        return {
             "meta": meta,
             "file": f,
             "mtime": t,
@@ -259,7 +291,33 @@ class ConfigParser:
             "exercise_loader": exercise_loader,
             "exercises": {}
         }
-        symbolic_link(DIR, data)
+
+
+    def _course_root(self, course_key):
+        '''
+        Gets course dictionary root (meta and data).
+
+        @type course_key: C{str}
+        @param course_key: a course key
+        @rtype: C{dict}
+        @return: course root or None
+        '''
+
+        # Try cached version.
+        if course_key in self._courses:
+            course_root = self._courses[course_key]
+            try:
+                if course_root["mtime"] >= os.path.getmtime(course_root["file"]):
+                    return course_root
+            except OSError:
+                pass
+
+        course_root = self._course_root_from_root_dir(course_key, settings.COURSES_PATH)
+        if course_root is None:
+            return None
+
+        self._courses[course_key] = course_root
+        symbolic_link(settings.COURSES_PATH, course_root["data"])
         return course_root
 
 
@@ -288,7 +346,7 @@ class ConfigParser:
         # Try cached version.
         if exercise_key in course_root["exercises"]:
             exercise_root = course_root["exercises"][exercise_key]
-            course_dir = self._conf_dir(DIR, course_root["data"]["key"], course_root["meta"])
+            course_dir = self._conf_dir(course_root["data"]["dir"], meta=course_root["meta"])
             include_ok, include_file_timestamp = self._check_include_file_timestamps(
                 exercise_root,
                 course_dir,
@@ -308,13 +366,13 @@ class ConfigParser:
             f, t, data = course_root["exercise_loader"](
                 course_root,
                 file_name[1:],
-                self._conf_dir(DIR, course_root["data"]["key"], {})
+                self._conf_dir(course_root["data"]["dir"], meta={})
             )
         else:
             f, t, data = course_root["exercise_loader"](
                 course_root,
                 file_name,
-                self._conf_dir(DIR, course_root["data"]["key"], course_root["meta"])
+                self._conf_dir(course_root["data"]["dir"], meta=course_root["meta"])
             )
         if not data:
             return None
@@ -355,7 +413,7 @@ class ConfigParser:
                 raise ConfigError('Required field "%s" missing from "%s"' % (name, file_name))
 
 
-    def _conf_dir(self, directory, course_key, meta):
+    def _conf_dir(self, directory, course_key = "", *, meta):
         '''
         Gets configuration directory for the course.
 
@@ -486,7 +544,7 @@ class ConfigParser:
                     # Load new data from rendered include file string
                     render_context = include_data["template_context"]
                     template_name = os.path.join(course_dir, include_file)
-                    template_name = template_name[len(DIR)+1:] # FIXME: XXX: NOTE: TODO: Fix this hack
+                    template_name = template_name[len(settings.COURSES_PATH)+1:] # FIXME: XXX: NOTE: TODO: Fix this hack
                     rendered = django_template_loader.render_to_string(
                                 template_name,
                                 render_context
@@ -594,6 +652,6 @@ class ConfigParser:
 config = ConfigParser()
 
 # We are probably developing a course if only single course is detected. Pre-read configuration in the case.
-if len(next(os.walk(DIR))[1]) == 1:
+if len(next(os.walk(settings.COURSES_PATH))[1]) == 1:
     LOGGER.info('Only single course detected. Pre-reading course configuration.')
     config.courses()

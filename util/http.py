@@ -6,11 +6,14 @@ import logging
 import requests
 import time
 import urllib
+
+from aplus_auth.requests import post as aplus_post
 from django.conf import settings
 from django.http import HttpResponseNotModified
 from django.utils.http import http_date, parse_http_date_safe
 
 from util.templates import template_to_str
+
 
 LOGGER = logging.getLogger('main')
 
@@ -67,7 +70,7 @@ def post_result(submission_url, course, exercise, template, result):
 
 def post_data(submission_url, data):
     try:
-        r = requests.post(submission_url, data=data)
+        r = aplus_post(submission_url, payload={}, data=data)
         if r.status_code != 200:
             r.raise_for_status()
         rsp = r.json()
