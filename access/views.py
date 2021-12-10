@@ -22,6 +22,7 @@ from util import export
 from util.files import (
     read_and_remove_submission_meta,
     renames,
+    rm_path,
     write_submission_meta,
 )
 from util.http import post_data
@@ -128,7 +129,7 @@ def configure(request):
         course_id_int = int(course_id)
     except (JSONDecodeError, ValueError) as e:
         LOGGER.exception("Invalid exercises or course_id field")
-        return HttpResponse(f"Invalid exercises or course_id field: {e}", status=500)
+        return HttpResponse(f"Invalid exercises or course_id field: {e}", status=400)
 
     if not request.auth.permissions.instances.has(Permission.WRITE, id=course_id_int):
         return HttpResponse(status=401)
@@ -159,18 +160,30 @@ def configure(request):
         "exercise_loader": "access.config._ext_exercise_loader",
     }
 
-    with open(course_path / "index.json", "w") as f:
-        json.dump(course_config, f)
+    try:
+        with open(course_path / "index.json", "w") as f:
+            json.dump(course_config, f)
 
-    for info in exercises:
-        with open(course_exercises_path / (info["key"] + ".json"), "w") as f:
-            json.dump(info["config"], f)
+        for info in exercises:
+            with open(course_exercises_path / (info["key"] + ".json"), "w") as f:
+                json.dump(info["config"], f)
+    except OSError as e:
+        LOGGER.exception("Failed to dump configuration JSONs to files")
+        return HttpResponse("Failed to dump configuration JSONs to files: {e}", status=500)
 
     if "version_id" in request.POST:
-        with open(version_id_path, "w") as f:
-            f.write(request.POST["version_id"])
+        try:
+            with open(version_id_path, "w") as f:
+                f.write(request.POST["version_id"])
+        except OSError as e:
+            LOGGER.exception("Failed to write version id file")
+            return HttpResponse("Failed to write version id file: {e}", status=500)
     elif version_id_path.exists():
-        version_id_path.unlink()
+        try:
+            rm_path(version_id_path)
+        except OSError as e:
+            LOGGER.exception("Failed to remove version id file")
+            return HttpResponse("Failed to remove version id file: {e}", status=500)
 
     course_config = config._course_root_from_root_dir(course_id, root_dir)
 
