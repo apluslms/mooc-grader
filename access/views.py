@@ -436,7 +436,8 @@ class LoginView(View):
             return HttpResponse("Invalid token", status=401)
         else:
             response = HttpResponse()
-            response.set_cookie("AuthToken", str(request.auth))
+            # secure=not settings.DEBUG so that we do not need https when developing
+            response.set_cookie("AuthToken", str(request.auth), secure=not settings.DEBUG, httponly=True)
             return response
 
 
