@@ -144,10 +144,12 @@ Alternatively, the system can be disabled by settings `DISABLE_JWT_SIGNING` and
 
 1. Create RSA keys for [JWT authentication](https://github.com/apluslms/a-plus/blob/master/doc/AUTH.md)
 
-    # generate private key
-    openssl genrsa -out private.pem 2048
-    # extract public key
-    openssl rsa -in private.pem -out public.pem -pubout
+   ```
+   # generate private key
+   openssl genrsa -out private.pem 2048
+   # extract public key
+   openssl rsa -in private.pem -out public.pem -pubout
+   ```
 
 2. Fill the `APLUS_AUTH` settings (in `local_settings.py`). Check the comments in `settings.py`.
 
