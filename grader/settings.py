@@ -100,17 +100,6 @@ ROOT_URLCONF = 'grader.urls'
 # LOGIN_ERROR_URL = "/login/"
 WSGI_APPLICATION = 'grader.wsgi.application'
 
-# Database (override in local_settings.py)
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-##########################################################################
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': join(BASE_DIR, 'db.sqlite3'),
-        # NOTE: Above setting can't be changed if girmanager is used.
-        # cron.sh expects database to be in that file.
-    }
-}
 ##########################################################################
 
 # Cache (override in local_settings.py)
