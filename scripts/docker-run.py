@@ -62,7 +62,7 @@ def run(
     })
 
     try:
-        docker_client.containers.run(
+        container = docker_client.containers.run(
             image,
             cmd,
             network = network if network else "bridge",
@@ -75,7 +75,7 @@ def run(
             volumes = volumes,
         )
 
-        return 0, "", ""
+        return 0, f"{', '.join(container.image.tags)} - {container.name} - {container.short_id}", ""
     except Exception as e:
         logger.exception("An exception while trying to run grading container")
         return 1, "", str(e)
