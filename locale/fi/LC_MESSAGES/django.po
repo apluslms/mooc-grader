@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-25 14:03+0000\n"
+"POT-Creation-Date: 2021-12-23 10:21+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -237,10 +237,6 @@ msgstr "Lataa"
 #: access/templates/access/ready.html
 msgid "GRADER_READY"
 msgstr "Tarkistin on valmiina"
-
-#: access/templates/access/ready.html
-msgid "GIT_MANAGER"
-msgstr "Git-hallinnointi"
 
 #: access/templates/access/ready.html
 msgid "AVAILABLE_COURSES"

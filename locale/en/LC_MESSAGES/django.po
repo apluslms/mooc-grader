@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-25 14:03+0000\n"
+"POT-Creation-Date: 2021-12-23 10:21+0000\n"
 "PO-Revision-Date: 2021-08-23 13:54+0000\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: English <>\n"
@@ -239,10 +239,6 @@ msgstr "Download"
 #: access/templates/access/ready.html
 msgid "GRADER_READY"
 msgstr "Grader ready"
-
-#: access/templates/access/ready.html
-msgid "GIT_MANAGER"
-msgstr "Git manager"
 
 #: access/templates/access/ready.html
 msgid "AVAILABLE_COURSES"
