@@ -241,7 +241,13 @@ assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
 
 APLUS_AUTH.update(APLUS_AUTH_LOCAL)
 
-Path(COURSE_STORE).mkdir(parents=True, exist_ok=True)
+try:
+    Path(COURSE_STORE).mkdir(parents=True, exist_ok=True)
+except OSError as e:
+    raise Exception(
+      "Cannot create COURSE_STORE directory (is the filesystem read-only?)."
+      "Create it manually or fix the issue"
+    ) from e
 
 # Add COURSES_PATH to template dirs here because at this point, the local settings have been imported.
 if len(TEMPLATES) == 1 and 'DIRS' in TEMPLATES[0]:
