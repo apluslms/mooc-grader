@@ -72,7 +72,7 @@ TEMPLATES = [
         'DIRS': [
             join(BASE_DIR, 'local_templates'),
             join(BASE_DIR, 'templates'),
-            join(BASE_DIR, 'courses'),
+            # COURSES_PATH is added at the bottom of this file
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -242,6 +242,10 @@ assert AJAX_KEY, "Secure random string is required in AJAX_KEY"
 APLUS_AUTH.update(APLUS_AUTH_LOCAL)
 
 Path(COURSE_STORE).mkdir(parents=True, exist_ok=True)
+
+# Add COURSES_PATH to template dirs here because at this point, the local settings have been imported.
+if len(TEMPLATES) == 1 and 'DIRS' in TEMPLATES[0]:
+    TEMPLATES[0]['DIRS'].append(COURSES_PATH)
 
 # Drop x-frame policy when debugging
 if DEBUG:
