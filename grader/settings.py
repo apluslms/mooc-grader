@@ -18,16 +18,20 @@ ADMINS = (
 )
 #SERVER_EMAIL = 'root@'
 ALLOWED_HOSTS = ["*"]
-# Local nessaging library settings, see [aplus-auth](https://pypi.org/project/aplus-auth/) for explanations
+# Authentication and authorization library settings
+# see https://pypi.org/project/aplus-auth/ for explanations
 APLUS_AUTH_LOCAL = {
+    #"UID": "...", # set to "grader" below, can be changed
     "PRIVATE_KEY": None,
     "PUBLIC_KEY": None,
-    "REMOTE_AUTHENTICATOR_KEY": None,
+    "REMOTE_AUTHENTICATOR_UID": None, # The UID of the remote authenticator, e.g. "aplus"
+    "REMOTE_AUTHENTICATOR_KEY": None, # The public key of the remote authenticator
     "REMOTE_AUTHENTICATOR_URL": None, # probably "https://<A+ domain>/api/v2/get-token/"
-    #"TRUSTED_KEYS": [...],
+    #"UID_TO_KEY": {...}
+    #"TRUSTED_UIDS": [...],
     #"TRUSTING_REMOTES": [...],
-    #"DISABLE_LOGIN_CHECKS": False,
     #"DISABLE_JWT_SIGNING": False,
+    #"DISABLE_LOGIN_CHECKS": False,
 }
 
 # modify this if there are very large courses to be configured through /configure
@@ -40,6 +44,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10*1024*1024 # 10MB
 
 # Messaging library
 APLUS_AUTH: Dict[str, Optional[str]] = {
+    "UID": "grader",
     "AUTH_CLASS": "access.auth.Authentication",
 }
 
