@@ -35,6 +35,7 @@ from util.auth import (
     instance_read_access_required,
     login_required,
 )
+from util.log import SecurityLog
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util.templates import template_to_str
@@ -74,9 +75,14 @@ def publish(request):
 
     try:
         access_write_check(request, course_id)
+    except PermissionDenied as e:
+        SecurityLog.reject(request, f"PUBLISH", f"course_id={course_id}: {e}")
+        raise
     except ValueError as e:
         LOGGER.info(f"Invalid course_id field: {e}")
         return HttpResponse(f"Invalid course_id field: {e}", status=400)
+
+    SecurityLog.accept(request, f"PUBLISH", f"course_id={course_id}")
 
     root_dir = Path(settings.COURSES_PATH)
     store_root_dir = Path(settings.COURSE_STORE)
@@ -144,9 +150,14 @@ def configure(request):
     course_id = request.POST["course_id"]
     try:
         access_write_check(request, course_id)
+    except PermissionDenied as e:
+        SecurityLog.reject(request, f"CONFIGURE", f"course_id={course_id}: {e}")
+        raise
     except ValueError as e:
         LOGGER.info(f"Invalid course_id field: {e}")
         return HttpResponse(f"Invalid course_id field: {e}", status=400)
+
+    SecurityLog.accept(request, f"CONFIGURE", f"course_id={course_id}")
 
     root_dir = Path(settings.COURSE_STORE)
     course_path = root_dir / course_id
@@ -255,10 +266,16 @@ def exercise(request, course_key, exercise_key):
     '''
     Presents the exercise and accepts answers to it.
     '''
-    if request.method == "GET":
-        access_read_check_if_number(request, course_key)
-    else:
-        access_write_check_if_number(request, course_key)
+    try:
+        if request.method == "GET":
+            access_read_check_if_number(request, course_key)
+        else:
+            access_write_check_if_number(request, course_key)
+    except PermissionDenied as e:
+        SecurityLog.reject(request, f"EXERCISE-{request.method}", f"course_id={course_key}: {e}")
+        raise
+
+    SecurityLog.accept(request, f"EXERCISE-{request.method}", f"course_id={course_key}")
 
     post_url = request.GET.get('post_url', None)
     lang = request.POST.get('__grader_lang', None) or request.GET.get('lang', None)
@@ -391,6 +408,8 @@ def aplus_json(request, course_key):
     '''
     Delivers the configuration as JSON for A+.
     '''
+    SecurityLog.accept(request, "APLUS-JSON", f"course_id={course_key}")
+
     try:
         course = config.course_entry(course_key)
     except ConfigError as e:
