@@ -71,16 +71,35 @@ MIDDLEWARE = [
     'aplus_auth.auth.django.AuthenticationMiddleware',
 ]
 
+CACHED_LOADERS = [
+    (
+        'django.template.loaders.filesystem.Loader',
+        [
+            join(BASE_DIR, 'local_templates'),
+            join(BASE_DIR, 'templates'),
+        ],
+    ),
+    'django.template.loaders.app_directories.Loader',
+]
+
+NON_CACHED_LOADERS = []
+
+COURSE_LOADERS = [
+    (
+        'django.template.loaders.filesystem.Loader',
+        [
+            # COURSES_PATH is added at the bottom of this file
+        ],
+    ),
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            join(BASE_DIR, 'local_templates'),
-            join(BASE_DIR, 'templates'),
-            # COURSES_PATH is added at the bottom of this file
-        ],
-        'APP_DIRS': True,
         'OPTIONS': {
+            'loaders': [
+                # these are filled at the end using CACHED_LOADERS and NON_CACHED_LOADERS
+            ],
             'context_processors': [
                 #"django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
@@ -254,13 +273,24 @@ except OSError as e:
       "Create it manually or fix the issue"
     ) from e
 
+
 # Add COURSES_PATH to template dirs here because at this point, the local settings have been imported.
-if len(TEMPLATES) == 1 and 'DIRS' in TEMPLATES[0]:
-    TEMPLATES[0]['DIRS'].append(COURSES_PATH)
+for loader in COURSE_LOADERS:
+    loader[1].append(COURSES_PATH)
+
+if DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        *CACHED_LOADERS,
+        *NON_CACHED_LOADERS,
+        *COURSE_LOADERS,
+    ]
+else:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        ('django.template.loaders.cached.Loader', CACHED_LOADERS),
+        *NON_CACHED_LOADERS,
+        *COURSE_LOADERS,
+    ]
 
 # Drop x-frame policy when debugging
 if DEBUG:
     MIDDLEWARE = [c for c in MIDDLEWARE if "XFrameOptionsMiddleware" not in c]
-
-# update template loaders for production
-use_cache_template_loader_in_production(__name__)
