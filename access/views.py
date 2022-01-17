@@ -8,7 +8,7 @@ from shutil import rmtree
 from tarfile import TarFile
 from typing import List
 
-from aplus_auth.payload import Permission
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.http.response import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.utils import timezone
@@ -27,7 +27,15 @@ from util.files import (
 )
 from util.http import post_data
 from util.importer import import_named
-from util.login_required import login_required
+from util.auth import (
+    access_read_check_if_number,
+    access_write_check,
+    access_write_check_if_number,
+    has_read_access,
+    instance_read_access_required,
+    login_required,
+)
+from util.log import SecurityLog
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util.templates import template_to_str
@@ -36,11 +44,13 @@ from util.templates import template_to_str
 LOGGER = logging.getLogger('main')
 
 
+@login_required
 def index(request):
     '''
     Signals that the grader is ready and lists available courses.
     '''
-    courses = config.courses()
+    courses = [course for course in config.courses() if has_read_access(request, course["key"])]
+
     if request.is_ajax():
         return JsonResponse({
             "ready": True,
@@ -63,8 +73,16 @@ def publish(request):
 
     course_id = request.POST["course_id"]
 
-    if not request.auth.permissions.instances.has(Permission.WRITE, id=int(course_id)):
-        return HttpResponse(status=401)
+    try:
+        access_write_check(request, course_id)
+    except PermissionDenied as e:
+        SecurityLog.reject(request, f"PUBLISH", f"course_id={course_id}: {e}")
+        raise
+    except ValueError as e:
+        LOGGER.info(f"Invalid course_id field: {e}")
+        return HttpResponse(f"Invalid course_id field: {e}", status=400)
+
+    SecurityLog.accept(request, f"PUBLISH", f"course_id={course_id}")
 
     root_dir = Path(settings.COURSES_PATH)
     store_root_dir = Path(settings.COURSE_STORE)
@@ -123,16 +141,23 @@ def configure(request):
     if "exercises" not in request.POST or "course_id" not in request.POST:
         return HttpResponse("Missing exercises or course_id", status=400)
 
-    course_id = request.POST["course_id"]
     try:
         exercises = json.loads(request.POST["exercises"])
-        course_id_int = int(course_id)
     except (JSONDecodeError, ValueError) as e:
-        LOGGER.exception("Invalid exercises or course_id field")
-        return HttpResponse(f"Invalid exercises or course_id field: {e}", status=400)
+        LOGGER.info(f"Invalid exercises field: {e}")
+        return HttpResponse(f"Invalid exercises field: {e}", status=400)
 
-    if not request.auth.permissions.instances.has(Permission.WRITE, id=course_id_int):
-        return HttpResponse(status=401)
+    course_id = request.POST["course_id"]
+    try:
+        access_write_check(request, course_id)
+    except PermissionDenied as e:
+        SecurityLog.reject(request, f"CONFIGURE", f"course_id={course_id}: {e}")
+        raise
+    except ValueError as e:
+        LOGGER.info(f"Invalid course_id field: {e}")
+        return HttpResponse(f"Invalid course_id field: {e}", status=400)
+
+    SecurityLog.accept(request, f"CONFIGURE", f"course_id={course_id}")
 
     root_dir = Path(settings.COURSE_STORE)
     course_path = root_dir / course_id
@@ -199,7 +224,7 @@ def configure(request):
     return JsonResponse(defaults)
 
 
-@login_required
+@instance_read_access_required
 def course(request, course_key):
     '''
     Signals that the course is ready to be graded and lists available exercises.
@@ -241,6 +266,17 @@ def exercise(request, course_key, exercise_key):
     '''
     Presents the exercise and accepts answers to it.
     '''
+    try:
+        if request.method == "GET":
+            access_read_check_if_number(request, course_key)
+        else:
+            access_write_check_if_number(request, course_key)
+    except PermissionDenied as e:
+        SecurityLog.reject(request, f"EXERCISE-{request.method}", f"course_id={course_key}: {e}")
+        raise
+
+    SecurityLog.accept(request, f"EXERCISE-{request.method}", f"course_id={course_key}")
+
     post_url = request.GET.get('post_url', None)
     lang = request.POST.get('__grader_lang', None) or request.GET.get('lang', None)
     course = exercise = None
@@ -285,7 +321,7 @@ def exercise_ajax(request, course_key, exercise_key):
     return response
 
 
-@login_required
+@instance_read_access_required
 def exercise_model(request, course_key, exercise_key, parameter=None):
     '''
     Presents a model answer for an exercise.
@@ -326,7 +362,7 @@ def exercise_model(request, course_key, exercise_key, parameter=None):
         raise Http404()
 
 
-@login_required
+@instance_read_access_required
 def exercise_template(request, course_key, exercise_key, parameter=None):
     '''
     Presents the exercise template.
@@ -367,17 +403,20 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
         raise Http404()
 
 
-@login_required
+@instance_read_access_required
 def aplus_json(request, course_key):
     '''
     Delivers the configuration as JSON for A+.
     '''
+    SecurityLog.accept(request, "APLUS-JSON", f"course_id={course_key}")
+
     try:
         course = config.course_entry(course_key)
     except ConfigError as e:
         return _error_response(exc=e)
     if course is None:
         raise Http404()
+
     data = _copy_fields(course, [
         "archive_time",
         "assistants",

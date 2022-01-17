@@ -18,16 +18,20 @@ ADMINS = (
 )
 #SERVER_EMAIL = 'root@'
 ALLOWED_HOSTS = ["*"]
-# Local nessaging library settings, see [aplus-auth](https://pypi.org/project/aplus-auth/) for explanations
+# Authentication and authorization library settings
+# see https://pypi.org/project/aplus-auth/ for explanations
 APLUS_AUTH_LOCAL = {
+    #"UID": "...", # set to "grader" below, can be changed
     "PRIVATE_KEY": None,
     "PUBLIC_KEY": None,
-    "REMOTE_AUTHENTICATOR_KEY": None,
+    "REMOTE_AUTHENTICATOR_UID": None, # The UID of the remote authenticator, e.g. "aplus"
+    "REMOTE_AUTHENTICATOR_KEY": None, # The public key of the remote authenticator
     "REMOTE_AUTHENTICATOR_URL": None, # probably "https://<A+ domain>/api/v2/get-token/"
-    #"TRUSTED_KEYS": [...],
+    #"UID_TO_KEY": {...}
+    #"TRUSTED_UIDS": [...],
     #"TRUSTING_REMOTES": [...],
-    #"DISABLE_LOGIN_CHECKS": False,
     #"DISABLE_JWT_SIGNING": False,
+    #"DISABLE_LOGIN_CHECKS": False,
 }
 
 # modify this if there are very large courses to be configured through /configure
@@ -40,6 +44,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10*1024*1024 # 10MB
 
 # Messaging library
 APLUS_AUTH: Dict[str, Optional[str]] = {
+    "UID": "grader",
     "AUTH_CLASS": "access.auth.Authentication",
 }
 
@@ -66,16 +71,35 @@ MIDDLEWARE = [
     'aplus_auth.auth.django.AuthenticationMiddleware',
 ]
 
+CACHED_LOADERS = [
+    (
+        'django.template.loaders.filesystem.Loader',
+        [
+            join(BASE_DIR, 'local_templates'),
+            join(BASE_DIR, 'templates'),
+        ],
+    ),
+    'django.template.loaders.app_directories.Loader',
+]
+
+NON_CACHED_LOADERS = []
+
+COURSE_LOADERS = [
+    (
+        'django.template.loaders.filesystem.Loader',
+        [
+            # COURSES_PATH is added at the bottom of this file
+        ],
+    ),
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            join(BASE_DIR, 'local_templates'),
-            join(BASE_DIR, 'templates'),
-            # COURSES_PATH is added at the bottom of this file
-        ],
-        'APP_DIRS': True,
         'OPTIONS': {
+            'loaders': [
+                # these are filled at the end using CACHED_LOADERS and NON_CACHED_LOADERS
+            ],
             'context_processors': [
                 #"django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
@@ -249,13 +273,24 @@ except OSError as e:
       "Create it manually or fix the issue"
     ) from e
 
+
 # Add COURSES_PATH to template dirs here because at this point, the local settings have been imported.
-if len(TEMPLATES) == 1 and 'DIRS' in TEMPLATES[0]:
-    TEMPLATES[0]['DIRS'].append(COURSES_PATH)
+for loader in COURSE_LOADERS:
+    loader[1].append(COURSES_PATH)
+
+if DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        *CACHED_LOADERS,
+        *NON_CACHED_LOADERS,
+        *COURSE_LOADERS,
+    ]
+else:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        ('django.template.loaders.cached.Loader', CACHED_LOADERS),
+        *NON_CACHED_LOADERS,
+        *COURSE_LOADERS,
+    ]
 
 # Drop x-frame policy when debugging
 if DEBUG:
     MIDDLEWARE = [c for c in MIDDLEWARE if "XFrameOptionsMiddleware" not in c]
-
-# update template loaders for production
-use_cache_template_loader_in_production(__name__)
