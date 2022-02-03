@@ -13,7 +13,7 @@ from django.forms.utils import ErrorDict
 from django.forms.widgets import CheckboxSelectMultiple, RadioSelect, Textarea
 from django.utils.crypto import get_random_string
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from util.templates import template_to_str
 from util import forms as custom_forms
