@@ -4,13 +4,13 @@ This module holds unit tests. It has nothing to do with the grader tests.
 '''
 import time, os
 from django.conf import settings
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from access.config import ConfigParser
 from util.shell import invoke_script
 
 
-class ConfigTestCase(TestCase):
+class ConfigTestCase(SimpleTestCase):
 
     TEST_DATA = {
         'key': 'value',
