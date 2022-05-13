@@ -63,7 +63,7 @@ def _ext_exercise_loader(course_root, exercise_key, course_dir):
             if "mount" in d["container"]:
                 d["container"]["mount"] = os.path.join(EXTERNAL_FILES_DIR, d["container"]["mount"])
             if "mounts" in d["container"]:
-                for k,v in d["container"]["mounts"]:
+                for k,v in d["container"]["mounts"].items():
                     d["container"]["mounts"][k] = os.path.join(EXTERNAL_FILES_DIR, v)
 
         for key, value in d.items():
