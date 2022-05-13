@@ -64,6 +64,10 @@ def _ext_exercise_loader(course_root, exercise_key, course_dir):
                 d["container"]["mount"] = os.path.join(EXTERNAL_FILES_DIR, d["container"]["mount"])
             if "mounts" in d["container"]:
                 for k,v in d["container"]["mounts"].items():
+                    # FIXME: v is the path inside the container, hence
+                    # this should likely not modify v and instead modify the key k, which is
+                    # the path inside the course git repo.
+                    # However, this works while EXTERNAL_FILES_DIR is empty.
                     d["container"]["mounts"][k] = os.path.join(EXTERNAL_FILES_DIR, v)
 
         for key, value in d.items():
