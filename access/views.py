@@ -9,6 +9,7 @@ from tarfile import TarFile
 from typing import List
 
 from django.core.exceptions import PermissionDenied
+from django.http import HttpRequest
 from django.shortcuts import render
 from django.http.response import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.utils import timezone
@@ -404,7 +405,7 @@ def exercise_template(request, course_key, exercise_key, parameter=None):
 
 
 @instance_read_access_required
-def aplus_json(request, course_key):
+def aplus_json(request: HttpRequest, course_key: str) -> JsonResponse:
     '''
     Delivers the configuration as JSON for A+.
     '''
@@ -440,8 +441,6 @@ def aplus_json(request, course_key):
         "start",
         "view_content_to",
     ])
-    if "language" in course:
-        data["lang"] = course["language"]
 
     errors = []
 
