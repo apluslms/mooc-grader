@@ -325,13 +325,16 @@ class ConfigParser:
         return course_root
 
 
-    def _default_lang(self, data):
-        l = data.get('language')
-        if type(l) == list:
-            data['lang'] = l[0]
-        elif l == str:
-            data['lang'] = l
-        return data.get('lang', DEFAULT_LANG)
+    def _default_lang(self, data: dict) -> str:
+        languages = data.get('language', data.get('lang'))
+        data['lang'] = languages
+
+        if isinstance(languages, list):
+            return languages[0]
+        elif isinstance(languages, str):
+            return languages
+        else:
+            return DEFAULT_LANG
 
 
     def _exercise_root(self, course_root, exercise_key):
