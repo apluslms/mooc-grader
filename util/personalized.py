@@ -216,8 +216,12 @@ def personalized_template_context(course, exercise, request):
             exercise_instance = os.path.basename(select_generated_exercise_instance(
                     course, exercise, userid, submission_number))
             # URL to download the exercise generated file
-            file_ctx["url"] = reverse('generated-file',
-                    args=(course["key"], exercise["key"], exercise_instance, gen_file_conf["file"]))
+            file_ctx["url"] = (
+                settings.BASE_URL
+                + reverse(
+                    'generated-file',
+                    args=(course["key"], exercise["key"], exercise_instance, gen_file_conf["file"])
+                ))
         if "content_in_template" in gen_file_conf and gen_file_conf["content_in_template"]:
             # read contents of the exercise generated file to a variable
             file_ctx["content"] = read_user_personal_file(course, exercise,

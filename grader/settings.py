@@ -6,7 +6,8 @@
 from os.path import abspath, dirname, join
 from typing import Dict, Optional
 BASE_DIR = dirname(dirname(abspath(__file__)))
-
+# BASE_URL of the server, e.g., 'http://grader.local'
+BASE_URL = ''
 
 # Base options, commonly overridden in local_settings.py
 ##########################################################################
