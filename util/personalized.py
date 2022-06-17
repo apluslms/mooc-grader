@@ -110,7 +110,7 @@ def read_generated_exercise_file(course, exercise, instance, filename):
     Return the contents of a file from a generated exercise instance.
     '''
     generated_dir = pregenerated_exercises_directory_path(course, exercise)
-    path = os.path.join(generated_dir, instance, filename)
+    path = os.path.join(generated_dir, str(instance), filename)
     try:
         with open(path, 'rb') as f:
             return f.read()
