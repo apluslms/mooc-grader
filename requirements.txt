@@ -1,6 +1,7 @@
-Django~=3.2.12
-git+https://github.com/apluslms/django-essentials.git@1.4.0#egg=django-essentials==1.4.0
-requests~=2.25.1
-PyYAML~=5.4.1
-docutils~=0.17.1
-python-magic~=0.4.22
+Django ~= 3.2.13
+git+https://github.com/apluslms/django-essentials.git@1.5.0#egg=django-essentials==1.5.0
+requests >= 2.28.0, < 3
+PyYAML ~= 6.0.0
+docutils ~= 0.17.1
+python-magic ~= 0.4.27
+kubernetes == 12.0.1
