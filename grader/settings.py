@@ -90,6 +90,7 @@ DATABASES = {
         # cron.sh expects database to be in that file.
     }
 }
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 ##########################################################################
 
 # Cache (override in local_settings.py)
