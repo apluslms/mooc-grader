@@ -213,7 +213,7 @@ def form_fields(languages, exercises):
                 'key': f.get('name'),
                 'type': 'textarea',
                 'title': i18n_map(list_get(fs, 'title', '')),
-                'requred': f.get('required', False),
+                'required': f.get('required', False),
             })
 
     elif t == 'access.types.stdasync.acceptFiles':
