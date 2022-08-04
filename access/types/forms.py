@@ -476,7 +476,7 @@ class GradedForm(forms.Form):
         cmp = good_strip(cmp)
 
         if "ignorerepl" in mods:
-            p = re.compile('(^\w+:\s[\w\.\[\]]+\s=)')
+            p = re.compile('(^(\w+\s)?\w+:\s[\w\.\[\]]+\s=)')
             m = p.match(val)
             if m:
                 val = val[len(m.group(1)):].strip()
