@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from shutil import rmtree
 from tarfile import TarFile
-from typing import List
+from typing import List, Optional
 
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest
@@ -547,7 +547,7 @@ def generated_exercise_file(request, course_key, exercise_key, exercise_instance
     raise Http404()
 
 
-def _get_course_exercise_lang(course_key, exercise_key, lang_code):
+def _get_course_exercise_lang(course_key: str, exercise_key: str, lang_code: Optional[str]):
     # Keep only "en" from "en-gb" if the long language format is used.
     if lang_code:
         lang_code = lang_code[:2]
@@ -556,6 +556,8 @@ def _get_course_exercise_lang(course_key, exercise_key, lang_code):
         raise Http404()
     if not lang_code:
         lang_code = course.get('lang', DEFAULT_LANG)
+        if isinstance(lang_code, list):
+            lang_code = lang_code[0]
     translation.activate(lang_code)
     return (course, exercise, lang_code)
 
