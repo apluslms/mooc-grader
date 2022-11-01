@@ -22,6 +22,7 @@ Functions take arguments:
 import logging
 import copy
 import os
+import json
 from django.conf import settings
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
@@ -297,6 +298,21 @@ def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
     '''
     uids = get_uid(request)
     attempt = int(request.GET.get("ordinal_number", 1))
+
+    # Write LTI parameters for use in grading.
+    # The request is already authenticated and LTI signature is ignored.
+    if "lti" in exercise:
+        sdir.write_file("lti.json", json.dumps({
+            k: request.POST.get(k)
+            for k in (
+                "user_id",
+                "custom_student_id",
+                "lis_person_name_full",
+                "lis_person_name_given",
+                "lis_person_name_family",
+                "lis_person_contact_email_primary",
+            )
+        }))
 
     if "submission_url" in request.GET:
         surl = request.GET["submission_url"]

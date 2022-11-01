@@ -188,6 +188,9 @@ course specific exercise view in a course specific Python module.
 		asynchronous submissions (normally occurs if queue is shorter than 3)
 	* `feedback_template` (default `access/task_success.html`):
 		name of a template used to format the feedback
+	* `lti` (optional with `lti_context_id`, `lti_resource_link_id`, `lti_aplus_get_and_post=True`):
+		A name for a configured LTI service for the mooc-grader at A-plus, the exercise receives
+		LTI user attributes from A-plus which are written to `lti.json` for the container.
 	* `container`: A dictionary for configuring attributes of the grading container
 		* `image`: Container image to use
 		* `mount`: Directory to mount to the container
