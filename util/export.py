@@ -63,6 +63,17 @@ def exercise(request, course, exercise_root, of):
     else:
         of['url'] = url_to_exercise(request, course['key'], exercise['key'])
 
+    if 'lti' in exercise:
+        for k in (
+            'lti',
+            'lti_context_id',
+            'lti_resource_link_id',
+            'lti_aplus_get_and_post',
+            'lti_open_in_iframe',
+        ):
+            if k in exercise:
+                of[k] = exercise[k]
+
     form, i18n = form_fields(languages, exercises)
     of['exercise_info'] = {
         'form_spec': form,
