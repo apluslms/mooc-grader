@@ -6,9 +6,13 @@ from aplus_auth.auth.django import login_required as login_required_base
 from aplus_auth.payload import Permission
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponse
+from django.urls import reverse_lazy
+from django.utils.text import format_lazy
 
 ViewType = Callable[..., HttpResponse]
-login_required: Callable[[ViewType],ViewType] = login_required_base(redirect_url="/login?referer={url}")
+login_required: Callable[[ViewType], ViewType] = login_required_base(
+    redirect_url=format_lazy('{}?{}', reverse_lazy('login'), 'referer={url}'),
+)
 
 
 def access_check(request, permission: Permission, course_key: Union[str,int]):

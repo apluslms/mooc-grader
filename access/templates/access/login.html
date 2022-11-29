@@ -17,7 +17,7 @@
         const data = new FormData(e.target);
 
         const xml = new XMLHttpRequest();
-        xml.open("POST", "/login");
+        xml.open("POST", "{% url 'login' %}");
         xml.setRequestHeader("Authorization", "Bearer " + data.get("token"))
         xml.onload = () => {
             console.log(xml);
