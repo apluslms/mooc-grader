@@ -177,7 +177,6 @@ class GradedForm(forms.Form):
             self.sample = '/'.join(samples)
             self.checksum = self.samples_hash(self.sample)
 
-
     def _get_text_field_type(self, field):
         # Field is a dictionary from the exercise config.yaml.
         input_type = field.get('compare_method', '').split('-')[0]
@@ -188,6 +187,14 @@ class GradedForm(forms.Form):
             return forms.FloatField
         else:
             return forms.CharField
+
+    def _get_float_tolerances(self, configuration):
+        float_tolerances = {}
+        for key in ('float_rel_tol', 'float_abs_tol'):
+            val = configuration.get(key, None)
+            if val is not None:
+                float_tolerances[key] = val
+        return float_tolerances
 
     def samples_hash(self, sample):
         return make_hash(
@@ -452,7 +459,7 @@ class GradedForm(forms.Form):
 
         return (points, error_groups, error_fields)
 
-    def compare_values(self, method, val, cmp):
+    def compare_values(self, method, val, cmp, float_rel_tol=1e-09, float_abs_tol=0.0):
         # Note: when adding new compare methods or modifiers, remember to update
         # _validate_compare_method in a-plus-rst-tools/directives/questionnaire.py
         parts = method.split("-")
@@ -468,7 +475,7 @@ class GradedForm(forms.Form):
         elif t == "float":
             if val is None or val == '':
                 return False
-            return math.isclose(float(val), float(cmp), rel_tol=0.02)
+            return math.isclose(float(val), float(cmp), rel_tol=float_rel_tol, abs_tol=float_abs_tol)
 
         def good_strip(v):
             return v.strip().replace("\r","")
@@ -622,7 +629,10 @@ class GradedForm(forms.Form):
                     methods_used = '-'.join([methods_used] + mods)
                 else:
                     methods_used = method
-                r = self.compare_values(methods_used, value, comparison)
+
+                float_tolerances = self._get_float_tolerances(configuration)
+
+                r = self.compare_values(methods_used, value, comparison, **float_tolerances)
                 add = not r if fb.get('not', False) else r
 
             # Checkbox-hints should be linkable with their options:
@@ -782,7 +792,8 @@ class GradedForm(forms.Form):
                         hints.append(hint)
                 return correct, hints, method
         if accept is not None:
-            correct = self.compare_values(method, value, accept)
+            float_tolerances = self._get_float_tolerances(configuration)
+            correct = self.compare_values(method, value, accept, **float_tolerances)
         else:
             # Answer counts as correct if there is no model solution.
             correct = True
