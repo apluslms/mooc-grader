@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-23 10:21+0000\n"
+"POT-Creation-Date: 2023-06-05 13:16+0000\n"
 "PO-Revision-Date: 2019-10-12 20:00+0300\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: Finnish <>\n"
@@ -92,13 +92,6 @@ msgid "POINTS_YOU_GOT -- %(points)s, %(max_points)s"
 msgstr "Sait %(points)s/%(max_points)s pistettä vastauksestasi."
 
 #: access/templates/access/async_accepted.html
-msgid "WARNING_GRADING_WAS_SYNCHRONOUS"
-msgstr ""
-"Arvostelujonoa ei ole konfiguroitu. Tämä palautus arvosteltiin "
-"synkronisesti, mikä estää muita palveluja toimimasta samaan aikaan. EI "
-"VALMIS TUOTANTOKÄYTTÖÖN!"
-
-#: access/templates/access/async_accepted.html
 msgid "ERROR_OCCURED_CONTACT_STAFF"
 msgstr ""
 "Palautuksen käsittelyssä tapahtui virhe. Ota yhteys kurssihenkilökuntaan."
@@ -124,14 +117,6 @@ msgstr ""
 "kun arvosteluprosessi on suoritettu loppuun. Huomaa, että arvostelu voi "
 "kestää useita kymmeniä sekunteja. Saatat joutua lataamaan tämän sivun "
 "uudelleen nähdäksesi palautteen. Tämän viestin voi sulkea."
-
-#: access/templates/access/async_accepted.html
-#, python-format
-msgid "SUBMISSION_IN_GRADING_QUEUE -- %(queue)s"
-msgstr ""
-"Palautuksesi on arvostelujonossa. Jonossa on edellä %(queue)s palautusta. "
-"Tulos näytetään tällä sivulla, kun arvosteluprosessi on suoritettu. Joudut "
-"lataamaan sivun uudelleen nähdäksesi palautteen."
 
 #: access/templates/access/course.html
 msgid "SERVICE_URLS_FOR_A+"

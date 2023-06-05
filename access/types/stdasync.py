@@ -370,13 +370,10 @@ def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
         settings=settings.RUNNER_MODULE_SETTINGS,
     )
     LOGGER.debug(f"Container order exit={return_code} out={out} err={err}")
-    qlen = 1
 
     return render_template(request, course, exercise, post_url,
         "access/async_accepted.html", {
             "error": return_code != 0,
             "accepted": True,
-            "wait": True,
             "missing_url": surl_missing,
-            "queue": qlen
         })
