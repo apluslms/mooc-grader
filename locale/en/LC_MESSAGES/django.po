@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-23 10:21+0000\n"
+"POT-Creation-Date: 2023-06-05 13:16+0000\n"
 "PO-Revision-Date: 2021-08-23 13:54+0000\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: English <>\n"
@@ -94,12 +94,6 @@ msgid "POINTS_YOU_GOT -- %(points)s, %(max_points)s"
 msgstr "You got %(points)s/%(max_points)s for your answer."
 
 #: access/templates/access/async_accepted.html
-msgid "WARNING_GRADING_WAS_SYNCHRONOUS"
-msgstr ""
-"The grading queue is not configured. This submission was graded "
-"synchronously while blocking other services. NOT READY FOR PRODUCTION!"
-
-#: access/templates/access/async_accepted.html
 msgid "ERROR_OCCURED_CONTACT_STAFF"
 msgstr ""
 "An error occurred while handling the submission. Please, contact course "
@@ -125,15 +119,6 @@ msgstr ""
 "when the grading process completes. Note that the grading may take a while. "
 "You might also need to update the page manually in order to see the results. "
 "You may close this message."
-
-#: access/templates/access/async_accepted.html
-#, python-format
-msgid "SUBMISSION_IN_GRADING_QUEUE -- %(queue)s"
-msgstr ""
-"Your submission is in the grading queue. There are %(queue)s other "
-"submissions before. The result will be available on this page when the "
-"grading process completes. The page must be updated manually to see the "
-"results."
 
 #: access/templates/access/course.html
 msgid "SERVICE_URLS_FOR_A+"

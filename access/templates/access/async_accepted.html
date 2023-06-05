@@ -2,17 +2,7 @@
 {% load i18n %}
 
 {% block exercise %}
-{% if result.synchronous %}
-<div class="alert alert-danger">
-	{% blocktrans trimmed %}
-		WARNING_GRADING_WAS_SYNCHRONOUS
-	{% endblocktrans %}
-</div>
-<div id="feedback">
-	{{ result.feedback }}
-</div>
-
-{% elif result.error %}
+{% if result.error %}
 <div class="alert alert-danger">
 	<h1>{% trans "SUBMISSION_FAILED" %}</h1>
 	<p>
@@ -38,13 +28,9 @@
 	<p>
 		{% if exercise.accepted_message %}
 			{{ exercise.accepted_message|safe }}
-		{% elif result.queue < 3 %}
+		{% else %}
 			{% blocktrans trimmed %}
 				SUBMISSION_IN_GRADING_NOW
-			{% endblocktrans %}
-		{% else %}
-			{% blocktrans trimmed with queue=result.queue %}
-				SUBMISSION_IN_GRADING_QUEUE -- {{ queue }}
 			{% endblocktrans %}
 		{% endif %}
 	</p>

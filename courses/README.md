@@ -355,7 +355,6 @@ listed below.
 		* `missing_files`: True if files missing
 		* `invalid_address`: True if Gitlab address is rejected
 		* `accepted`: True if accepted for grading
-		* `wait`: True if the grading should be finished in a moment
 	A default file submission form can be included with
 
 		{% include 'access/accept_files_form.html' %}
