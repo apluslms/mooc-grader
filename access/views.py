@@ -37,6 +37,7 @@ from util.auth import (
     login_required,
 )
 from util.log import SecurityLog
+from util.misc import is_ajax
 from util.monitored_dict import MonitoredDict
 from util.personalized import read_generated_exercise_file
 from util.templates import template_to_str
@@ -52,7 +53,7 @@ def index(request):
     '''
     courses = [course for course in config.courses() if has_read_access(request, course["key"])]
 
-    if request.is_ajax():
+    if is_ajax(request):
         return JsonResponse({
             "ready": True,
             "courses": _filter_fields(courses, ["key", "name"])
@@ -239,7 +240,7 @@ def course(request, course_key):
     else:
         if course is None:
             raise Http404()
-    if request.is_ajax():
+    if is_ajax(request):
         if error:
             data = {
                 "ready": False,
@@ -310,7 +311,7 @@ def exercise_ajax(request, course_key, exercise_key):
             raise Http404()
 
         # jQuery does not send "requested with" on cross domain requests
-        #if not request.is_ajax():
+        #if not is_ajax(request):
         #    return HttpResponse('Method not allowed', status=405)
 
         response = import_named(course, exercise['ajax_type'])(request, course, exercise)
