@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-05 13:16+0000\n"
+"POT-Creation-Date: 2023-08-08 13:42+0000\n"
 "PO-Revision-Date: 2021-08-23 13:54+0000\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: English <>\n"
@@ -135,8 +135,8 @@ msgstr "Available assignments"
 #: access/templates/access/create_form_default.html
 msgid "WHOLE_SECTION_WITHIN_LINE_MARKED_AS_INCORRECT"
 msgstr ""
-"The whole section within the black line is marked as being incorrect, if one "
-"of the questions incorrect."
+"The whole question section is marked as incorrect if one of the questions "
+"incorrect."
 
 #: access/templates/access/exercise_config_error.html
 msgid "EXERCISE_CONFIGURATION_ERROR_NOTIFY_COURSE_STAFF_WITH_MESSAGE"
@@ -181,6 +181,11 @@ msgid "INCORRECT"
 msgstr "Incorrect"
 
 #: access/templates/access/graded_form.html
+#: access/templates/access/graded_form_feedback.html
+msgid "FEEDBACK_CORRECT_WITH_PUNCTUATION"
+msgstr "Correct!"
+
+#: access/templates/access/graded_form.html
 msgid "CORRECT"
 msgstr "Correct"
 
@@ -194,10 +199,6 @@ msgstr[1] "%(points)s points"
 #: access/templates/access/graded_form.html
 msgid "NEUTRAL_OPTION_DESCRIPTION"
 msgstr "neutral option which does not affect grading"
-
-#: access/templates/access/graded_form_feedback.html
-msgid "FEEDBACK_CORRECT_WITH_PUNCTUATION"
-msgstr "Correct!"
 
 #: access/templates/access/graded_form_feedback.html
 msgid "FEEDBACK_INCORRECT_WITH_PUNCTUATION"

@@ -154,6 +154,7 @@ class GradedForm(forms.Form):
 
                 for fi in f:
                     fi.group_errors = group_errors
+                    fi.group_name = self.group_name(g)
 
                 if j == 0:
                     f[0].open_set = "exercise-{}-set-{}".format(self.form_nonce, self.group_name(g))
@@ -446,15 +447,27 @@ class GradedForm(forms.Form):
         g = 0
         i = 0
         for group in self.exercise["fieldgroups"]:
+            group_correct = True
+            group_points = 0
+
             for field in group["_fields"]:
                 prev = i
                 i, ok, p = self.grade_field(i, field)
-                points += p
+                group_correct = group_correct and ok
+                group_points += p
+
                 if not ok:
                     error_fields.append(self.field_name(prev, field))
                     gname = self.group_name(g)
                     if gname not in error_groups:
                         error_groups.append(gname)
+
+            if not group.get("group_errors", False) or group_correct:
+                # If errors are grouped, the whole question group must be
+                # answered correctly in order to gain any points
+                # from the question group.
+                points += group_points
+
             g += 1
 
         return (points, error_groups, error_fields)
