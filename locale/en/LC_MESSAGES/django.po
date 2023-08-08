@@ -135,7 +135,7 @@ msgstr "Available assignments"
 #: access/templates/access/create_form_default.html
 msgid "WHOLE_SECTION_WITHIN_LINE_MARKED_AS_INCORRECT"
 msgstr ""
-"The whole question section is marked as incorrect if one of the questions "
+"The whole question section is marked as incorrect if one of the questions is "
 "incorrect."
 
 #: access/templates/access/exercise_config_error.html
