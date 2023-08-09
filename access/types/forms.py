@@ -683,6 +683,14 @@ class GradedForm(forms.Form):
             else:
                 hints.append(_('HINT_MULTIPLE_CHOICES_SELECTABLE'))
 
+        if t == "checkbox" and not ok and not configuration.get("partial_points"):
+            # Show this hint in checkbox questions when the answer is not
+            # correct and the partial points option is not set.
+            if checkbox_feedback:
+                hints['points_only_for_fully_correct'] = _('POINTS_AWARDED_ONLY_FOR_FULLY_CORRECT_ANSWERS')
+            else:
+                hints.append(_('POINTS_AWARDED_ONLY_FOR_FULLY_CORRECT_ANSWERS'))
+
         if name in self.fields:
             self.fields[name].grade_points = earned_points
             self.fields[name].max_points = points

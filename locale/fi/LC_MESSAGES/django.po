@@ -259,7 +259,14 @@ msgstr ""
 
 #: access/types/forms.py
 msgid "HINT_MULTIPLE_CHOICES_SELECTABLE"
-msgstr "Voit valita useita vaihtoehtoja"
+msgstr "Voit valita useita vaihtoehtoja."
+
+#: access/types/forms.py
+msgid "POINTS_AWARDED_ONLY_FOR_FULLY_CORRECT_ANSWERS"
+msgstr ""
+"Vain täysin oikeista vastauksista myönnetään pisteitä; kysymys on "
+"tarkoitettu kokonaisuutena, joten osittaisia pisteitä ei anneta. Nolla "
+"pistettä ei välttämättä tarkoita, että vastauksesi oli täysin väärin."
 
 #: access/types/forms.py
 msgid "HINT_MULTIPLE_CORRECT_ANSWERS_ACCEPTED"

@@ -261,7 +261,14 @@ msgstr ""
 
 #: access/types/forms.py
 msgid "HINT_MULTIPLE_CHOICES_SELECTABLE"
-msgstr "Multiple choices are selectable"
+msgstr "Multiple choices are selectable."
+
+#: access/types/forms.py
+msgid "POINTS_AWARDED_ONLY_FOR_FULLY_CORRECT_ANSWERS"
+msgstr ""
+"Only fully correct answers are awarded with points; the question is meant as "
+"a whole, so no partial points are given. A zero score does not necessarily "
+"mean that your answer was entirely incorrect."
 
 #: access/types/forms.py
 msgid "HINT_MULTIPLE_CORRECT_ANSWERS_ACCEPTED"
