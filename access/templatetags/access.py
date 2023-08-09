@@ -35,4 +35,7 @@ def find_common_hints(list_of_hints, checked):
                     hints_seen.add(hint_value)
                     hints.append(hint_text)
 
+        if list_of_hints.get('points_only_for_fully_correct'):
+            hints.append(list_of_hints.get('points_only_for_fully_correct'))
+
     return hints
