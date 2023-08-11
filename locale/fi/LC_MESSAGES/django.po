@@ -276,6 +276,14 @@ msgstr "Useita oikeita vastauksia."
 msgid "HINT_CORRECT_PARTS_IN_YOUR_ANSWER"
 msgstr "Oikeat osat vastauksessasi: "
 
+#: access/views.py
+msgid "FEEDBACK_TOO_LARGE"
+msgstr ""
+"Tästä palautuksesta annettava palaute ylitti sallitun maksimipituuden. "
+"Koodisi saattaa olla jumissa ikuisessa silmukassa tai tulostaa suuren määrän "
+"dataa jostain muusta syystä. Olet saattanut ansaita pisteitä tästä "
+"palautuksesta, sillä se arvosteltiin, vaikka palaute ei olekaan näkyvissä."
+
 #: templates/404.html
 msgid "NOT_FOUND"
 msgstr "Sivua ei löytynyt"

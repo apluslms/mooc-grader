@@ -278,6 +278,14 @@ msgstr "Multiple correct answers are accepted."
 msgid "HINT_CORRECT_PARTS_IN_YOUR_ANSWER"
 msgstr "Correct parts in your answer: "
 
+#: access/views.py
+msgid "FEEDBACK_TOO_LARGE"
+msgstr ""
+"The feedback given for this submission exceeded the maximum allowed length. "
+"Your code may be stuck in an infinite loop or may output a large amount of "
+"data for some other reason. You might have been awarded points for this "
+"submission since it was graded even though the feedback is not visible."
+
 #: templates/404.html
 msgid "NOT_FOUND"
 msgstr "Not found"

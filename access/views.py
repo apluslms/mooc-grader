@@ -14,6 +14,7 @@ from django.shortcuts import render
 from django.http.response import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.utils import timezone
 from django.utils import translation
+from django.utils.translation import gettext as _
 from django.urls import reverse
 from django.conf import settings
 from django.views import View
@@ -650,7 +651,6 @@ def container_post(request):
         return HttpResponseForbidden("Invalid sid")
     #clean_submission_dir(meta["dir"])
 
-
     data = {
         "points": int(request.POST.get("points", 0)),
         "max_points": int(request.POST.get("max_points", 1)),
@@ -661,9 +661,15 @@ def container_post(request):
     if "error" in data and data["error"].lower() in ("no", "false"):
         del data["error"]
 
-    feedback = request.POST.get("feedback", "")
-    # Fetch the corresponding exercise entry from the config.
     lang = meta["lang"]
+    translation.activate(lang)
+    if request.POST.get("feedback_size_error") == "true":
+        error_msg = _("FEEDBACK_TOO_LARGE")
+        feedback = f'<div class="alert alert-danger">{error_msg}</div>'
+    else:
+        feedback = request.POST.get("feedback", "")
+
+    # Fetch the corresponding exercise entry from the config.
     (course, exercise) = config.exercise_entry(meta["course_key"], meta["exercise_key"], lang=lang)
     if "feedback_template" in exercise:
         # replace the feedback with a rendered feedback template if the exercise is configured to do so
@@ -677,7 +683,6 @@ def container_post(request):
             "error": data.get("error", False),
             "title": exercise.get("title", ""),
         })
-        translation.activate(lang)
         feedback = template_to_str(course, exercise, None, exercise["feedback_template"], result=result)
         if result.accessed.isdisjoint(required_fields):
             alert = template_to_str(
