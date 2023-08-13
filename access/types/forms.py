@@ -683,7 +683,11 @@ class GradedForm(forms.Form):
             else:
                 hints.append(_('HINT_MULTIPLE_CHOICES_SELECTABLE'))
 
-        if t == "checkbox" and not ok and not configuration.get("partial_points"):
+        if (t == "checkbox"
+                and not ok
+                and not configuration.get("partial_points")
+                and not self.group_errors
+                ):
             # Show this hint in checkbox questions when the answer is not
             # correct and the partial points option is not set.
             if checkbox_feedback:
