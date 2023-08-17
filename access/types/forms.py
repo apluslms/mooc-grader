@@ -57,6 +57,7 @@ class GradedForm(forms.Form):
         self.rng = random.Random()
         self.multipart = False
         self.enrollment_exercise = self.is_enrollment_exercise()
+        self.group_errors = False
         samples = []
         g = 0
         i = 0
