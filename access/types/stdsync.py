@@ -167,7 +167,7 @@ def createFormModel(request, course, exercise, parameter):
         "model_answer": True,
     }
     return render_template(request, course, exercise, None,
-        'access/graded_form.html', result)
+        'access/graded_form_model_solution.html', result)
 
 
 def md5Authentication(request, course, exercise, post_url):
