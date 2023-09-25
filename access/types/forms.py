@@ -256,10 +256,17 @@ class GradedForm(forms.Form):
         random_attributes = None
 
         if choices is not None:
-            if 'randomized' in config and multiple:
+            if 'randomized' in config and multiple or 'structured-randomized' in config and multiple:
                 selected_choices, correct_choices, initial_choices, random_attributes = (
-                    self.get_randomized_checkbox_attributes(i, config, initial,
-                            correct, name, choices, post_data)
+                    self.get_randomized_checkbox_attributes(
+                        i,
+                        config,
+                        initial,
+                        correct,
+                        name,
+                        choices,
+                        post_data,
+                    )
                 )
             args['choices'] = selected_choices
 
@@ -385,7 +392,7 @@ class GradedForm(forms.Form):
 
     def current_sample(self, is_checkbox_question, how_many, index_range,
                 correct_count=None, correct_indexes=None, incorrect_indexes=None,
-                question_key='', resample_after_attempt=True):
+                question_key='', resample_after_attempt=True, groups=None):
         '''Calculate a random sample (selection of choices) for a pick_randomly
         questionnaire or a randomized checkbox question.
 
@@ -412,16 +419,38 @@ class GradedForm(forms.Form):
         self.rng.seed(calculated_seed)
 
         if is_checkbox_question:
+            if groups:
+                def randomly_sample_group_recursive(group):
+                    choices = []
+                    pick_num = group[0]
+                    for choice_or_subgroup in group[1]:
+                        if isinstance(choice_or_subgroup, tuple):
+                            choices.extend(randomly_sample_group_recursive(choice_or_subgroup))
+                        else:
+                            choices.append(choice_or_subgroup)
+                    return self.rng.sample(choices, pick_num)
+
+                random_sample = []
+                for group in groups:
+                    try:
+                        random_sample.extend(randomly_sample_group_recursive(group))
+                    except IndexError as e: # Should never go here
+                        raise Exception(
+                            "Something went terribly wrong while randomly sampling checkbox answer choices!"
+                        ) from e
+                self.rng.shuffle(random_sample)
+                return random_sample
             if correct_count is not None:
-                random_sample = self.rng.sample(correct_indexes, correct_count) \
+                random_sample = (
+                    self.rng.sample(correct_indexes, correct_count)
                     + self.rng.sample(incorrect_indexes, how_many - correct_count)
+                )
                 # Shuffle the list so that the correct choices are not always listed first.
                 self.rng.shuffle(random_sample)
-            else:
-                random_sample = self.rng.sample(range(index_range), how_many)
-        else:
-            random_sample = self.rng.sample(range(index_range), how_many)
-        return random_sample
+                return random_sample
+            return self.rng.sample(range(index_range), how_many)
+
+        return self.rng.sample(range(index_range), how_many)
 
     def bind_initial(self):
         '''
@@ -862,13 +891,46 @@ class GradedForm(forms.Form):
             ):
                 raise PermissionDenied('Invalid checksum')
 
+        if config.get('randomized'):
+            num_randomized = config.get('randomized')
+            groups = None
+        else:
+            # Must be a structured-randomized questionnaire
+            num_randomized = None # Not needed when using groups
+            choice_keys = [choice[0] for choice in choices]
+
+            def replace_keys_with_indexes_recursive(group):
+                choice_indexes = []
+                for choice_or_subgroup in group[1]:
+                    if isinstance(choice_or_subgroup, list):
+                        choice_indexes.append(replace_keys_with_indexes_recursive(choice_or_subgroup))
+                    else:
+                        choice_indexes.append(choice_keys.index(choice_or_subgroup))
+                return group[0], choice_indexes
+
+            groups = []
+            for group in config.get('structured-randomized'):
+                try:
+                    groups.append(replace_keys_with_indexes_recursive(group))
+                except IndexError as e: # Should never go here
+                    raise Exception(
+                        "Something went terribly wrong while replacing checkbox answer choice keys with indexes!"
+                    ) from e
+
         # The sample is stored in the POST data for only debugging purposes.
         # The random sample used in grading is computed again
         # deterministically in the server.
-        samples = self.current_sample(True, config.get('randomized'),
-            len(choices), config.get('correct_count'),
-            correct_indexes, incorrect_indexes, name,
-            resample_after_attempt=config.get('resample_after_attempt', True))
+        samples = self.current_sample(
+            True,
+            num_randomized,
+            len(choices),
+            config.get('correct_count'),
+            correct_indexes,
+            incorrect_indexes,
+            name,
+            resample_after_attempt=config.get('resample_after_attempt', True),
+            groups=groups,
+        )
 
         selected_choices = []
         correct_choices = []
