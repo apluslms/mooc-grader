@@ -12,12 +12,12 @@ from util.personalized import (
 
 class Command(BaseCommand):
     help = "Pregenerate personalized exercise instances"
-    
+
     def add_arguments(self, parser):
         parser.add_argument("course_key", help="Course key")
         # exercise key is optional positional argument
         parser.add_argument("exercise_key", nargs='?', default=None,
-                help="Exercise key which new instances should be generated for. " \
+                help="Exercise key for which new instances should be generated. " \
                 "By default all personalized exercises in the course are generated.")
         # optional arguments
         parser.add_argument("--instances", type=int, default=10, dest="instances",
@@ -26,16 +26,16 @@ class Command(BaseCommand):
                             help="Keep existing generated instances instead of deleting them first")
         parser.add_argument("--gen-if-none-exist", action="store_true", dest="gen_if_none_exist",
                             default=False,
-                            help="Only generate new instances if no instances exist yet")
-    
+                            help="Only generate new instances for an exercise if no instances exist yet")
+
     def handle(self, *args, **options):
         course_key = options["course_key"]
         exercise_key = options["exercise_key"]
-        
+
         course = config.course_entry(course_key)
         if course is None:
             raise CommandError("Course not found for key: %s" % (course_key))
-        
+
         if exercise_key:
             (_course, exercise) = config.exercise_entry(course_key, exercise_key)
             if exercise is None:
@@ -51,17 +51,17 @@ class Command(BaseCommand):
             if not exercises:
                 self.stdout.write(self.style.WARNING("The course %s has no personalized exercises so no instances are generated." % (course_key)))
                 return
-        
+
         # course and exercises have been parsed
         if options["instances"] < 1:
             raise CommandError("--instances value must be at least 1")
-        
+
         try:
             for ex in exercises:
                 if options["gen_if_none_exist"] and pregenerated_exercise_instances(course, ex):
                     # some instances already exist so do not delete them and do not generate any new instances
                     continue
-                
+
                 if not options["keep_old"]:
                     delete_pregenerated_exercise_instances(course, ex)
                     # check if there are any users that had accessed any of the old, deleted instances
@@ -71,10 +71,10 @@ class Command(BaseCommand):
                             "were deleted but there are users that had accessed those instances" %
                             (course_key, ex["key"]))
                         break
-                
+
                 # ensure that base directory exists
                 prepare_pregenerated_exercises_directory(course, ex)
                 generate_exercise_instances(course, ex, options["instances"])
-                
+
         except Exception as e:
             raise CommandError(str(e))
