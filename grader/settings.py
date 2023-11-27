@@ -174,7 +174,12 @@ COURSE_STORE = join(BASE_DIR, 'course_store')
 # Django process requires write access to this directory.
 SUBMISSION_PATH = join(BASE_DIR, 'uploads')
 
-# Personalized exercises and user files are kept here.
+# Personalized exercises are kept in this directory (relative to the course git repository root).
+PERSONALIZED_CONTENT_DIR = 'personalized_exercises'
+
+# Old personalized exercise directory.
+# Personalized exercises are generated locally in a mooc-grader container into this directory and copied
+# to the above directory in the course.
 # Django process requires write access to this directory.
 PERSONALIZED_CONTENT_PATH = join(BASE_DIR, 'exercises-meta')
 
