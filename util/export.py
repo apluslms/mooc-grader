@@ -126,15 +126,19 @@ def form_fields(languages, exercises):
     def i18n_map(values):
         if all(v == "" for v in values):
             return ""
-        key = str(values[0])
+        key = str(values.copy()[0])
         if key in values[1:]:
             key = "i18n_" + "_".join(key.split())
+        translation_dict = {
+            l: str(v)
+            for l, v in zip(languages, values)
+        }
+        if key in i18n and i18n[key] == translation_dict:
+            # Identical key with the same value already exists, no need to create a duplicate
+            return key
         while key in i18n:
             key += "_duplicate"
-        i18n[key] = {
-            l: v
-            for l,v in zip(languages, values)
-        }
+        i18n[key] = translation_dict
         return key
 
     def field_spec(fs, n):
@@ -173,7 +177,7 @@ def form_fields(languages, exercises):
         if 'extra_info' in f:
             es = list_get(fs, 'extra_info', {})
             extra = es[0]
-            for key in ['validationMessage']:
+            for key in ['validationMessage', 'placeholder']:
                 if key in extra:
                     extra[key] = i18n_map(list_get(es, key, ''))
             field.update(extra)
