@@ -19,7 +19,7 @@ from util.templates import template_to_str
 from util import forms as custom_forms
 from .auth import make_hash
 from .auth import user_ids_from_string
-from ..config import ConfigError
+from ..config import ConfigError, ConfigParser
 
 
 class GradedForm(forms.Form):
@@ -34,6 +34,7 @@ class GradedForm(forms.Form):
         if "exercise" not in kwargs:
             raise ConfigError("Missing exercise configuration from form arguments.")
         self.exercise = kwargs.pop("exercise")
+        self.course = kwargs.pop("course")
         self.model_answer = kwargs.pop('model_answer', False)
         self.reveal_correct = kwargs.pop('reveal_correct', False)
         if not self.exercise.get('reveal_model_at_max_submissions', False):
@@ -127,13 +128,21 @@ class GradedForm(forms.Form):
                         forms.ChoiceField, forms.Select,
                         initial, correct, neutral, choices, False)
                 elif t == "text":
+                    attrs = {'class': 'form-control'}
+                    placeholder = self._get_placeholder(field, g, j)
+                    if placeholder:
+                        attrs['placeholder'] = placeholder
                     i, f = self.add_field(i, field,
-                        self._get_text_field_type(field), forms.TextInput)
+                        self._get_text_field_type(field), forms.TextInput,
+                        widget_attrs=attrs)
                 elif t == "textarea":
                     attrs = {'class': 'form-control'}
-                    for key in ['rows','cols']:
+                    for key in ['rows', 'cols']:
                         if key in field:
                             attrs[key] = field[key]
+                    placeholder = self._get_placeholder(field, g, j)
+                    if placeholder:
+                        attrs['placeholder'] = placeholder
                     i, f = self.add_field(i, field,
                         self._get_text_field_type(field), forms.Textarea,
                         widget_attrs=attrs)
@@ -197,6 +206,17 @@ class GradedForm(forms.Form):
             if val is not None:
                 float_tolerances[key] = val
         return float_tolerances
+
+    def _get_placeholder(self, field, group_idx, field_idx):
+        if 'extra_info' in field and 'placeholder' in field['extra_info']:
+            _, exercise_entry = ConfigParser().exercise_entry(
+                self.course['key'],
+                self.exercise['key'],
+                self.exercise.get('lang', None),
+            )
+            translated_extra_info = exercise_entry['fieldgroups'][group_idx]['fields'][field_idx]['extra_info']
+            return translated_extra_info['placeholder']
+        return None
 
     def samples_hash(self, sample):
         return make_hash(

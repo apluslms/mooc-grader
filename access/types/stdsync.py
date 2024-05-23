@@ -108,7 +108,7 @@ def createForm(request, course, exercise, post_url):
 
     try:
         form = GradedForm(request.POST or None, request.FILES or None,
-            exercise=exercise, reveal_correct=last, request=request)
+            exercise=exercise, reveal_correct=last, request=request, course=course)
     except PermissionDenied:
         # Randomized forms raise PermissionDenied when the POST data contains
         # forged checksums or samples. It could be cleaner to check those
@@ -155,7 +155,7 @@ def createForm(request, course, exercise, post_url):
 
 
 def createFormModel(request, course, exercise, parameter):
-    form = GradedForm(None, exercise=exercise, model_answer=True)
+    form = GradedForm(None, exercise=exercise, model_answer=True, course=course)
     form.bind_initial()
     points,error_groups,error_fields = form.grade()
     result = {
