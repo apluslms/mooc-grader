@@ -442,6 +442,7 @@ def aplus_json(request: HttpRequest, course_key: str) -> JsonResponse:
         "numerate_ignoring_modules",
         "start",
         "view_content_to",
+        "points_goal_enabled",
     ])
 
     errors = []
