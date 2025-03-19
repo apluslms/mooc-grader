@@ -182,7 +182,13 @@ def configure(request):
         tarh = TarFile(fileobj=tar_file)
         tarh.extractall(course_files_path)
 
+    course_key = request.POST.get("course_key", None)
+    course_spec = json.loads(request.POST.get("course_spec", "{}"))
+    lang = course_spec.get("lang", None)
+
     course_config = {
+        "key": course_key,
+        "lang": lang,
         "name": course_id,
         "exercises": [ex["key"] for ex in exercises],
         "exercise_loader": "access.config._ext_exercise_loader",
