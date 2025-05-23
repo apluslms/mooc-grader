@@ -44,7 +44,7 @@
 
 			{% if field.label %}
 				{% if field.field.choice_list %}
-					<label class="control-label">{{ field.label }}</label>
+					<label class="form-label">{{ field.label }}</label>
 				{% else %}
 					{{ field.label_tag }}
 				{% endif %}
@@ -54,7 +54,7 @@
 			{% if result.accepted and not result.form.enrollment_exercise %}
 			<!-- Points badge -->
 				{% if not exercise.feedback or field.field.points > 0 %}
-				<span class="badge badge-{% if field.field.grade_points > 0 and field.field.grade_points < field.field.max_points %}warning{% elif field.field.name in result.error_fields %}danger{% else %}success{% endif %}">
+				<span class="badge text-bg-{% if field.field.grade_points > 0 and field.field.grade_points < field.field.max_points %}warning{% elif field.field.name in result.error_fields %}danger{% else %}success{% endif %}">
 					{{ field.field.grade_points }} / {{ field.field.max_points }}
 				</span>
 					{% if field.field.max_points == 0 %}
@@ -69,7 +69,7 @@
 				{% endif %}
 			{% else %}
 				{% if exercise.max_points > 0 and not exercise.feedback or field.field.points > 0 %}
-				<span class="badge">
+				<span class="badge text-bg-secondary">
 				{% blocktrans trimmed count points=field.field.points %}
 					POINTS_SINGULAR -- {{ points }}
 				{% plural %}

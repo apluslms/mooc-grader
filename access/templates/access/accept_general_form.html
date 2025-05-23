@@ -5,7 +5,7 @@
 	{% if exercise.fields %}
 	{% for entry in exercise.fields %}
 	<div class="form-group{% if entry.missing %} has-error{% endif %}">
-		<label for="exercise-{{ unique_id }}-{{ entry.name }}" class="control-label">
+		<label for="exercise-{{ unique_id }}-{{ entry.name }}" class="form-label">
 			{{ entry.title|safe }}
 		</label>
 		{% if entry.more %}

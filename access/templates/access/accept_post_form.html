@@ -3,7 +3,7 @@
 <form method="post" action="{{ post_url }}">
 	{% for entry in result.fields %}
 	<div class="form-group{% if entry.missing %} has-error{% endif %}">
-		<label for="exercise-{{ unique_id }}-{{ entry.name }}" class="control-label">
+		<label for="exercise-{{ unique_id }}-{{ entry.name }}" class="form-label">
 			{{ entry.title|safe }}
 		</label>
 		{% if entry.more %}
