@@ -164,13 +164,4 @@ if (document.readyState == 'loading') {
 
 ## Bootstrap frontend CSS/JS framework
 
-A+ and MOOC grader templates use the Bootstrap 3 framework. Moodle core includes
-a default theme Boost that uses the Bootstrap version 4.0 (since Moodle 3.5).
-Many Bootstrap components work the same way in both versions, but there are also
-differences and some components have been completely revised. If exercises should
-work with both the A+ frontend and Astra, then the exercise contents must avoid
-the Bootstrap structures that do not work in both Bootstrap 3 and 4.
-
-Different Moodle sites may have different themes. Other themes may have a different
-version of Bootstrap or no Bootstrap at all.
-
+A+ and MOOC grader templates use the Bootstrap 5.3 framework.

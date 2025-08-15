@@ -4,7 +4,7 @@
 
 	{% if exercise.fields %}
 	{% for entry in exercise.fields %}
-	<div class="form-group{% if entry.missing %} has-error{% endif %}">
+	<div class="form-group{% if entry.missing %} is-invalid{% endif %}">
 		<label for="exercise-{{ unique_id }}-{{ entry.name }}" class="form-label">
 			{{ entry.title|safe }}
 		</label>
@@ -34,7 +34,7 @@
 		{% for entry in exercise.files %}
 		<div class="form-group">
 			<label for="exercise-{{ unique_id }}-{{ entry.field }}">
-				<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+				<span class="bi-file-earmark-fill" aria-hidden="true"></span>
 				{{ entry.name }}
 			</label>
 			<input
@@ -44,7 +44,7 @@
 				class="form-control"
 			/>
 		</div>
-		{% endfor %}	
+		{% endfor %}
 	{% endif %}
 
 	{% if post_url or not result.accepted %}

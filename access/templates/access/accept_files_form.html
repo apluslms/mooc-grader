@@ -12,7 +12,7 @@
 	{% for entry in exercise.files %}
 	<div class="form-group">
 		<label for="exercise-{{ unique_id }}-{{ entry.field }}">
-			<span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+			<span class="bi-file-earmark-fill" aria-hidden="true"></span>
 			{{ entry.name }}
 		</label>
 		<input
@@ -25,7 +25,7 @@
 	</div>
 	{% endfor %}
 	{% if post_url or not result.accepted %}
-	<div class="form-group">
+	<div class="form-group mt-3">
 		<input type="submit" value="{% trans 'SUBMIT' %}" class="btn btn-primary aplus-submit" />
 	</div>
 	{% endif %}

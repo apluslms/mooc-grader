@@ -2,7 +2,7 @@
 {% if exercise.fields %}
 <form method="post" action="{{ post_url }}">
 	{% for entry in result.fields %}
-	<div class="form-group{% if entry.missing %} has-error{% endif %}">
+	<div class="form-group{% if entry.missing %} is-invalid{% endif %}">
 		<label for="exercise-{{ unique_id }}-{{ entry.name }}" class="form-label">
 			{{ entry.title|safe }}
 		</label>
