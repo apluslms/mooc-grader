@@ -9,12 +9,12 @@
 {% endif %}
 {% if not result.model_answer %}
 	<p class="question-feedback">
-		{% if field.answer_correct %}
+		{% if field.answer_correct and not exercise.hide_correctness %}
 			{% if not field.group_errors %}
 				<i class="quiz1-icon-correct" aria-hidden="true"></i>
 				<span class="feedback-text">{% trans "FEEDBACK_CORRECT_WITH_PUNCTUATION" %}</span>
 			{% endif %}
-		{% else %}
+		{% elif not exercise.hide_correctness %}
 			{% if not field.group_errors %}
 				<i class="quiz1-icon-incorrect" aria-hidden="true"></i>
 			{% endif %}

@@ -53,7 +53,15 @@
 			{% if not field.field.group_errors %}
 			{% if result.accepted and not result.form.enrollment_exercise %}
 			<!-- Points badge -->
-				{% if not exercise.feedback or field.field.points > 0 %}
+			    {% if exercise.hide_correctness %}
+				<span class="badge rounded-pill text-bg-secondary">
+					{% blocktrans trimmed count points=field.field.max_points %}
+						POINTS_SINGULAR -- {{ points }}
+					{% plural %}
+						POINTS_PLURAL -- {{ points }}
+					{% endblocktrans %}
+				</span>
+				{% elif not exercise.feedback or field.field.points > 0 %}
 				<span class="badge rounded-pill text-bg-{% if field.field.grade_points > 0 and field.field.grade_points < field.field.max_points %}warning{% elif field.field.name in result.error_fields %}danger{% else %}success{% endif %}">
 					{{ field.field.grade_points }} / {{ field.field.max_points }}
 				</span>
@@ -101,7 +109,7 @@
 			<tr>
 				<td>&nbsp;</td>
 				{% for choice in field %}
-				<td>{{ choice.choice_label|safe }}</td>
+				<td>{{ choice.choice_label|safe }}</td>
 				{% endfor %}
 				{% if field.field.more_text %}
 				<td>{{ field.field.more_text|safe }}</td>
@@ -110,7 +118,7 @@
 			{% endif %}
 
 			{% if field.field.table_more %}
-				<td>{{ field }}</td>
+				<td>{{ field }}</td>
 			</tr>
 			{% else %}
 			<tr>
