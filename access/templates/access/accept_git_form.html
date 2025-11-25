@@ -6,13 +6,13 @@
 		</label>
 		<input type="text" id="git_id" name="git" class="form-control" />
 		{% if not exercise.no_git_reminder %}
-		<p class="help-block">
+		<p class="help-block mb-0">
 			{% trans "GIT_WORKFLOW_REMINDER" %}
 		</p>
 		{% endif %}
 	</div>
 	{% if post_url or not result.accepted %}
-	<div class="form-group">
+	<div class="form-group mt-3">
 		<input type="submit" id="git_submit" value="{% trans 'SUBMIT' %}" class="btn btn-primary aplus-submit" />
 	</div>
 	{% endif %}

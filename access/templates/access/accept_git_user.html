@@ -22,12 +22,12 @@
 	</div>
 	{% endif %}
     {% if not exercise.no_git_reminder %}
-	<p class="help-block">
+	<p class="help-block mb-0">
         {% trans "GIT_WORKFLOW_REMINDER" %}
     </p>
 	{% endif %}
     {% if post_url or not result.accepted %}
-    <div class="form-group">
+    <div class="form-group mt-3">
         <input type="submit" class="btn btn-primary aplus-submit" value="{% trans 'GIT_REQUEST_GRADING_OF_REPO' %}" />
     </div>
     {% endif %}
