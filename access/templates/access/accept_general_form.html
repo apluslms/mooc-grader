@@ -31,20 +31,22 @@
 			</p>
 		{% endif %}
 
-		{% for entry in exercise.files %}
-		<div class="form-group">
-			<label for="exercise-{{ unique_id }}-{{ entry.field }}">
-				<span class="bi-file-earmark-fill" aria-hidden="true"></span>
-				{{ entry.name }}
-			</label>
-			<input
-				type="file"
-				id="exercise-{{ unique_id }}-{{ entry.field }}"
-				name="{{ entry.field }}"
-				class="form-control"
-			/>
+		<div class="d-flex flex-column gap-2">
+			{% for entry in exercise.files %}
+			<div class="form-group">
+				<label for="exercise-{{ unique_id }}-{{ entry.field }}" class="fw-bold mb-1">
+					<span class="bi-file-earmark-fill" aria-hidden="true"></span>
+					{{ entry.name }}
+				</label>
+				<input
+					type="file"
+					id="exercise-{{ unique_id }}-{{ entry.field }}"
+					name="{{ entry.field }}"
+					class="form-control"
+				/>
+			</div>
+			{% endfor %}
 		</div>
-		{% endfor %}
 	{% endif %}
 
 	{% if post_url or not result.accepted %}

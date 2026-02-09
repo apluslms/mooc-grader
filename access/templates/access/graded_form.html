@@ -44,9 +44,9 @@
 
 			{% if field.label %}
 				{% if field.field.choice_list %}
-					<label class="form-label">{{ field.label }}</label>
+					<label class="form-label fw-bold">{{ field.label }}</label>
 				{% else %}
-					{{ field.label_tag }}
+					<label for="{{ field.id_for_label }}" class="fw-bold">{{ field.label }}</label>
 				{% endif %}
 			{% endif %}
 
