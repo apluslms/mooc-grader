@@ -112,21 +112,23 @@ class GradedForm(forms.Form):
                 # Create a field by type.
                 choices, initial, correct, neutral = self.create_choices(field)
                 if t == "checkbox":
+                    attrs = {'class': 'form-check-input'}
                     if 'randomized' in field and args[0] is not None:
                         # grading a randomized question
                         self.disabled = True
-
                     i, f = self.add_field(i, field,
                         forms.MultipleChoiceField, forms.CheckboxSelectMultiple,
-                        initial, correct, neutral, choices, True, {}, args[0])
+                        initial, correct, neutral, choices, True, attrs, args[0])
                 elif t == "radio":
+                    attrs = {'class': 'form-check-input'}
                     i, f = self.add_field(i, field,
                         forms.ChoiceField, forms.RadioSelect,
-                        initial, correct, neutral, choices, False, {})
+                        initial, correct, neutral, choices, False, attrs)
                 elif (t == "dropdown" or t == "select"):
+                    attrs = {'class': 'form-select'}
                     i, f = self.add_field(i, field,
                         forms.ChoiceField, forms.Select,
-                        initial, correct, neutral, choices, False)
+                        initial, correct, neutral, choices, False, attrs)
                 elif t == "text":
                     attrs = {'class': 'form-control'}
                     placeholder = self._get_placeholder(field, g, j)
