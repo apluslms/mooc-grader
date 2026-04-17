@@ -675,7 +675,43 @@ class GradedForm(forms.Form):
         methods = method.split("-")
         mods = methods[1:]
 
-        for fb in configuration.get("feedback", []):
+        # For randomized checkbox questions, only show 'not'-type hints for
+        # options that were included in the random sample (i.e., shown to the
+        # student). Options outside the sample were never displayed, so the
+        # student could not have selected them; triggering their '!' hints would
+        # reveal information about options the student never saw.
+        # sampled_option_values_ordered preserves display order so that hints
+        # can be shown in the same order the options appeared on screen.
+        sampled_option_values = None
+        sampled_option_values_ordered = None
+        if t == "checkbox":
+            field = self.fields.get(name)
+            random_sample_str = getattr(field, 'random_sample', '') if field else ''
+            if random_sample_str:
+                sample_indices_ordered = [int(x) for x in random_sample_str.split('-')]
+                all_options = configuration.get("options", [])
+                sampled_option_values_ordered = [
+                    self.option_name(idx, all_options[idx])
+                    for idx in sample_indices_ordered
+                    if idx < len(all_options)
+                ]
+                sampled_option_values = set(sampled_option_values_ordered)
+
+        # For randomized checkbox questions, process feedback entries in display
+        # order so that hints appear in the same sequence the options were shown.
+        feedback_list = configuration.get("feedback", [])
+        if t == "checkbox" and sampled_option_values_ordered:
+            option_display_pos = {
+                val: idx for idx, val in enumerate(sampled_option_values_ordered)
+            }
+            feedback_list = sorted(
+                feedback_list,
+                key=lambda fb: option_display_pos.get(
+                    fb.get('value', ''), len(sampled_option_values_ordered)
+                ),
+            )
+
+        for fb in feedback_list:
             new_hint = fb.get('label', None)
             comparison = fb.get('value', '')
             if not new_hint:
@@ -699,6 +735,15 @@ class GradedForm(forms.Form):
 
                 r = self.compare_values(methods_used, value, comparison, **float_tolerances)
                 add = not r if fb.get('not', False) else r
+
+            # For randomized checkbox questions, suppress 'not'-type hints for
+            # options that were not included in the random sample. Those options
+            # were never shown to the student, so they can't be expected to have
+            # selected them.
+            if (t == "checkbox" and fb.get('not', False)
+                    and sampled_option_values is not None
+                    and comparison not in sampled_option_values):
+                add = False
 
             # Checkbox-hints should be linkable with their options:
             if t == "checkbox" and checkbox_feedback and add:
@@ -791,29 +836,34 @@ class GradedForm(forms.Form):
         # If no correct answers are set in configuration, points are granted to
         # an empty answer only.
         correct = True
-        i = 0
-        for opt in configuration.get("options", []):
-            if not is_randomized or i in sample:
-                name = self.option_name(i, opt)
-                correct_answer = opt.get("correct", False)
-                # correct_answer may be boolean or string "neutral"
-                if correct_answer is True:
-                    correct_count += 1
-                    non_neutral_count += 1
-                    if name not in value:
-                        wrong_answers += 1
-                        correct = False
-                        self.append_hint_checkbox(hints, opt, checkbox_feedback, False)
-                elif correct_answer is False:
-                    non_neutral_count += 1
-                    if value is not None and name in value:
-                        correct = False
-                        wrong_answers += 1
-                        self.append_hint_checkbox(hints, opt, checkbox_feedback, True)
-                elif correct_answer == "neutral":
-                    if value is not None and name in value:
-                        self.append_hint_checkbox(hints, opt, checkbox_feedback, True)
-            i += 1
+        options = configuration.get("options", [])
+        # When randomized, iterate in display order (the order the student saw
+        # the options) so that hints appear in the same order as the options.
+        options_iter = (
+            ((idx, options[idx]) for idx in sample)
+            if is_randomized
+            else enumerate(options)
+        )
+        for i, opt in options_iter:
+            name = self.option_name(i, opt)
+            correct_answer = opt.get("correct", False)
+            # correct_answer may be boolean or string "neutral"
+            if correct_answer is True:
+                correct_count += 1
+                non_neutral_count += 1
+                if name not in value:
+                    wrong_answers += 1
+                    correct = False
+                    self.append_hint_checkbox(hints, opt, checkbox_feedback, False)
+            elif correct_answer is False:
+                non_neutral_count += 1
+                if value is not None and name in value:
+                    correct = False
+                    wrong_answers += 1
+                    self.append_hint_checkbox(hints, opt, checkbox_feedback, True)
+            elif correct_answer == "neutral":
+                if value is not None and name in value:
+                    self.append_hint_checkbox(hints, opt, checkbox_feedback, True)
 
         # If partial_points are set, the variable 'correct' becomes a float
         # less than one instead of a boolean. It will be used to multiply
