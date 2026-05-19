@@ -9,8 +9,8 @@ any record other than service logs. The grader is designed to serve exercises
 for the A+ learning system. If the number of submissions is large, we recommend
 setting up a Kubernetes cluster for the grader.
 
-The grader is implemented on Django 3.2 (`grader/settings.py`).
-The application requires Python 3.7 or newer.
+The grader is implemented on Django 5.2 (`grader/settings.py`).
+The application requires Python 3.10 or newer.
 
 The grader can be run stand alone without the full stack to test graders in
 the local system environment. The grader is designed to be extended for
