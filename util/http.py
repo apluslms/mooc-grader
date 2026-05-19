@@ -125,7 +125,7 @@ def not_modified_since(request, exercise):
         or not exercise.get('cacheable', True)
     ):
         return False
-    time = parse_http_date_safe(request.META.get('HTTP_IF_MODIFIED_SINCE'))
+    time = parse_http_date_safe(request.headers.get('if-modified-since'))
     return time and time >= exercise['mtime']
 
 
