@@ -42,6 +42,33 @@ def noGrading(request, course, exercise, post_url):
     )
 
 
+def noSubmission(request, course, exercise, post_url):
+    '''
+    Presents a template for teacher-only grading exercises.
+    Students cannot submit; grading is done only via the teacher API.
+    Requires max_points in exercise configuration.
+    '''
+    if "max_points" not in exercise:
+        raise ConfigError("Missing required \"max_points\" in exercise configuration")
+
+    if not_modified_since(request, exercise):
+        return not_modified_response(request, exercise)
+
+    result = {
+        "no_submission": True,
+        "max_points": exercise["max_points"],
+    }
+    
+    return cache_headers(
+        render_configured_template(
+            request, course, exercise, post_url,
+            'access/no_submission_default.html', result
+        ),
+        request,
+        exercise
+    )
+
+
 def comparePostValues(request, course, exercise, post_url):
     '''
     Presents a template and grades configured POST values.

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MOOC-grader\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-08 13:42+0000\n"
+"POT-Creation-Date: 2026-06-12 13:04+0000\n"
 "PO-Revision-Date: 2021-08-23 13:54+0000\n"
 "Last-Translator: Ella Anttila <ella.anttila@aalto.fi>\n"
 "Language-Team: English <>\n"
@@ -186,15 +186,15 @@ msgid "FEEDBACK_CORRECT_WITH_PUNCTUATION"
 msgstr "Correct!"
 
 #: access/templates/access/graded_form.html
-msgid "CORRECT"
-msgstr "Correct"
-
-#: access/templates/access/graded_form.html
 #, python-format
 msgid "POINTS_SINGULAR -- %(points)s"
 msgid_plural "POINTS_PLURAL -- %(points)s"
 msgstr[0] "%(points)s point"
 msgstr[1] "%(points)s points"
+
+#: access/templates/access/graded_form.html
+msgid "CORRECT"
+msgstr "Correct"
 
 #: access/templates/access/graded_form.html
 msgid "NEUTRAL_OPTION_DESCRIPTION"
@@ -217,6 +217,10 @@ msgstr ""
 #, python-format
 msgid "CORRECT_ANSWER_IS -- %(correct)s"
 msgstr "The correct answer is: %(correct)s"
+
+#: access/templates/access/no_submission_default.html
+msgid "NO_SUBMISSION_GRADED_BY_COURSE_STAFF_ONLY"
+msgstr "This assignment is eventually graded by the course staff. You cannot submit an answer."
 
 #: access/templates/access/personalized_content_default.html
 msgid "DOWNLOAD"
