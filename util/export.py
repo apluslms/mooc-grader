@@ -80,6 +80,11 @@ def exercise(request, course, exercise_root, of):
         'form_i18n': i18n,
     }
 
+    # Mark teacher-only exercises so that A+ can block student submissions.
+    # These exercises are graded by course staff via the teacher API only.
+    if exercise.get('view_type', None) == 'access.types.stdsync.noSubmission':
+        of['exercise_info']['no_submission'] = True
+
     if 'radar_info' in exercise:
         of['exercise_info']['radar'] = exercise['radar_info']
 

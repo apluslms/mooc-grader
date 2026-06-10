@@ -1,0 +1,20 @@
+{% extends 'access/exercise_frame.html' %}
+{% load i18n %}
+
+{% block exercise %}
+
+<div class="alert alert-info">
+	{% trans "NO_SUBMISSION_GRADED_BY_COURSE_STAFF_ONLY" %}
+</div>
+
+{% if exercise.instructions %}
+<div class="instructions mb-3">
+	{{ exercise.instructions|safe }}
+</div>
+{% endif %}
+
+{% if exercise.instructions_file %}
+	{% include exercise.instructions_file %}
+{% endif %}
+
+{% endblock %}
