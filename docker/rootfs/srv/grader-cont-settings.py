@@ -1,3 +1,5 @@
+import os
+
 DEBUG = True
 #SECRET_KEY = 'not a very secret key'
 ADMINS = (
@@ -21,7 +23,7 @@ def local_path_to_data(local_path):
 
 RUNNER_MODULE = '/srv/docker_compose_run.py'
 RUNNER_MODULE_SETTINGS = {
-    "network": "aplus_default",
+    "network": os.environ.get('GRADER_RUNNER_MODULE_NETWORK', 'aplus_default'),
     "mounts": {
         COURSES_PATH:                                  HOST_TMP + '/_courses',
         # The symlink /local -> /data/grader seems to be missing somehow nowadays.
