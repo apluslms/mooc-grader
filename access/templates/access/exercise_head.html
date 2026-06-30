@@ -23,3 +23,7 @@
 		{% if result.points >= 0 %}
 		<meta name="points" value="{{ result.points }}" />
 		{% endif %}
+
+		{% if exercise.content_hash %}
+		<meta name="x-aplus-exercise-version" value="{{ exercise.content_hash }}" />
+		{% endif %}
