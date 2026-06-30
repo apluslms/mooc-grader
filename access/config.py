@@ -2,6 +2,7 @@
 The exercises and classes are configured in json/yaml.
 Each directory inside courses/ holding an index.json/yaml is a course.
 '''
+import hashlib
 import io
 import json
 from json.decoder import JSONDecodeError
@@ -394,6 +395,12 @@ class ConfigParser:
             self._check_fields(f, version, ["title", "view_type"])
             version["key"] = exercise_key
             version["mtime"] = t
+            # Compute a deterministic content hash from the exercise config so
+            # that A+ can detect genuine edits independently of file timestamps.
+            serialized = json.dumps(version, sort_keys=True, default=str)
+            version["content_hash"] = hashlib.sha256(
+                serialized.encode("utf-8")
+            ).hexdigest()
 
         course_root["exercises"][exercise_key] = exercise_root = {
             "file": f,
