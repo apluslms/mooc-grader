@@ -2,11 +2,18 @@
 '''
 This module holds unit tests. It has nothing to do with the grader tests.
 '''
+import hashlib
 import time, os
-from django.conf import settings
-from django.test import SimpleTestCase
+from unittest.mock import patch
 
-from access.config import ConfigParser
+from django.conf import settings
+from django.test import RequestFactory
+from django.test import SimpleTestCase
+import yaml
+
+from access.config import ConfigParser, _exercise_content_hash
+from access.views import container_post
+from util.http import post_result
 from util.shell import invoke_script
 
 
@@ -73,3 +80,90 @@ class ConfigTestCase(SimpleTestCase):
         self.assertGreater(root["mtime"], mtime)
         self.assertGreater(root["ptime"], ptime)
 
+    def test_exercise_hash_ignores_file_timestamp(self):
+        course_key = self.get_course_key()
+        course_root = self.config._course_root(course_key)
+        _, exercise = self.config.exercise_entry(course_root, 'arithmetic', 'en')
+        exercise_root = course_root['exercises']['arithmetic']
+        stat = os.stat(exercise_root['file'])
+
+        try:
+            os.utime(exercise_root['file'], (stat.st_atime, stat.st_mtime + 1))
+            _, reloaded = self.config.exercise_entry(course_root, 'arithmetic', 'en')
+            self.assertEqual(reloaded['content_hash'], exercise['content_hash'])
+        finally:
+            os.utime(exercise_root['file'], ns=(stat.st_atime_ns, stat.st_mtime_ns))
+
+    def test_exercise_hash_serializes_yaml_sets_deterministically(self):
+        version = yaml.safe_load("values: !!set {bravo: null, alpha: null}")
+        expected_serialized = (
+            '{"values": {"__type__": "set", "items": ["alpha", "bravo"]}}'
+        )
+        self.assertEqual(
+            _exercise_content_hash(version),
+            hashlib.sha256(expected_serialized.encode("utf-8")).hexdigest(),
+        )
+        self.assertNotEqual(
+            _exercise_content_hash(version),
+            _exercise_content_hash({"values": ["alpha", "bravo"]}),
+        )
+
+    def test_exercise_hash_serializes_yaml_timestamps(self):
+        version = yaml.safe_load("value: 2026-07-10")
+        expected_serialized = '{"value": "2026-07-10"}'
+
+        self.assertEqual(
+            _exercise_content_hash(version),
+            hashlib.sha256(expected_serialized.encode("utf-8")).hexdigest(),
+        )
+
+    def test_exercise_hash_rejects_unsupported_values(self):
+        with self.assertRaises(TypeError):
+            _exercise_content_hash({"value": object()})
+
+
+class HttpTestCase(SimpleTestCase):
+
+    @patch('util.http.post_data')
+    @patch('util.http.template_to_str', return_value='feedback')
+    def test_post_result_includes_exercise_version(self, _template_to_str, post_data):
+        post_result(
+            'https://aplus.example/submission',
+            {},
+            {'content_hash': 'version'},
+            'feedback.html',
+            {'points': 1, 'max_points': 1},
+        )
+
+        data = post_data.call_args.args[1]
+        self.assertEqual(data['exercise_version'], 'version')
+
+    @patch('access.views.post_data', return_value=True)
+    @patch('access.views.config.exercise_entry', return_value=({}, {}))
+    @patch('access.views.read_and_remove_submission_meta')
+    def test_container_result_uses_queued_exercise_version(
+            self,
+            read_meta,
+            _exercise_entry,
+            post_data,
+            ):
+        read_meta.return_value = {
+            'url': 'https://aplus.example/submission',
+            'dir': '/submission',
+            'course_key': 'course',
+            'exercise_key': 'exercise',
+            'lang': 'en',
+            'exercise_version': 'queued version',
+        }
+        request = RequestFactory().post('/container-post', {
+            'sid': 'submission',
+            'points': '1',
+            'max_points': '1',
+            'feedback': 'feedback',
+        })
+
+        response = container_post(request)
+
+        self.assertEqual(response.status_code, 200)
+        data = post_data.call_args.args[1]
+        self.assertEqual(data['exercise_version'], 'queued version')

@@ -59,6 +59,9 @@ def post_result(submission_url, course, exercise, template, result):
         "feedback": html
     }
 
+    if exercise and exercise.get("content_hash"):
+        data["exercise_version"] = exercise["content_hash"]
+
     if "error" in result and result["error"]:
         data["error"] = True
 

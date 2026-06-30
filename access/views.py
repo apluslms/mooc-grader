@@ -700,6 +700,8 @@ def container_post(request):
         feedback = feedback.encode("ascii", "xmlcharrefreplace")
 
     data["feedback"] = feedback
+    if meta.get("exercise_version"):
+        data["exercise_version"] = meta["exercise_version"]
 
     if not post_data(meta["url"], data):
         write_submission_meta(sid, meta)

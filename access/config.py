@@ -2,9 +2,11 @@
 The exercises and classes are configured in json/yaml.
 Each directory inside courses/ holding an index.json/yaml is a course.
 '''
+import hashlib
 import io
 import json
 from json.decoder import JSONDecodeError
+from datetime import date, datetime, time as datetime_time
 import os
 import re
 import time
@@ -77,6 +79,39 @@ def _ext_exercise_loader(course_root, exercise_key, course_dir):
             ndata[key][lang] = value
 
     return config_file, os.path.getmtime(config_file), ndata
+
+
+def _hash_json_default(obj: Any) -> Any:
+    """Convert supported non-JSON values into deterministic hash data."""
+    if isinstance(obj, (set, frozenset)):
+        return {
+            "__type__": type(obj).__name__,
+            "items": sorted(
+                obj,
+                key=lambda item: json.dumps(
+                    item,
+                    sort_keys=True,
+                    default=_hash_json_default,
+                ),
+            ),
+        }
+    if isinstance(obj, (date, datetime, datetime_time)):
+        return obj.isoformat()
+    raise TypeError(f"Unsupported value type for content_hash: {type(obj)!r}")
+
+
+def _exercise_content_hash(version: Dict[str, Any]) -> str:
+    hash_data = {
+        key: value
+        for key, value in version.items()
+        if key not in ("content_hash", "mtime")
+    }
+    serialized = json.dumps(
+        hash_data,
+        sort_keys=True,
+        default=_hash_json_default,
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 class ConfigError(Exception):
@@ -393,6 +428,9 @@ class ConfigParser:
         for version in data.values():
             self._check_fields(f, version, ["title", "view_type"])
             version["key"] = exercise_key
+            # Compute a deterministic content hash from the exercise config so
+            # that A+ can detect genuine edits independently of file timestamps.
+            version["content_hash"] = _exercise_content_hash(version)
             version["mtime"] = t
 
         course_root["exercises"][exercise_key] = exercise_root = {

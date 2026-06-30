@@ -356,6 +356,7 @@ def _acceptSubmission(request, course, exercise, post_url, sdir: SubmissionDir):
         "course_key": course["key"],
         "exercise_key": exercise["key"],
         "lang": translation.get_language(),
+        "exercise_version": exercise.get("content_hash", ""),
     })
     return_code, out, err = runner_func(
         course=course,
