@@ -167,6 +167,12 @@ def form_fields(languages, exercises):
         if 'more' in f:
             field['description'] = i18n_map(list_get(fs, 'more', ''))
 
+        # HTML dimensions of freetext fields (the length and height options
+        # of the RST directive) so that the grader services can render them.
+        for key in ('size', 'rows', 'cols'):
+            if key in f:
+                field[key] = f[key]
+
         if 'options' in f:
             titleMap = {}
             enum = []
