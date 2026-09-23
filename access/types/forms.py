@@ -131,6 +131,11 @@ class GradedForm(forms.Form):
                         initial, correct, neutral, choices, False, attrs)
                 elif t == "text":
                     attrs = {'class': 'form-control'}
+                    if 'size' in field:
+                        attrs['size'] = field['size']
+                        # Override the Bootstrap form-control width of 100%
+                        # so that the size attribute takes effect.
+                        attrs['class'] += ' form-field-sized'
                     placeholder = self._get_placeholder(field, g, j)
                     if placeholder:
                         attrs['placeholder'] = placeholder
@@ -142,6 +147,10 @@ class GradedForm(forms.Form):
                     for key in ['rows', 'cols']:
                         if key in field:
                             attrs[key] = field[key]
+                    if 'cols' in field:
+                        # Override the Bootstrap form-control width of 100%
+                        # so that the cols attribute takes effect.
+                        attrs['class'] += ' form-field-sized'
                     placeholder = self._get_placeholder(field, g, j)
                     if placeholder:
                         attrs['placeholder'] = placeholder
